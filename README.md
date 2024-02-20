@@ -1,0 +1,1 @@
+# geogjango_simple_template
