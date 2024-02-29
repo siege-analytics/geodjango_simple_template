@@ -6,7 +6,7 @@ services:
       context: ./app
       dockerfile: Dockerfile.prod
     container_name: geodjango_webserver_prod
-    command: sh -c "gunicorn hellodjango.wsgi:application --bind 0.0.0.0:8000"
+    command: gunicorn hellodjango/hellodjango/wsgi:application --bind 0.0.0.0:8000
     #command: python3 hellodjango/manage.py runserver 0.0.0.0:8000
     ports:
       - 8000:8000

@@ -47,7 +47,7 @@ build-prod:
 
 rebuild-prod:
 	docker compose -f docker-compose.prod.yml stop
-	docker compose -f docker-compose.prod.yml --no-cache
+	docker compose -f docker-compose.prod.yml build --no-cache
 	docker volume create --name=geodjango_pg_data
 
 clean-prod:
