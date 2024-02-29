@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  webserver_python:
+    build: ./app
+    container_name: geodjango_webserver
+    command: python3 hellodjango/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./app/:/usr/src/app/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.dev
+  postgis:
+    image: postgis/postgis:latest
+    container_name: geodjango_postgis
+    environment:
+      - POSTGRES_DB=geodjango_database
+      - POSTGRES_PASSWORD=dessert
+      - POSTGRES_USER=dheerajchand
+      - POSTGRES_HOST_AUTH_METHOD=password
+    ports:
+      - 54321:5432
+    volumes:
+      - geodjango_pg_data:/var/lib/postgresql
+    restart: always
+volumes:
+  geodjango_pg_data:
