@@ -1,3 +1,6 @@
 Django
 gunicorn
 psycopg2-binary
+pysal
+pandas
+geopandas

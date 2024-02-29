@@ -1,4 +1,4 @@
-# Basic operations
+# Basic operations dev
 
 down:
 	docker-compose down
@@ -29,7 +29,34 @@ pg_term:
 python_term:
 	docker compose exec webserver_python /bin/bash
 
-# Functional operations
+# Basic operations prod
 
+down-prod:
+	docker-compose -f docker-compose.prod.yml down
 
+stop-prod:
+	docker compose -f docker-compose.prod.yml stop
+
+up-prod:
+	docker compose -f docker-compose.prod.yml up -d
+
+build-prod:
+	docker compose -f docker-compose.prod.yml stop
+	docker compose -f docker-compose.prod.yml build
+	docker volume create --name=geodjango_pg_data
+
+rebuild-prod:
+	docker compose -f docker-compose.prod.yml stop
+	docker compose -f docker-compose.prod.yml --no-cache
+	docker volume create --name=geodjango_pg_data
+
+clean-prod:
+	docker compose -f docker-compose.prod.yml down
+	docker compose -f docker-compose.prod.yml rm
+
+pg_term-prod:
+	docker compose -f docker-compose.prod.yml exec postgis psql -U dheerajchand -d geodjango_database
+
+python_term-prod:
+	docker compose -f docker-compose.prod.yml exec webserver_python /bin/bash
 

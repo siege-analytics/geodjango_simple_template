@@ -3,7 +3,7 @@ version: '3.8'
 services:
   webserver_python:
     build: ./app
-    container_name: geodjango_webserver
+    container_name: geodjango_webserver_dev
     command: python3 hellodjango/manage.py runserver 0.0.0.0:8000
     volumes:
       - ./app/:/usr/src/app/
@@ -13,7 +13,7 @@ services:
       - ./.env.dev
   postgis:
     image: postgis/postgis:latest
-    container_name: geodjango_postgis
+    container_name: geodjango_postgis_dev
     environment:
       - POSTGRES_DB=geodjango_database
       - POSTGRES_PASSWORD=dessert
