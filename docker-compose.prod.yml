@@ -8,13 +8,12 @@ services:
     container_name: geodjango_webserver_prod
     command: sh -c "cd hellodjango/ && gunicorn hellodjango.wsgi:application --bind 0.0.0.0:8000"
     #command: python3 hellodjango/manage.py runserver 0.0.0.0:8000
-    ports:
-      - 8000:8000
+    expose:
+      - 8000
     env_file:
       - ./.env.dev
     depends_on:
       - postgis
-
   postgis:
     image: postgis/postgis:latest
     container_name: geodjango_postgis_prod
@@ -25,5 +24,11 @@ services:
     volumes:
       - geodjango_pg_data:/var/lib/postgresql
     restart: always
+  nginx:
+    build: ./nginx
+    ports:
+      - 1337:80
+    depends_on:
+      - webserver_python
 volumes:
   geodjango_pg_data:

@@ -60,3 +60,14 @@ pg_term-prod:
 python_term-prod:
 	docker compose -f docker-compose.prod.yml exec webserver_python /bin/bash
 
+# Django operations dev
+
+migrate:
+	docker-compose exec webserver_python python3 hellodjango/manage.py makemigrations
+	docker-compose exec webserver_python python3 hellodjango/manage.py migrate
+
+# Django operations prod
+
+migrate-prod:
+	docker-compose -f docker-compose.prod.yml exec webserver_python python3 hellodjango/manage.py makemigrations
+	docker-compose -f docker-compose.prod.yml exec webserver_python python3 hellodjango/manage.py migrate
