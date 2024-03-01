@@ -10,5 +10,5 @@ then
 
     echo "PostgreSQL started"
 fi
-
+python3 hellodjango/manage.py collectstatic --no-input
 exec "$@"

@@ -22,6 +22,7 @@ Currently debugging `nginx`.
 
 I'd like to add
 
+- Daphne
 - Spark
 - Sedona
 - GeoServer

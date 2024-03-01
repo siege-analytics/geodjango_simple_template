@@ -13,5 +13,5 @@ fi
 
 python3 hellodjango/manage.py flush --no-input
 python3 hellodjango/manage.py migrate
-
+python3 hellodjango/manage.py collectstatic --no-input
 exec "$@"
