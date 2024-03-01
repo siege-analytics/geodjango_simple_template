@@ -64,9 +64,18 @@ python_term-prod:
 
 migrate:
 
-	docker-compose exec webserver_python python3 hellodjango/manage.py migrate --no-input
+	docker compose exec webserver_python python3 hellodjango/manage.py migrate --no-input
+
+static:
+
+	docker compose exec webserver_python python3 hellodjango/manage.py collectstatic --no-input
 
 # Django operations prod
 
 migrate-prod:
-	docker-compose -f docker-compose.prod.yml exec webserver_python python3 hellodjango/manage.py migrate --no-input
+
+	docker compose -f docker-compose.prod.yml exec webserver_python python3 hellodjango/manage.py migrate --no-input
+
+static:
+
+	docker compose -f docker-compose.prod.yml exec webserver_python python3 hellodjango/manage.py collectstatic --no-input

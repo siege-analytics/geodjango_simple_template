@@ -16,7 +16,7 @@ The project makes use of some standard technologies:
 - [nginx][3]
 - [PostGIS][4]
 
-Currently debugging `nginx`.
+Currently adding `redis`.
 
 # Goals
 
@@ -26,10 +26,17 @@ I'd like to add
 - Spark
 - Sedona
 - GeoServer
+- Redis/Django Channels
+
+# References:
+
+- [TestDriven's Django on Docker][1]
+- [Runitrupam's Django with Celery/Redis][5]
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 [2]: https://gunicorn.org
 [3]: https://www.nginx.com
 [4]: https://www.postgis.net
+[5]: https://github.com/runitrupam/Django-Docker-Compose-Celery-Redis-PostgreSQL
 
 
