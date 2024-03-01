@@ -5,6 +5,8 @@ services:
     build: ./app
     container_name: geodjango_webserver_dev
     command: python3 hellodjango/manage.py runserver 0.0.0.0:8000
+    networks:
+      - geodjango_project_network_dev
     volumes:
       - ./app/:/usr/src/app/
     ports:
@@ -21,8 +23,12 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=password
     ports:
       - 54321:5432
+    networks:
+      - geodjango_project_network_dev
     volumes:
       - geodjango_pg_data:/var/lib/postgresql
     restart: always
+networks:
+  geodjango_project_network_dev:
 volumes:
   geodjango_pg_data:
