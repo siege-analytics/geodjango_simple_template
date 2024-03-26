@@ -32,11 +32,13 @@ I'd like to add
 
 - [TestDriven's Django on Docker][1]
 - [Runitrupam's Django with Celery/Redis][5]
+- [Spark on Docker][6]
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 [2]: https://gunicorn.org
 [3]: https://www.nginx.com
 [4]: https://www.postgis.net
 [5]: https://github.com/runitrupam/Django-Docker-Compose-Celery-Redis-PostgreSQL
+[6]: https://medium.com/@SaphE/testing-apache-spark-locally-docker-compose-and-kubernetes-deployment-94d35a54f222
 
 

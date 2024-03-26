@@ -28,7 +28,13 @@ services:
     volumes:
       - geodjango_pg_data:/var/lib/postgresql
     restart: always
+  celery:
 
+  redis:
+    image: redis:7
+    container_name: geodjango_redis_server
+    networks:
+      - geodjango_project_network_dev
 
 networks:
   geodjango_project_network_dev:
