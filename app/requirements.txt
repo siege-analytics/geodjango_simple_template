@@ -1,9 +1,0 @@
-channels
-channels-redis
-daphne
-Django
-gunicorn
-pandas
-psycopg2-binary
-pysal
-geopandas
