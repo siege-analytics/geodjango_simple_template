@@ -1,7 +1,7 @@
 # Basic operations dev
 
 down:
-	docker-compose down
+	docker compose down
 
 stop:
 	docker compose stop
