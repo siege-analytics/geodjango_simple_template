@@ -2,12 +2,13 @@
 services:
   webserver_python:
     build:
-      context: ./app
+      context: ./docker
       args:
         UBUNTU_BASE_IMAGE: ${UBUNTU_BASE_IMAGE}
-        PYTHON_VENV_PATH: ${PYTHON_VENV_PATH}
     container_name: geodjango_webserver_dev
     command: python3 hellodjango/manage.py runserver 0.0.0.0:8000
+    depends_on:
+      - postgis
     networks:
       - geodjango_project_network_dev
     volumes:
@@ -19,18 +20,22 @@ services:
   postgis:
     image: postgis/postgis:latest
     container_name: geodjango_postgis_dev
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
     environment:
-      - POSTGRES_DB=geodjango_database
-      - POSTGRES_PASSWORD=dessert
-      - POSTGRES_USER=dheerajchand
-      - POSTGRES_HOST_AUTH_METHOD=password
+      - POSTGRES_DB
+      - POSTGRES_PASSWORD
+      - POSTGRES_USER
+      - POSTGRES_HOST_AUTH_METHOD
     ports:
       - 54321:5432
     networks:
       - geodjango_project_network_dev
     volumes:
       - geodjango_pg_data:/var/lib/postgresql
-    restart: always
 
   redis:
     image: redis:7
