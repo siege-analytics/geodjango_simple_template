@@ -27,7 +27,8 @@ RUN apt-get clean && apt-get install -y \
     gdal-bin \
     postgresql \
     postgresql-contrib \
-    postgis
+    postgis \
+    netcat-traditional
 
 # Activate Python Virtual Environment
 
