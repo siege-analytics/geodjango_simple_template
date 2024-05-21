@@ -1,6 +1,6 @@
 # Args from compose
 ARG UBUNTU_BASE_IMAGE=ubuntu:latest
-ARG PYTHON_VENV_PATH
+ARG PYTHON_VENV_PATH=/opt/venv
 
 FROM ${UBUNTU_BASE_IMAGE}
 
@@ -8,7 +8,6 @@ FROM ${UBUNTU_BASE_IMAGE}
 ENV DEBIAN_FRONTEND noninteractive
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-# ENV GDAL_VERSION=3.4.1
 
 # Install the basics
 RUN apt-get update
@@ -32,15 +31,15 @@ RUN apt-get clean && apt-get install -y \
 
 # Activate Python Virtual Environment
 
-ENV PYTHON_VENV_PATH=${PYTHON_VENV_PATH:-"/opt/venv"}
+ENV PYTHON_VENV_PATH=${PYTHON_VENV_PATH}
 RUN python3 -m venv ${PYTHON_VENV_PATH}
 ENV PATH="${PYTHON_VENV_PATH}/bin:$PATH"
 
-# Install GDAL
+# Install GDAL python bindings
 RUN apt-get install -y --install-recommends libgdal-dev
-RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal
-RUN export C_INCLUDE_PATH=/usr/include/gdal
-RUN pip install GDAL=="$(gdal-config --version).*"
+RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
+export C_INCLUDE_PATH=/usr/include/gdal && \
+pip install GDAL=="$(gdal-config --version).*"
 
 # Install PIP requirements
 ADD requirements.txt /tmp/
