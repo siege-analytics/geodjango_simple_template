@@ -1,8 +1,11 @@
-version: '3.8'
 
 services:
   webserver_python:
-    build: ./app
+    build:
+      context: ./app
+      args:
+        UBUNTU_BASE_IMAGE: ${UBUNTU_BASE_IMAGE}
+        PYTHON_VENV_PATH: ${PYTHON_VENV_PATH}
     container_name: geodjango_webserver_dev
     command: python3 hellodjango/manage.py runserver 0.0.0.0:8000
     networks:
@@ -28,7 +31,6 @@ services:
     volumes:
       - geodjango_pg_data:/var/lib/postgresql
     restart: always
-  celery:
 
   redis:
     image: redis:7
