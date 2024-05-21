@@ -8,6 +8,8 @@ services:
         PYTHON_VENV_PATH: ${PYTHON_VENV_PATH}
     container_name: geodjango_webserver_dev
     command: python3 hellodjango/manage.py runserver 0.0.0.0:8000
+    depends_on:
+      - postgis
     networks:
       - geodjango_project_network_dev
     volumes:
@@ -19,6 +21,11 @@ services:
   postgis:
     image: postgis/postgis:latest
     container_name: geodjango_postgis_dev
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
     environment:
       - POSTGRES_DB=geodjango_database
       - POSTGRES_PASSWORD=dessert
@@ -30,7 +37,6 @@ services:
       - geodjango_project_network_dev
     volumes:
       - geodjango_pg_data:/var/lib/postgresql
-    restart: always
 
   redis:
     image: redis:7
