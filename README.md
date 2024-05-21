@@ -18,6 +18,14 @@ The project makes use of some standard technologies:
 
 Currently adding `redis`.
 
+# Building
+
+Link the `.env` file to the appropriate environment file, e.g. `ln -s .env.dev .env`.
+
+Override UBUNTU_BASE_IMAGE in the `.env` file to use a different base image, e.g. `UBUNTU_BASE_IMAGE=arm64v8/ubuntu:latest`.
+
+Then run `make build` to build the project.
+
 # Goals
 
 I'd like to add
