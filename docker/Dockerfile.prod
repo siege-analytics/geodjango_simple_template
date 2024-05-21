@@ -1,15 +1,15 @@
-# Args from compose
-ARG UBUNTU_BASE_IMAGE=ubuntu:latest
-ARG PYTHON_VENV_PATH=/opt/venv
-
+ARG UBUNTU_BASE_IMAGE=ubunut:latest
 FROM ${UBUNTU_BASE_IMAGE}
 
+ARG PYTHON_VENV_PATH=/opt/venv
+ARG DEBIAN_FRONTEND=noninteractive
+
 # Environmental Variables
-ENV DEBIAN_FRONTEND noninteractive
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Install the basics
+
+# Install the basics, python utils, gdal, and postgres
 RUN apt-get update
 RUN apt-get install -y tzdata
 RUN apt-get clean && apt-get install -y \
@@ -29,9 +29,8 @@ RUN apt-get clean && apt-get install -y \
     postgis \
     netcat-traditional
 
-# Activate Python Virtual Environment
 
-ENV PYTHON_VENV_PATH=${PYTHON_VENV_PATH}
+# Activate Python Virtual Environment
 RUN python3 -m venv ${PYTHON_VENV_PATH}
 ENV PATH="${PYTHON_VENV_PATH}/bin:$PATH"
 
@@ -42,18 +41,31 @@ export C_INCLUDE_PATH=/usr/include/gdal && \
 pip install GDAL=="$(gdal-config --version).*"
 
 # Install PIP requirements
-ADD requirements.txt /tmp/
+ADD docker/requirements.txt /tmp/
 RUN pip3 install -r /tmp/requirements.txt
 
-# copy code over
+# create the app user
+RUN addgroup --system app && adduser --system --group app
 
-# set work directory
-WORKDIR /usr/src/app
+# create the appropriate directories
+ENV HOME=/home/app
+ENV APP_HOME=$HOME/web
+RUN mkdir -p $APP_HOME
 
-COPY . .
-# COPY ./entrypoint.sh /usr/src/app/entrypoint.sh
+# copy project
+COPY ./app ${APP_HOME}
 
-RUN chmod +x /usr/src/app/entrypoint.sh
+RUN mkdir $APP_HOME/staticfiles
 
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+# copy entrypoint.prod.sh
+COPY ./docker/entrypoint.prod.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
+# chown all the files to the app user
+RUN chown -R app:app $APP_HOME
+
+# change to the app user
+USER app
+
+WORKDIR $APP_HOME
+ENTRYPOINT ["/entrypoint.sh"]
