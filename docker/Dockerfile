@@ -29,6 +29,10 @@ RUN apt-get clean && apt-get install -y \
     postgis \
     netcat-traditional
 
+# Copy pip.conf to /etc/pip.conf
+
+COPY pip.conf /etc/pip.conf
+
 # Activate Python Virtual Environment
 RUN python3 -m venv ${PYTHON_VENV_PATH}
 ENV PATH="${PYTHON_VENV_PATH}/bin:$PATH"
@@ -36,17 +40,18 @@ ENV PATH="${PYTHON_VENV_PATH}/bin:$PATH"
 # Install GDAL python bindings
 RUN apt-get install -y --install-recommends libgdal-dev
 RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
-export C_INCLUDE_PATH=/usr/include/gdal && \
-pip install GDAL=="$(gdal-config --version).*"
+export C_INCLUDE_PATH=/usr/include/gdal # && \
+pip install --trusted-host pypi.python.org --upgrade pip GDAL=="$(gdal-config --version).*"
 
 # Install PIP requirements
 ADD requirements.txt /tmp/
-RUN pip3 install -r /tmp/requirements.txt
+RUN pip install --trusted-host pypi.python.org --upgrade pip -r /tmp/requirements.txt
 
 # Copy the entrypoint
-COPY ./entrypoint.sh /usr/src/app/entrypoint.sh
-RUN chmod +x /usr/src/app/entrypoint.sh
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
 
 # set work directory
 WORKDIR /usr/src/app

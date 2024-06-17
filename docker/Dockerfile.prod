@@ -38,11 +38,11 @@ ENV PATH="${PYTHON_VENV_PATH}/bin:$PATH"
 RUN apt-get install -y --install-recommends libgdal-dev
 RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
 export C_INCLUDE_PATH=/usr/include/gdal && \
-pip install GDAL=="$(gdal-config --version).*"
+pip install --trusted-host pypi.python.org --upgrade pip GDAL=="$(gdal-config --version).*"
 
 # Install PIP requirements
 ADD docker/requirements.txt /tmp/
-RUN pip3 install -r /tmp/requirements.txt
+RUN pip install --trusted-host pypi.python.org --upgrade pip -r /tmp/requirements.txt
 
 # create the app user
 RUN addgroup --system app && adduser --system --group app
