@@ -6,7 +6,7 @@ services:
       args:
         UBUNTU_BASE_IMAGE: ${UBUNTU_BASE_IMAGE}
     container_name: geodjango_webserver_dev
-    # command: python3 hellodjango/manage.py runserver 0.0.0.0:8000
+    command: python3 hellodjango/manage.py runserver 0.0.0.0:8000
     depends_on:
       - postgis
     networks:
