@@ -2,8 +2,8 @@
 
 default: build
 
-.env:
-	ln -s .env.dev .env
+link-dev:
+	ln -sf .env.dev .env
 
 down:
 	docker compose down
@@ -15,11 +15,13 @@ up: .env
 	docker compose up -d
 
 build: .env
+	make link-dev
 	docker compose stop
 	docker compose build
 	docker volume create --name=geodjango_pg_data
 
 rebuild:
+	make link-dev
 	docker compose stop
 	docker compose build --no-cache
 	docker volume create --name=geodjango_pg_data
@@ -40,6 +42,9 @@ python_term:
 
 # Basic operations prod
 
+link-prod:
+	ln -sf .env.prod .env
+
 down-prod:
 	docker-compose -f docker-compose.prod.yml down
 
@@ -50,11 +55,13 @@ up-prod:
 	docker compose -f docker-compose.prod.yml up -d
 
 build-prod:
+	make link-prod
 	docker compose -f docker-compose.prod.yml stop
 	docker compose -f docker-compose.prod.yml build
 	docker volume create --name=geodjango_pg_data
 
 rebuild-prod:
+	make link-prod
 	docker compose -f docker-compose.prod.yml stop
 	docker compose -f docker-compose.prod.yml build --no-cache
 	docker volume create --name=geodjango_pg_data
