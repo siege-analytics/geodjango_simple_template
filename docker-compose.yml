@@ -15,8 +15,6 @@ services:
       - ./app/:/usr/src/app/
     ports:
       - 8000:8000
-    env_file:
-      - ./.env.dev
   postgis:
     image: postgis/postgis:latest
     container_name: geodjango_postgis_dev
