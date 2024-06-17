@@ -1,5 +1,10 @@
 # Basic operations dev
 
+default: build
+
+.env:
+	ln -s .env.dev .env
+
 down:
 	docker compose down
 
