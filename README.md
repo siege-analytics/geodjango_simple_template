@@ -42,6 +42,9 @@ I'd like to add
 - [Runitrupam's Django with Celery/Redis][5]
 - [Spark on Docker][6]
 - [SSL problem with pip in Docker](7)
+- Pip running into SSL problems inside Docker
+  - [pip.conf file](8)
+  - [where to put pip.conf](9)
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 [2]: https://gunicorn.org
@@ -50,4 +53,5 @@ I'd like to add
 [5]: https://github.com/runitrupam/Django-Docker-Compose-Celery-Redis-PostgreSQL
 [6]: https://medium.com/@SaphE/testing-apache-spark-locally-docker-compose-and-kubernetes-deployment-94d35a54f222
 [7]: https://stackoverflow.com/questions/25981703/pip-install-fails-with-connection-error-ssl-certificate-verify-failed-certi/73745221
-
+[8]: https://stackoverflow.com/questions/59287824/specifying-multiple-trusted-hosts-in-pip-conf
+[9]:https://stackoverflow.com/questions/38869231/python-cant-find-the-file-pip-conf
