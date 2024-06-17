@@ -11,10 +11,10 @@ down:
 stop:
 	docker compose stop
 
-up:
+up: .env
 	docker compose up -d
 
-build:
+build: .env
 	docker compose stop
 	docker compose build
 	docker volume create --name=geodjango_pg_data
