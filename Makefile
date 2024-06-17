@@ -28,11 +28,15 @@ clean:
 	docker compose down
 	docker compose rm
 
+# Helper functions
+task-up = $(if $(shell $(DKC) ps -q $(1)),$(1) is running)
+exec-or-run = $(if $(call task-up,$1),exec,run --rm) $1
+
 pg_term:
-	docker compose exec postgis psql -U dheerajchand -d geodjango_database
+	docker compose $(call exec-or-run,postgis) psql -U dheerajchand -d geodjango_database
 
 python_term:
-	docker compose exec webserver_python /bin/bash
+	docker compose $(call exec-or-run,webserver_python) /bin/bash
 
 # Basic operations prod
 
