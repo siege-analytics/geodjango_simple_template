@@ -29,6 +29,9 @@ RUN apt-get clean && apt-get install -y \
     postgis \
     netcat-traditional
 
+# Copy pip.conf to /etc/pip.conf
+
+COPY pip.conf /etc/pip.conf
 
 # Activate Python Virtual Environment
 RUN python3 -m venv ${PYTHON_VENV_PATH}
