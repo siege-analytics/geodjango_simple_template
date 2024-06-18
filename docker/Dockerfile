@@ -40,8 +40,8 @@ ENV PATH="${PYTHON_VENV_PATH}/bin:$PATH"
 # Install GDAL python bindings
 RUN apt-get install -y --install-recommends libgdal-dev
 RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
-export C_INCLUDE_PATH=/usr/include/gdal # && \
-pip install --trusted-host pypi.python.org --upgrade pip GDAL=="$(gdal-config --version).*"
+export C_INCLUDE_PATH=/usr/include/gdal && \
+pip install --trusted-host pypi.python.org --upgrade pip GDAL=="$(gdal-config --version).*" && echo "succesfully built python gdal bindings"
 
 # Install PIP requirements
 ADD requirements.txt /tmp/
