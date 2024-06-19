@@ -1,97 +1,72 @@
-# Basic operations dev
 
-default: build
+default: up
 
-link-dev:
-	ln -sf .env.dev .env
+include .env # enable use of SQL_ env's in make recipes
 
-down:
-	docker compose down
+DKC ?= docker compose
 
-stop:
-	docker compose stop
+#
+# Config
+#
 
-up: .env
-	docker compose up -d
+TARGET_ENV ?= dev
 
-build: .env
-	make link-dev
-	docker compose stop
-	docker compose build
-	docker volume create --name=geodjango_pg_data
+ifeq (${TARGET_ENV},dev)
+ENV_INCLUDES := conf/dev.env conf/django.dev.conf conf/postgres.conf
+COMPOSE_SRC := docker-compose.dev.yml
+else
+ENV_INCLUDES := conf/prod.env conf/django.prod.conf conf/postgres.conf
+COMPOSE_SRC := docker-compose.prod.yml
+endif
 
-rebuild:
-	make link-dev
-	docker compose stop
-	docker compose build --no-cache
-	docker volume create --name=geodjango_pg_data
-
-clean:
-	docker compose down
-	docker compose rm
+#
+# Docker
+#
 
 # Helper functions
 task-up = $(if $(shell $(DKC) ps -q $(1)),$(1) is running)
 exec-or-run = $(if $(call task-up,$1),exec,run --rm) $1
 
-pg_term:
-	docker compose $(call exec-or-run,postgis) psql -U dheerajchand -d geodjango_database
+.env: ${ENV_INCLUDES}
+	cat $^ >$@
 
-python_term:
-	docker compose $(call exec-or-run,webserver_python) /bin/bash
+docker-compose.yml: ${COMPOSE_SRC}
+	cat $^ >$@
 
-# Basic operations prod
+docker-files := .env docker-compose.yml
 
-link-prod:
-	ln -sf .env.prod .env
+stop:  ${docker-files}
+	$(DKC) $@
 
-down-prod:
-	docker-compose -f docker-compose.prod.yml down
+down: ${docker-files}
+	$(DKC) $@
 
-stop-prod:
-	docker compose -f docker-compose.prod.yml stop
+up: ${docker-files}
+	$(DKC) $@ -d
 
-up-prod:
-	docker compose -f docker-compose.prod.yml up -d
+build: ${docker-files} stop
+	$(DKC) $@
 
-build-prod:
-	make link-prod
-	docker compose -f docker-compose.prod.yml stop
-	docker compose -f docker-compose.prod.yml build
-	docker volume create --name=geodjango_pg_data
+rebuild: ${docker-files} stop
+	$(DKC) build --no-cache
 
-rebuild-prod:
-	make link-prod
-	docker compose -f docker-compose.prod.yml stop
-	docker compose -f docker-compose.prod.yml build --no-cache
-	docker volume create --name=geodjango_pg_data
+clean: ${docker-files} down
+	$(DKC) rm
 
-clean-prod:
-	docker compose -f docker-compose.prod.yml down
-	docker compose -f docker-compose.prod.yml rm
+#
+# Tasks
+#
 
-pg_term-prod:
-	docker compose -f docker-compose.prod.yml exec postgis psql -U dheerajchand -d geodjango_database
+pg_term: ${docker-files}
+	$(DKC) $(call exec-or-run,postgis) psql -U $(SQL_USER) -d $(SQL_DATABASE)
 
-python_term-prod:
-	docker compose -f docker-compose.prod.yml exec webserver_python /bin/bash
+python_term: ${docker-files}
+	$(DKC) $(call exec-or-run,webserver_python) /bin/bash
 
-# Django operations dev
+# Django operations
 
-migrate:
+migrate collectstatic: ${docker-files}
+	$(DKC) $(call exec-or-run,webserver_python) python3 hellodjango/manage.py $@ --no-input
 
-	docker compose exec webserver_python python3 hellodjango/manage.py migrate --no-input
+static: collectstatic
 
-static:
-
-	docker compose exec webserver_python python3 hellodjango/manage.py collectstatic --no-input
-
-# Django operations prod
-
-migrate-prod:
-
-	docker compose -f docker-compose.prod.yml exec webserver_python python3 hellodjango/manage.py migrate --no-input
-
-static:
-
-	docker compose -f docker-compose.prod.yml exec webserver_python python3 hellodjango/manage.py collectstatic --no-input

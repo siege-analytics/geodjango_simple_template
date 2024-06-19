@@ -3,14 +3,24 @@ services:
 
   webserver_python:
     container_name: geodjango_webserver_prod
+    image: geogjango_webserver_prod
     build:
       context: .
       dockerfile: docker/Dockerfile.prod
       args:
-        UBUNTU_BASE_IMAGE: ${UBUNTU_BASE_IMAGE}
+        - DEV_IMAGE=geogjango_webserver_dev
     command: sh -c "cd hellodjango/ && gunicorn hellodjango.wsgi:application --bind 0.0.0.0:8000"
-    env_file:
-      - .env.prod
+    environment:
+      - DEBUG
+      - DATABASE
+      - SECRET_KEY
+      - DJANGO_ALLOWED_HOSTS
+      - SQL_ENGINE
+      - SQL_DATABASE
+      - SQL_USER
+      - SQL_PASSWORD
+      - SQL_HOST
+      - SQL_PORT
     networks:
       - geodjango_project_network_prod
     volumes:
@@ -23,8 +33,6 @@ services:
   postgis:
     image: postgis/postgis:latest
     container_name: geodjango_postgis_prod
-    env_file:
-      - .env.prod.db
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]

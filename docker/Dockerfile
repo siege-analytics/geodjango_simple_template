@@ -9,10 +9,11 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+# assure TZ config
+RUN apt-get update && apt-get install -y tzdata
+
 # Install the basics, python utils, gdal, and postgres
-RUN apt-get update
-RUN apt-get install -y tzdata
-RUN apt-get clean && apt-get install -y \
+RUN apt-get install -y \
     build-essential \
     ca-certificates \
     vim \
@@ -27,10 +28,11 @@ RUN apt-get clean && apt-get install -y \
     postgresql \
     postgresql-contrib \
     postgis \
-    netcat-traditional
+    netcat-traditional \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy pip.conf to /etc/pip.conf
-
+# Python Installer Config
 COPY pip.conf /etc/pip.conf
 
 # Activate Python Virtual Environment
@@ -47,8 +49,7 @@ pip install --trusted-host pypi.python.org --upgrade pip GDAL=="$(gdal-config --
 ADD requirements.txt /tmp/
 RUN pip install --trusted-host pypi.python.org --upgrade pip -r /tmp/requirements.txt
 
-# Copy the entrypoint
-
+# Container entrypoint
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
