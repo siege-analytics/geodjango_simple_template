@@ -20,11 +20,17 @@ Currently adding `redis`.
 
 # Building
 
-Link the `.env` file to the appropriate environment file, e.g. `ln -s .env.dev .env`.
+The `TARGET_ENV` variable in the `.env` file determines the environment to build. The default is `dev`. To build the project for production, set `TARGET_ENV=prod`.
+
+**NB:** The docker compose files (`docker-compose.yml`, `.env`) are auto-generated and git-ignored. The sources are determined by the `TARGET_ENV` file. See the `Makefile` for more details.
 
 Override UBUNTU_BASE_IMAGE in the `.env` file to use a different base image, e.g. `UBUNTU_BASE_IMAGE=arm64v8/ubuntu:latest`.
 
 Then run `make build` to build the project.
+
+## Environment Config
+
+The `conf/` directory contains ingredients for the auto-generated `.env` file. The `Makefile` declares `ENV_INCLUDES` depending on the value of `TARGET_ENV`. The `dev.env` and `prod.env` files are meant for general environment config. Other files are meant for specific services, e.g. django and postgres.
 
 # Goals
 
