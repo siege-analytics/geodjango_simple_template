@@ -40,10 +40,15 @@ RUN python3 -m venv ${PYTHON_VENV_PATH}
 ENV PATH="${PYTHON_VENV_PATH}/bin:$PATH"
 
 # Install GDAL python bindings
-RUN apt-get install -y --install-recommends libgdal-dev
-RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
-export C_INCLUDE_PATH=/usr/include/gdal && \
-pip install --trusted-host pypi.python.org --upgrade pip GDAL=="$(gdal-config --version).*" && echo "succesfully built python gdal bindings"
+RUN apt-get update \
+    && apt-get install -y --install-recommends libgdal-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+ENV C_INCLUDE_PATH=/usr/include/gdal
+RUN pip install --trusted-host pypi.python.org --upgrade pip GDAL=="$(gdal-config --version).*" \
+ && echo "succesfully built python gdal bindings"
 
 # Install PIP requirements
 ADD requirements.txt /tmp/
