@@ -34,7 +34,7 @@ The Makefile has a `build-prod` target that builds the dev image, and deletes th
 
 ## Environment Config
 
-**NB:** The docker compose files (`docker-compose.yml`, `.env`) are auto-generated and git-ignored. The sources are determined by the `TARGET_ENV` file. See the `Makefile` for more details.
+**NB:** The docker compose files (`docker-compose.yml`, `.env`) are auto-generated and git-ignored. The sources are determined by the `TARGET_ENV` env var. See the `Makefile` for more details.
 
 The `conf/` directory contains ingredients for the auto-generated `.env` file. The `Makefile` declares `ENV_INCLUDES` depending on the value of `TARGET_ENV`. The `dev.env` and `prod.env` files are meant for general environment config. Other files are meant for specific services, e.g. django and postgres.
 
