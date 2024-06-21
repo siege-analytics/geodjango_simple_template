@@ -11,7 +11,7 @@ DKC ?= docker compose
 
 TARGET_ENV ?= dev
 
-ifeq (${TARGET_ENV},dev)
+ifeq ($(shell echo ${TARGET_ENV} | tr A-Z a-z),dev)
 ENV_INCLUDES := conf/dev.env conf/django.dev.conf conf/postgres.conf
 COMPOSE_SRC := docker-compose.dev.yml
 else
@@ -46,6 +46,13 @@ up: ${docker-files}
 
 build: ${docker-files} stop
 	$(DKC) $@
+
+
+# so you don't have to remember to delete the .env and docker-compose.yml files.
+build-prod:
+	TARGET_ENV=dev make build
+	-rm -f ${docker-files}
+	TARGET_ENV=prod make rebuild
 
 rebuild: ${docker-files} stop
 	$(DKC) build --no-cache

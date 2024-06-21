@@ -4,7 +4,7 @@ This repository contains a simple template for building GeoDjango applications. 
 
 It currently supports two environments
 
-- Dev
+- Dev (default)
 - Prod
 
 The `Makefile` has parallel commands for most things relating to building the project. Default commands relate to the `dev` environment, `prod` commands have a flag on them.
@@ -20,15 +20,21 @@ Currently adding `redis`.
 
 # Building
 
-The `TARGET_ENV` variable in the `.env` file determines the environment to build. The default is `dev`. To build the project for production, set `TARGET_ENV=prod`.
-
-**NB:** The docker compose files (`docker-compose.yml`, `.env`) are auto-generated and git-ignored. The sources are determined by the `TARGET_ENV` file. See the `Makefile` for more details.
+The `TARGET_ENV` env variable determines the environment to build. The default is `dev`. To build the project for production, set `TARGET_ENV=prod` (case in-sensitive). **You should delete the `docker-compose.yml` and `.env` files before switching environments.**
 
 Override UBUNTU_BASE_IMAGE in the `.env` file to use a different base image, e.g. `UBUNTU_BASE_IMAGE=arm64v8/ubuntu:latest`.
 
 Then run `make build` to build the project.
 
+## Production Builds
+
+**NB:** The production image uses the Dev image as its base. Be sure to build the Dev image first.
+
+The Makefile has a `build-prod` target that builds the dev image, and deletes the docker files in-between switching environments.
+
 ## Environment Config
+
+**NB:** The docker compose files (`docker-compose.yml`, `.env`) are auto-generated and git-ignored. The sources are determined by the `TARGET_ENV` file. See the `Makefile` for more details.
 
 The `conf/` directory contains ingredients for the auto-generated `.env` file. The `Makefile` declares `ENV_INCLUDES` depending on the value of `TARGET_ENV`. The `dev.env` and `prod.env` files are meant for general environment config. Other files are meant for specific services, e.g. django and postgres.
 
