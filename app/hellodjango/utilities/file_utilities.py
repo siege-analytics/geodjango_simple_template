@@ -14,6 +14,40 @@ def run_subprocess(command_list):
         print("SUBPROCESS FAILED!")
         raise Exception("Subprocess failed with error: {}".format(stderr))
 
+def ensure_path_exists(desired_path):
+
+    try:
+        desired_path_object = pathlib.Path(desired_path)
+        pathlib.Path(desired_path_object).mkdir(parents=True, exist_ok=True)
+        return desired_path_object
+
+    except Exception as e:
+        print(f"Exception while generating local path: {e}")
+        return False
+
+
+def generate_local_path_from_url(url, directory_path):
+
+    # Returns a pathlib path to a file
+
+    #Parameters:
+    #       url             :   string, the remote url for a file
+    #       directory_name  :   path, the directory to white the file should be saved
+
+    #Returns:
+    #    Path object that concatenates the file name to a directory path
+
+    try:
+        remote_file_name = url.split('/')[-1]
+        directory_path = pathlib.Path(directory_path)
+
+        new_path = directory_path / remote_file_name
+        return new_path
+
+    except Exception as e:
+        print(f"Exception while generating local path: {e}"
+        return False
+
 def download_file(url, local_filename):
 
     with requests.get(url, stream=True, allow_redirects=True) as r:
