@@ -29,6 +29,8 @@ RUN apt-get install -y \
     postgresql-contrib \
     postgis \
     netcat-traditional \
+    sqlite3 \
+    spatialite-bin \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
