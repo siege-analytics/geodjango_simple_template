@@ -1,6 +1,8 @@
 Django
+geopandas
 gunicorn
+pandas
 psycopg2-binary
 pysal
-pandas
-geopandas
+python-dotenv
+
