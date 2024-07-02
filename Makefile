@@ -9,7 +9,7 @@ DKC ?= docker compose
 # Config
 #
 
-TARGET_ENV ?= prod
+TARGET_ENV ?= dev
 
 ifeq ($(shell echo ${TARGET_ENV} | tr A-Z a-z),dev)
 ENV_INCLUDES := conf/dev.env conf/django.dev.conf conf/postgres.conf
