@@ -1,4 +1,6 @@
 import pathlib
+import importlib.util
+
 
 # going to build paths for use relative to the settings file
 
@@ -20,8 +22,8 @@ VECTOR_SPATIAL_DATA_SUBDIRECTORY = SPATIAL_DATA_SUBDIRECTORY / 'vector'
 RASTER_SPATIAL_DATA_SUBDIRECTORY = SPATIAL_DATA_SUBDIRECTORY / 'raster'
 POINTCLOUD_SPATIAL_DATA_SUBDIRECTORY = SPATIAL_DATA_SUBDIRECTORY / 'pointcloud'
 
-# Utilities
+# Utilities have to be handled oddly because I'm trying to handle it with Pathlib
+# and this is done with importlib
 
-UTILITIES = DJANGO_PROJECT_DIRECTORY / 'utilities'
-
-
+UTILITIES_PACKAGE_NAME='utilities'
+PATH_TO_UTILITIES_PACKAGE=DJANGO_PROJECT_DIRECTORY / UTILITIES_PACKAGE_NAME

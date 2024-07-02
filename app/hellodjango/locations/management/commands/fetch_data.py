@@ -3,16 +3,16 @@
 #Django Management Command Imports
 
 from django.core.management.base import BaseCommand, CommandError
-
+from django.conf import settings
 
 # Generic Python Library Imports
 
 import sys, os
-from zipfile import ZipFile
+import importlib.util
 
 # custom functions
 
-from UTILITIES import *
+from utilities.file_utilities import *
 
 # Useful Constants
 
@@ -28,7 +28,8 @@ class Command(BaseCommand):
         try:
             # fetch_data()
             # unzip_data()
-            print("This command worked")
+            execution_location = os.getcwd()
+            print(execution_location)
 
         except Exception as ex:
             raise CommandError("There was an error at the command level: %s" % (ex))

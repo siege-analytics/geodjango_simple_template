@@ -1,11 +1,10 @@
-from settings import *
-
+from django.conf import settings
 import subprocess
 import zipfile
 import requests
 from tqdm import tqdm
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 def run_subprocess(command_list):
     # Not sure if this is handling failures properly...
