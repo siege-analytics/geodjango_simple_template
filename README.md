@@ -59,6 +59,7 @@ I'd like to add
   - [where to put pip.conf](9)
 - [ARM64 PostGIS Image for Docker](10)
 - [Adding Spatialite for dev's SQLite](11)
+- [Organizing a settings.py file as a package](12)
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 [2]: https://gunicorn.org
@@ -71,3 +72,4 @@ I'd like to add
 [9]: https://stackoverflow.com/questions/38869231/python-cant-find-the-file-pip-conf
 [10]: https://github.com/Tob1as/docker-postgresql-postgis
 [11]: https://zoomadmin.com/HowToInstall/UbuntuPackage/spatialite-bin
+[12]: https://www.reddit.com/r/django/comments/l9s3r4/how_do_you_organize_your_settingspy_file_to_keep/
