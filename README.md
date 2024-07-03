@@ -16,7 +16,13 @@ The project makes use of some standard technologies:
 - [nginx][3]
 - [PostGIS][4]
 
-Currently adding `redis`.
+# Currently 
+
+Adding a Django application to import and convert vector and raster data formats using OGR/GDAL and Django Rest Framework.
+
+# Immediately to do
+
+- [Make tasks happen asynchronously](13)
 
 # Building
 
@@ -46,7 +52,8 @@ I'd like to add
 - Spark
 - Sedona
 - GeoServer
-- Redis/Django Channels
+- RabbitMQ/Django Channels
+
 
 # References:
 
@@ -73,3 +80,4 @@ I'd like to add
 [10]: https://github.com/Tob1as/docker-postgresql-postgis
 [11]: https://zoomadmin.com/HowToInstall/UbuntuPackage/spatialite-bin
 [12]: https://www.reddit.com/r/django/comments/l9s3r4/how_do_you_organize_your_settingspy_file_to_keep/
+[13]: https://pub.aimind.so/download-large-file-in-python-with-beautiful-progress-bar-f4f86b394ad7
