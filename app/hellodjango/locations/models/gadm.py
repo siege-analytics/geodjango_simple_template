@@ -208,12 +208,7 @@ class Admin_Level_1(models.Model):
     def __unicode__(self): return self.name_1
 
 
-class Timezone(models.Model):
-    tzid = models.CharField(max_length=80)
-    geom = models.PolygonField(srid=4326)
 
-    def __unicode__(self):
-        return unicode(self.tzid)
 
 # Auto-generated `LayerMapping` dictionary for BangladeshPopulation--srid=4326 model
 
@@ -383,32 +378,7 @@ admin_level_1_mapping = {
     'geom': 'MULTIPOLYGON',
 }
 
-timezone_mapping = {
-    'tzid': 'TZID',
-    'geom': 'POLYGON',
-}
 
-bangladeshroads_mapping = {
-    'rd_cond': 'RD_COND',
-    'cond_ws': 'COND_WS',
-    'totlength': 'TOTLENGTH',
-    'crestwidth': 'CRESTWIDTH',
-    'lgedcode': 'LGEDcode',
-    'ftype': 'FType',
-    'roadtype': 'RoadType',
-    'roadname': 'RoadName',
-    'division': 'Division',
-    'district': 'District',
-    'upazila': 'Upazila',
-    'shape_leng': 'Shape_Leng',
-    'geom': 'MULTILINESTRING',
-}
 
-bangladeshpopulation_mapping = {
-    'cat': 'cat',
-    'population': 'population',
-    'geom': 'MULTIPOLYGON',
-}
-from django.db import models
 
-# Create your models here.
+
