@@ -1,4 +1,5 @@
 # Imports
+import pathlib
 
 #Django Management Command Imports
 
@@ -22,7 +23,7 @@ BOUNDARIES_URL = 'https://github.com/evansiroky/timezone-boundary-builder/releas
 
 class Command(BaseCommand):
     args = ''
-    help = 'Fetches the Natural Earth Timezones Shapefile'
+    help = 'Fetches data specified by CLI argument, data must be in the dispatcher'
 
     def handle(self, *args, **options):
         try:
@@ -36,11 +37,12 @@ class Command(BaseCommand):
                 local_filename=str(local_filename)
             )
 
-
-
-
-            print(downloaded_file)
-
+            path_to_downloaded_file = pathlib.Path(downloaded_file)
+            unzipped_downloaded_file = unzip_file_to_its_own_directory(
+                path_to_zipfile=path_to_downloaded_file,
+                new_dir_name=None,
+                new_dir_parent=None
+            )
 
         except Exception as ex:
             raise CommandError("There was an error at the command level: %s" % (ex))

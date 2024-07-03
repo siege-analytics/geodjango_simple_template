@@ -17,7 +17,7 @@ def run_subprocess(command_list):
         print("SUBPROCESS FAILED!")
         raise Exception("Subprocess failed with error: {}".format(stderr))
 
-def ensure_path_exists(desired_path):
+def ensure_path_exists(desired_path) -> pathlib.Path:
 
     try:
         desired_path_object = pathlib.Path(desired_path)
@@ -28,7 +28,7 @@ def ensure_path_exists(desired_path):
         print(f"Exception while generating local path: {e}")
         return False
 
-def generate_local_path_from_url(url, directory_path, as_string=True):
+def generate_local_path_from_url(url: str, directory_path:pathlib.Path, as_string: bool =True):
 
     # Returns a pathlib path to a file
 
@@ -74,7 +74,7 @@ def download_file(url, local_filename):
         else:
             return False
 
-def unzip_file_to_its_own_directory(path_to_zipfile, new_dir_name=None, new_dir_parent=None):
+def unzip_file_to_its_own_directory(path_to_zipfile:pathlib.Path, new_dir_name=None, new_dir_parent=None):
     try:
         frtz = zipfile.ZipFile(path_to_zipfile)
         if new_dir_name is None:
@@ -84,18 +84,17 @@ def unzip_file_to_its_own_directory(path_to_zipfile, new_dir_name=None, new_dir_
 
         # ensure that a directory exists for the new files to go in
         target_dir_for_unzipped_files = new_dir_parent / new_dir_name
+
         pathlib.Path(target_dir_for_unzipped_files).mkdir(parents=True, exist_ok=True)
 
         frtz.extractall(path=target_dir_for_unzipped_files)
-        info_message = "Just unzipped: \n {path_to_zipfile} \n To: {target_dir}".format(
-            **{'path_to_zipfile': path_to_zipfile,
-               'target_dir': target_dir_for_unzipped_files})
+        info_message = f"Just unzipped: \n {path_to_zipfile} \n To: {target_dir_for_unzipped_files}"
         logging.info(info_message)
         return target_dir_for_unzipped_files
 
     except Exception as e:
 
-        error_message = "There was an error {e}".format(**{'e': e})
+        error_message = f"There was an error: {e}"
         logging.error(error_message)
         return False
 
