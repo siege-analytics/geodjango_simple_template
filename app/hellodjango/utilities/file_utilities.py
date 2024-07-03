@@ -1,8 +1,11 @@
 from django.conf import settings
-import subprocess
-import zipfile
+import logging
+import pathlib
 import requests
+import subprocess
 from tqdm import tqdm
+# import werkzeug
+import zipfile
 
 # logging.basicConfig(level=logging.INFO)
 
@@ -25,14 +28,14 @@ def ensure_path_exists(desired_path):
         print(f"Exception while generating local path: {e}")
         return False
 
-
-def generate_local_path_from_url(url, directory_path):
+def generate_local_path_from_url(url, directory_path, as_string=True):
 
     # Returns a pathlib path to a file
 
     #Parameters:
     #       url             :   string, the remote url for a file
     #       directory_name  :   path, the directory to white the file should be saved
+    #       as_string       :   bool, toggles whether object is returned as string or path
 
     #Returns:
     #    Path object that concatenates the file name to a directory path
@@ -42,10 +45,13 @@ def generate_local_path_from_url(url, directory_path):
         directory_path = pathlib.Path(directory_path)
 
         new_path = directory_path / remote_file_name
+
+        if as_string is True:
+            new_path = str(new_path)
         return new_path
 
     except Exception as e:
-        print(f"Exception while generating local path: {e}"
+        print(f"Exception while generating local path: {e}")
         return False
 
 def download_file(url, local_filename):
@@ -57,7 +63,7 @@ def download_file(url, local_filename):
             total_size = int(r.headers.get('content-length',0))
 
             initial_pos = 0
-            with open(local_filename, 'ab') as f:
+            with open(local_filename, 'wb') as f:
                 with tqdm(total=total_size, unit_scale=True, desc=local_filename, initial=initial_pos,
                           ascii=True) as pbar:
                     for chunk in r.iter_content(chunk_size=1024):

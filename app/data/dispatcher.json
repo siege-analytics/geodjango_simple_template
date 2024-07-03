@@ -1,0 +1,7 @@
+{
+'timezones' : {
+  'easy_name' : 'timezones',
+  'url'       : 'https://github.com/evansiroky/timezone-boundary-builder/releases/download/2024a/timezones-with-oceans-now.shapefile.zip'
+}
+
+}

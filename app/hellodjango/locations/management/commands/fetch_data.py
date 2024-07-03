@@ -16,9 +16,9 @@ from utilities.file_utilities import *
 
 # Useful Constants
 
-BOUNDARIES_URL = 'http://efele.net/maps/tz/world/tz_world_mp.zip'
+BOUNDARIES_URL = 'https://github.com/evansiroky/timezone-boundary-builder/releases/download/2024a/timezones-with-oceans-now.shapefile.zip'
 
-BOUNDARIES_SHAPEFILE = './shapefiles/tz_world_mp.shp.zip'
+
 
 class Command(BaseCommand):
     args = ''
@@ -26,10 +26,21 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            # fetch_data()
-            # unzip_data()
-            execution_location = os.getcwd()
-            print(execution_location)
+            local_filename = generate_local_path_from_url(
+                url=BOUNDARIES_URL,
+                directory_path=settings.VECTOR_SPATIAL_DATA_SUBDIRECTORY,
+            )
+
+            downloaded_file = download_file(
+                url=BOUNDARIES_URL,
+                local_filename=str(local_filename)
+            )
+
+
+
+
+            print(downloaded_file)
+
 
         except Exception as ex:
             raise CommandError("There was an error at the command level: %s" % (ex))
@@ -42,25 +53,3 @@ class Command(BaseCommand):
         if self.success == True:
             self.stdout.write('Successfully fetched the boundaries for Natural Earth Timezone boundaries.')
 
-def fetch_data():
-
-    """This function fetches the Natural Earth timezones shapefile."""
-
-    print("Now fetching the timezones geodatabase.")
-
-    # variables for logic (magic strings/numbers)
-
-    r = requests.get(BOUNDARIES_URL, stream = True)
-
-    with open(BOUNDARIES_SHAPEFILE, 'wb') as f:
-        total_length = int(r.headers.get('content-length'))
-        for chunk in progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length / 1024) + 1):
-            if chunk:
-                f.write(chunk)
-                f.flush()
-
-def unzip_data():
-
-    os.chdir('./shapefiles')
-    boundaries_gdb_zip = ZipFile('tz_world_mp.shp.zip')
-    boundaries_gdb_zip.extractall()
