@@ -209,8 +209,8 @@ class Admin_Level_1(models.Model):
 
 
 class Timezone(models.Model):
-    tzid = models.CharField(max_length=30)
-    geom = models.MultiPolygonField()
+    tzid = models.CharField(max_length=80)
+    geom = models.PolygonField(srid=4326)
 
     def __unicode__(self):
         return unicode(self.tzid)
@@ -385,7 +385,7 @@ admin_level_1_mapping = {
 
 timezone_mapping = {
     'tzid': 'TZID',
-    'geom': 'MULTIPOLYGON',
+    'geom': 'POLYGON',
 }
 
 bangladeshroads_mapping = {
