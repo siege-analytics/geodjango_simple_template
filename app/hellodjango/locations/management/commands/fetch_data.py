@@ -11,13 +11,14 @@ from django.conf import settings
 import sys, os
 import importlib.util
 
-# custom functions
+# custom functions and data
 
-from utilities.file_utilities import *
+#from utilities.file_utilities import *
+from utilities import *
 
 # Useful Constants
 
-BOUNDARIES_URL = 'https://github.com/evansiroky/timezone-boundary-builder/releases/download/2024a/timezones-with-oceans-now.shapefile.zip'
+# BOUNDARIES_URL = 'https://github.com/evansiroky/timezone-boundary-builder/releases/download/2024a/timezones-with-oceans-now.shapefile.zip'
 
 
 
@@ -25,30 +26,21 @@ class Command(BaseCommand):
     args = ''
     help = 'Fetches data specified by CLI argument, data must be in the dispatcher'
 
-    def handle(self, *args, **options):
-        try:
-            local_filename = generate_local_path_from_url(
-                url=BOUNDARIES_URL,
-                directory_path=settings.VECTOR_SPATIAL_DATA_SUBDIRECTORY,
-            )
+    def add_arguments(self, parser):
+        parser.add_argument('models', nargs='*')
 
-            downloaded_file = download_file(
-                url=BOUNDARIES_URL,
-                local_filename=str(local_filename)
-            )
+    def handle(self, *args, **kwargs):
 
-            path_to_downloaded_file = pathlib.Path(downloaded_file)
-            unzipped_downloaded_file = unzip_file_to_its_own_directory(
-                path_to_zipfile=path_to_downloaded_file,
-                new_dir_name=None,
-                new_dir_parent=None
-            )
+        model_set = kwargs['models']
+        known_models = list(dispatcher.keys())
 
-        except Exception as ex:
-            raise CommandError("There was an error at the command level: %s" % (ex))
-            sys.exit()
+        models_to_work_on = [m for m in model_set if m.lower() in known_models]
+        models_that_cannot_be_worked_on = [m for m in model_set if not m.lower() in known_models]
 
+        print(models_that_cannot_be_worked_on)
+        print(models_to_work_on)
         self.success = True
+
 
         # Output mesages
 
