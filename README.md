@@ -67,6 +67,7 @@ I'd like to add
 - [ARM64 PostGIS Image for Docker](10)
 - [Adding Spatialite for dev's SQLite](11)
 - [Organizing a settings.py file as a package](12)
+- [Django Management Commmand options/arguments](14)
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 [2]: https://gunicorn.org
@@ -81,3 +82,4 @@ I'd like to add
 [11]: https://zoomadmin.com/HowToInstall/UbuntuPackage/spatialite-bin
 [12]: https://www.reddit.com/r/django/comments/l9s3r4/how_do_you_organize_your_settingspy_file_to_keep/
 [13]: https://pub.aimind.so/download-large-file-in-python-with-beautiful-progress-bar-f4f86b394ad7
+[14]: https://simpleisbetterthancomplex.com/tutorial/2018/08/27/how-to-create-custom-django-management-commands.html
