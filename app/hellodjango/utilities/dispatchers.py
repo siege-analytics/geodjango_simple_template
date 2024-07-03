@@ -8,7 +8,16 @@ from django.contrib.gis.utils import LayerMapping
 
 from locations.models import *
 
-# Python imports
+
+data_types_to_path = {
+
+    'VECTOR'        : VECTOR_SPATIAL_DATA_SUBDIRECTORY,
+    'RASTER'        : RASTER_SPATIAL_DATA_SUBDIRECTORY,
+    'TABULAR'       : TABULAR_DATA_SUBDIRECTORY,
+    'POINTCLOUD'    : POINTCLOUD_SPATIAL_DATA_SUBDIRECTORY,
+}
+
+
 
 dispatcher = {
             'gadm': {
