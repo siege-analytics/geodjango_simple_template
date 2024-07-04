@@ -9,17 +9,17 @@ from django.contrib.gis.utils import LayerMapping
 from locations.models import *
 
 
-data_types_to_path = {
+DATA_TYPES_TO_PATH = {
 
-    'VECTOR'        : VECTOR_SPATIAL_DATA_SUBDIRECTORY,
-    'RASTER'        : RASTER_SPATIAL_DATA_SUBDIRECTORY,
-    'TABULAR'       : TABULAR_DATA_SUBDIRECTORY,
-    'POINTCLOUD'    : POINTCLOUD_SPATIAL_DATA_SUBDIRECTORY,
+    'VECTOR'        : settings.VECTOR_SPATIAL_DATA_SUBDIRECTORY,
+    'RASTER'        : settings.RASTER_SPATIAL_DATA_SUBDIRECTORY,
+    'TABULAR'       : settings.TABULAR_DATA_SUBDIRECTORY,
+    'POINTCLOUD'    : settings.POINTCLOUD_SPATIAL_DATA_SUBDIRECTORY,
 }
 
 
 
-dispatcher = {
+DOWNLOADS_DISPATCHER = {
             'gadm': {
                 'url': 'http://biogeo.ucdavis.edu/data/gadm2.8/gadm28_levels.gdb.zip',
                 'model_to_model': [
