@@ -5,11 +5,12 @@ import requests
 import subprocess
 from tqdm import tqdm
 
-# import werkzeug
 import zipfile
 
-# logging.basicConfig(level=logging.INFO)
+# Logging
 
+import logging
+logger = logging.getLogger("django")
 
 def run_subprocess(command_list):
     # Not sure if this is handling failures properly...
@@ -18,7 +19,7 @@ def run_subprocess(command_list):
     )
     stdout, stderr = p.communicate()
     if p.returncode != 0:
-        print("SUBPROCESS FAILED!")
+        logger.error("SUBPROCESS FAILED!")
         raise Exception("Subprocess failed with error: {}".format(stderr))
 
 
@@ -30,7 +31,8 @@ def ensure_path_exists(desired_path) -> pathlib.Path:
         return desired_path_object
 
     except Exception as e:
-        print(f"Exception while generating local path: {e}")
+        message = f"Exception while generating local path: {e}"
+        logger.error(message)
         return False
 
 
@@ -59,7 +61,8 @@ def generate_local_path_from_url(
         return new_path
 
     except Exception as e:
-        print(f"Exception while generating local path: {e}")
+        message = f"Exception while generating local path: {e}"
+        logger.error(message)
         return False
 
 
@@ -107,11 +110,11 @@ def unzip_file_to_its_own_directory(
 
         frtz.extractall(path=target_dir_for_unzipped_files)
         info_message = f"Just unzipped: \n {path_to_zipfile} \n To: {target_dir_for_unzipped_files}"
-        logging.info(info_message)
+        logger.info(info_message)
         return target_dir_for_unzipped_files
 
     except Exception as e:
 
         error_message = f"There was an error: {e}"
-        logging.error(error_message)
+        logger.error(error_message)
         return False
