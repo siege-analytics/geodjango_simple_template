@@ -33,8 +33,12 @@ class Command(BaseCommand):
         # get command line specified options
         model_set = kwargs["models"]
         known_models = list(DOWNLOADS_DISPATCHER.keys())
+
+        # container variables
         models_to_work_on = []
         models_that_cannot_be_worked_on = []
+        successes = []
+        failures = []
 
         # specify which models to work on
         # if the user specifies nothing, do them all
@@ -51,17 +55,31 @@ class Command(BaseCommand):
         print(models_to_work_on)
 
         # start work
+        try:
+            for m in models_to_work_on:
+                m = m.lower()
+                fetch_and_load_all_data(m)
+                successes.append(m)
+        except Exception as e:
+            message = (
+                "There was an error at the management command level working on {m}: {e}"
+            )
+            failures.append(m)
 
-        for m in models_to_work_on:
-            m = m.lower()
-            fetch_and_load_all_data(m)
+        # count failures
+        if len(failures) > 0:
+            message = "\n FAILURE"
+            message += f"\n The following models succeeded : {successes}"
+            message += f"\n The following models failed : {failures}"
 
-        self.success = True
+            logger.error(message)
 
-        # Output mesages
+        else:
+            message = "\n SUCCESS"
+            message += f"\n The following models succeeded : {successes}"
+            message += f"\n The following models failed : {failures}"
 
-        if self.success == True:
-            self.stdout.write("Successfully fetched the boundaries for data.")
+            logger.info(message)
 
 
 def fetch_and_unzip_the_file(model_to_work_on: str, url: str, data_type: str):
@@ -73,15 +91,25 @@ def fetch_and_unzip_the_file(model_to_work_on: str, url: str, data_type: str):
             url=url,
             directory_path=data_path,
         )
+        message = f"Successfully generated {local_filename}"
+        logger.debug(message)
 
         downloaded_file = download_file(
             url=url,
             local_filename=local_filename,
         )
 
-        unzip_file_to_its_own_directory(
+        message = f"Successfully downloaded {downloaded_file}"
+        logger.debug(message)
+
+        unzipped_file_path = unzip_file_to_its_own_directory(
             path_to_zipfile=downloaded_file, new_dir_name=None, new_dir_parent=None
         )
+
+        message = f"Successfully unzipped {unzipped_file_path}"
+        logger.debug(message)
+
+        return unzipped_file_path
 
     except Exception as e:
         message = f"There was an error: {e}"
@@ -99,6 +127,6 @@ def fetch_and_load_all_data(model_to_work_on: str):
     data_type = params["type"].upper()
     model_to_model = params["model_to_model"]
 
-    fetch_and_unzip_the_file(
+    data_file = fetch_and_unzip_the_file(
         model_to_work_on=model_to_work_on, url=url, data_type=data_type
     )
