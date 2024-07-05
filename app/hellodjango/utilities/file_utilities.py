@@ -10,7 +10,9 @@ import zipfile
 # Logging
 
 import logging
+
 logger = logging.getLogger("django")
+
 
 def run_subprocess(command_list):
     # Not sure if this is handling failures properly...
@@ -58,6 +60,8 @@ def generate_local_path_from_url(
 
         if as_string is True:
             new_path = str(new_path)
+        message = f"Successfully generated path {new_path}, as_string={as_string}"
+        logger.debug(message)
         return new_path
 
     except Exception as e:
@@ -109,12 +113,12 @@ def unzip_file_to_its_own_directory(
         pathlib.Path(target_dir_for_unzipped_files).mkdir(parents=True, exist_ok=True)
 
         frtz.extractall(path=target_dir_for_unzipped_files)
-        info_message = f"Just unzipped: \n {path_to_zipfile} \n To: {target_dir_for_unzipped_files}"
-        logger.info(info_message)
+        message = f"Just unzipped: \n {path_to_zipfile} \n To: {target_dir_for_unzipped_files}"
+        logger.info(message)
         return target_dir_for_unzipped_files
 
     except Exception as e:
 
-        error_message = f"There was an error: {e}"
-        logger.error(error_message)
+        message = f"There was an error: {e}"
+        logger.error(message)
         return False
