@@ -16,10 +16,6 @@ import importlib.util
 # from utilities.file_utilities import *
 from utilities import *
 
-# Useful Constants
-
-# BOUNDARIES_URL = 'https://github.com/evansiroky/timezone-boundary-builder/releases/download/2024a/timezones-with-oceans-now.shapefile.zip'
-
 
 class Command(BaseCommand):
     args = ""
@@ -82,6 +78,50 @@ class Command(BaseCommand):
             logger.info(message)
 
 
+def load_zipped_data_file_into_orm(
+    model_to_model: list, unzipped_data_file_path: pathlib.Path
+) -> bool:
+    """
+    This function takes a list of dictionary pairings, a Django model object and a layermapping object
+    and a data source and uses all of them to load the data from the file into the
+    corresponding Django model using the layermapping. The reason that you need a list is that some
+    some data files have many layers and you want to load all of them.
+
+    :param model_to_model: list
+    :param unzipped_data_file_path: pathlib.Path
+    :return: bool
+    """
+
+    try:
+        message = "\n"
+        message += f"About to start loading data from {unzipped_data_file_path} using {model_to_model}"
+        logger.info(message)
+
+        # first get the data file
+
+        target_data_file = find_vector_dataset_file_in_directory(
+            target_directory=unzipped_data_file_path
+        )
+
+        print(target_data_file)
+
+        # iterate through model to model list
+        for mtm in model_to_model:
+
+            # need the numerical index of the layer because it will be loaded correctly
+            layer_index = model_to_model.index(mtm)
+
+            message = "\n"
+            message += "Hello Cupcake"
+
+    except Exception as e:
+        message = "\n"
+        message += (
+            f"There was an error loading data from {unzipped_data_file_path}: {e}"
+        )
+        logger.error(message)
+
+
 def fetch_and_unzip_the_file(model_to_work_on: str, url: str, data_type: str):
     # create path to file for download
     try:
@@ -130,3 +170,8 @@ def fetch_and_load_all_data(model_to_work_on: str):
     data_file = fetch_and_unzip_the_file(
         model_to_work_on=model_to_work_on, url=url, data_type=data_type
     )
+
+    velvet_underground = load_zipped_data_file_into_orm(
+        model_to_model=model_to_model, unzipped_data_file_path=data_file
+    )
+    return True
