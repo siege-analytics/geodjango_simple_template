@@ -26,11 +26,6 @@ def find_vector_dataset_file_in_directory(
     This function takes a pathlib object and searches within it for the one file that:
 
     1. is a vector format spatial dataset
-    2. the file name should match the directory name
-
-    (2) is important because this is a supplementary function to
-    unzip_file_to_its_own_directory(path_to_zipfile, new_dir_name=None, new_dir_parent=None)
-    function in file_utilities, and I only use it without specifying new directory names and paths
 
     #Parameters
     #       target_directory    :   string, the remote url for a file
@@ -49,12 +44,21 @@ def find_vector_dataset_file_in_directory(
 
         # now look to see which file matches both the directory name and having a valid suffix
 
-        directory_name = target_directory.name
         target_files_list = []
 
-        for spam in directory_name:
-            eggs = pathlib.Path(spam)
-            logger.info(eggs.name)
+        for f in files_in_directory:
+
+            lowered_file_stem = str(f.stem).lower()
+            logger.info(lowered_file_stem)
+            lowered_file_suffix = str(f.suffix).lower()
+            logger.info(lowered_file_suffix)
+
+            # logic test
+            if lowered_file_suffix in settings.VALID_VECTOR_FILE_EXTENSIONS:
+                target_files_list.append(f)
+                logger.info(f"Added {f} to target_files_list")
+            else:
+                continue
 
         # success condition: found exactly one file
         if len(target_files_list) == 1:
