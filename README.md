@@ -23,6 +23,10 @@ Adding a Django application to import and convert vector and raster data formats
 # Immediately to do
 
 - [Make tasks happen asynchronously](13)
+- Add Django REST Framework
+  - [Django REST Framework](16)
+  - [Django REST Framework GIS Extensions](17)
+- Integrate [Siege Analytics Social Warehouse](18)
 
 # Building
 
@@ -85,3 +89,6 @@ I'd like to add
 [13]: https://pub.aimind.so/download-large-file-in-python-with-beautiful-progress-bar-f4f86b394ad7
 [14]: https://simpleisbetterthancomplex.com/tutorial/2018/08/27/how-to-create-custom-django-management-commands.html
 [15]: https://www.crowdstrike.com/guides/python-logging/logging-with-django/
+[16]: https://www.django-rest-framework.org
+[17]: https://github.com/openwisp/django-rest-framework-gis
+[18]: https://github.com/siege-analytics/socialwarehouse
