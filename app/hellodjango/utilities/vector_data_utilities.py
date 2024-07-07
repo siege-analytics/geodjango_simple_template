@@ -48,10 +48,7 @@ def find_vector_dataset_file_in_directory(
 
         for f in files_in_directory:
 
-            lowered_file_stem = str(f.stem).lower()
-            logger.info(lowered_file_stem)
             lowered_file_suffix = str(f.suffix).lower()
-            logger.info(lowered_file_suffix)
 
             # logic test
             if lowered_file_suffix in settings.VALID_VECTOR_FILE_EXTENSIONS:
@@ -64,7 +61,7 @@ def find_vector_dataset_file_in_directory(
         if len(target_files_list) == 1:
             target_file = target_files_list[0]
             message = "\n"
-            message += f"Found exactly one vector spatial dataset file in {target_directory}: {target_file}"
+            message += f"SUCCESS: Found exactly one vector spatial dataset file in {target_directory}: {target_file}"
             logger.info(message)
 
             return target_file
@@ -78,7 +75,7 @@ def find_vector_dataset_file_in_directory(
 
         else:
             message = "\n"
-            message += f"There are problems finding a vector spatial dataset in {target_directory}, here's the files list {files_in_directory}"
+            message += f"There were problems finding a vector spatial dataset in {target_directory}, here's the files list {files_in_directory}"
             logger.error(message)
 
             return False

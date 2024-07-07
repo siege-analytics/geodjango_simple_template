@@ -111,15 +111,40 @@ def load_zipped_data_file_into_orm(
             # need the numerical index of the layer because it will be loaded correctly
             layer_index = model_to_model.index(mtm)
 
+            # now assign the model name and mapping to variables
+            # this can probably be done more efficiently but this works
+            for mdl, mppng in mtm.items():
+                model_definition = mdl
+                layer_mapping = mppng
+
             message = "\n"
-            message += "Hello Cupcake"
+            message += f"Determined layer index, model and mapping: {layer_index}, {model_definition} {layer_mapping}"
+            logger.info(message)
+
+            # try clearing all the objects in memory if they exist
+
+            model_definition.objects.all().delete()
+
+            # now save the layermapping
+
+            lm = LayerMapping(
+                model_definition,
+                target_data_file,
+                layer_mapping,
+                transform=True,
+                layer=layer_index,
+            )
+            lm.save(verbose=False, strict=True)
+
+            message = "\n"
+            message += f"Successfully loaded data from {unzipped_data_file_path} for {model_definition}"
+            logger.info(message)
 
     except Exception as e:
         message = "\n"
-        message += (
-            f"There was an error loading data from {unzipped_data_file_path}: {e}"
-        )
+        message += f"There was an error loading data for model {model_definition} from {unzipped_data_file_path} : {e}"
         logger.error(message)
+        return False
 
 
 def fetch_and_unzip_the_file(model_to_work_on: str, url: str, data_type: str):
@@ -160,18 +185,33 @@ def fetch_and_load_all_data(model_to_work_on: str):
     message = f"Working on {model_to_work_on}"
     print(message)
 
-    # get params
-    params = DOWNLOADS_DISPATCHER[model_to_work_on]
+    try:
+        # get params
+        params = DOWNLOADS_DISPATCHER[model_to_work_on]
 
-    url = params["url"]
-    data_type = params["type"].upper()
-    model_to_model = params["model_to_model"]
+        url = params["url"]
+        data_type = params["type"].upper()
+        model_to_model = params["model_to_model"]
 
-    data_file = fetch_and_unzip_the_file(
-        model_to_work_on=model_to_work_on, url=url, data_type=data_type
-    )
+        data_file = fetch_and_unzip_the_file(
+            model_to_work_on=model_to_work_on, url=url, data_type=data_type
+        )
 
-    velvet_underground = load_zipped_data_file_into_orm(
-        model_to_model=model_to_model, unzipped_data_file_path=data_file
-    )
-    return True
+        velvet_underground = load_zipped_data_file_into_orm(
+            model_to_model=model_to_model, unzipped_data_file_path=data_file
+        )
+
+        logger.info(velvet_underground)
+
+        message = "\n"
+        message += (
+            f"Successfully loaded all data for {model_to_work_on} from {data_file}"
+        )
+        logger.info(message)
+        return True
+    except Exception as e:
+        message = "\n"
+        message += (
+            f"There was an error fetching and loading for {model_to_work_on}: {e}"
+        )
+        logger.error(message)
