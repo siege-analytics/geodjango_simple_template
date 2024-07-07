@@ -92,6 +92,9 @@ def load_zipped_data_file_into_orm(
     :return: bool
     """
 
+    successes = []
+    failures = []
+
     try:
         message = "\n"
         message += f"About to start loading data from {unzipped_data_file_path} using {model_to_model}"
@@ -139,12 +142,30 @@ def load_zipped_data_file_into_orm(
             message = "\n"
             message += f"Successfully loaded data from {unzipped_data_file_path} for {model_definition}"
             logger.info(message)
+            successes.append(model_definition)
 
     except Exception as e:
         message = "\n"
         message += f"There was an error loading data for model {model_definition} from {unzipped_data_file_path} : {e}"
         logger.error(message)
+        failures.append(model_definition)
+
+    # return test: count failures
+    if len(failures) > 0:
+        message = "\n FAILURE"
+        message += f"\n The following models succeeded : {successes}"
+        message += f"\n The following models failed : {failures}"
+
+        logger.error(message)
         return False
+
+    else:
+        message = "\n SUCCESS"
+        message += f"\n The following models succeeded : {successes}"
+        message += f"\n The following models failed : {failures}"
+
+        logger.info(message)
+        return True
 
 
 def fetch_and_unzip_the_file(model_to_work_on: str, url: str, data_type: str):

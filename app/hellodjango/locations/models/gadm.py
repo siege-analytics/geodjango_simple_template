@@ -9,8 +9,8 @@ class Country(models.Model):
     # Admin Level 0
 
     # Regular Django fields
-    gid_0 = models.CharField(max_length=32, null=True, default=None)
-    country = models.CharField(max_length=32, null=True, default=None)
+    gid_0 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    country = models.CharField(max_length=250, null=True, blank=True, default=None)
 
     # GeoDjango Geometry
 
@@ -30,17 +30,17 @@ country_mapping = {
 
 
 class Admin_Level_1(models.Model):
-    gid_0 = models.CharField(max_length=32, null=True, default=None)
-    country = models.CharField(max_length=32, null=True, default=None)
-    gid_1 = models.CharField(max_length=32, null=True, default=None)
-    name_1 = models.CharField(max_length=32, null=True, default=None)
-    varname_1 = models.CharField(max_length=32, null=True, default=None)
-    nl_name_1 = models.CharField(max_length=32, null=True, default=None)
-    type_1 = models.CharField(max_length=32, null=True, default=None)
-    engtype_1 = models.CharField(max_length=32, null=True, default=None)
-    cc_1 = models.CharField(max_length=32, null=True, default=None)
-    hasc_1 = models.CharField(max_length=32, null=True, default=None)
-    iso_1 = models.CharField(max_length=32, null=True, default=None)
+    gid_0 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    country = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    varname_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    nl_name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    type_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    engtype_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    cc_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    hasc_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    iso_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
 
     # returns string representation of model
 
@@ -70,19 +70,19 @@ admin_level_1_mapping = {
 
 
 class Admin_Level_2(models.Model):
-    gid_0 = models.CharField(max_length=32, null=True, default=None)
-    country = models.CharField(max_length=32, null=True, default=None)
-    gid_1 = models.CharField(max_length=32, null=True, default=None)
-    name_1 = models.CharField(max_length=32, null=True, default=None)
-    nl_name_1 = models.CharField(max_length=32, null=True, default=None)
-    gid_2 = models.CharField(max_length=32, null=True, default=None)
-    name_2 = models.CharField(max_length=32, null=True, default=None)
-    varname_2 = models.CharField(max_length=32, null=True, default=None)
-    nl_name_2 = models.CharField(max_length=32, null=True, default=None)
-    type_2 = models.CharField(max_length=32, null=True, default=None)
-    engtype_2 = models.CharField(max_length=32, null=True, default=None)
-    cc_2 = models.CharField(max_length=32, null=True, default=None)
-    hasc_2 = models.CharField(max_length=32, null=True, default=None)
+    gid_0 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    country = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    nl_name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    varname_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    nl_name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    type_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    engtype_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    cc_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    hasc_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
     geom = models.MultiPolygonField(srid=4326)
 
 
@@ -106,22 +106,22 @@ admin_level_2_mapping = {
 
 
 class Admin_Level_3(models.Model):
-    gid_0 = models.CharField(max_length=32, null=True, default=None)
-    country = models.CharField(max_length=32, null=True, default=None)
-    gid_1 = models.CharField(max_length=32, null=True, default=None)
-    name_1 = models.CharField(max_length=32, null=True, default=None)
-    nl_name_1 = models.CharField(max_length=32, null=True, default=None)
-    gid_2 = models.CharField(max_length=32, null=True, default=None)
-    name_2 = models.CharField(max_length=32, null=True, default=None)
-    nl_name_2 = models.CharField(max_length=32, null=True, default=None)
-    gid_3 = models.CharField(max_length=32, null=True, default=None)
-    name_3 = models.CharField(max_length=32, null=True, default=None)
-    varname_3 = models.CharField(max_length=32, null=True, default=None)
-    nl_name_3 = models.CharField(max_length=32, null=True, default=None)
-    type_3 = models.CharField(max_length=32, null=True, default=None)
-    engtype_3 = models.CharField(max_length=32, null=True, default=None)
-    cc_3 = models.CharField(max_length=32, null=True, default=None)
-    hasc_3 = models.CharField(max_length=32, null=True, default=None)
+    gid_0 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    country = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    nl_name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    nl_name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    varname_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    nl_name_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    type_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    engtype_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    cc_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    hasc_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
     geom = models.MultiPolygonField(srid=4326)
 
 
@@ -148,20 +148,20 @@ admin_level_3_mapping = {
 
 
 class Admin_Level_4(models.Model):
-    gid_4 = models.CharField(max_length=32, null=True, default=None)
-    gid_0 = models.CharField(max_length=32, null=True, default=None)
-    country = models.CharField(max_length=32, null=True, default=None)
-    gid_1 = models.CharField(max_length=32, null=True, default=None)
-    name_1 = models.CharField(max_length=32, null=True, default=None)
-    gid_2 = models.CharField(max_length=32, null=True, default=None)
-    name_2 = models.CharField(max_length=32, null=True, default=None)
-    gid_3 = models.CharField(max_length=32, null=True, default=None)
-    name_3 = models.CharField(max_length=32, null=True, default=None)
-    name_4 = models.CharField(max_length=32, null=True, default=None)
-    varname_4 = models.CharField(max_length=32, null=True, default=None)
-    type_4 = models.CharField(max_length=32, null=True, default=None)
-    engtype_4 = models.CharField(max_length=32, null=True, default=None)
-    cc_4 = models.CharField(max_length=32, null=True, default=None)
+    gid_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_0 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    country = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    varname_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    type_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    engtype_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    cc_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
     geom = models.MultiPolygonField(srid=4326)
 
 
@@ -186,21 +186,21 @@ admin_level_4_mapping = {
 
 
 class Admin_Level_5(models.Model):
-    gid_0 = models.CharField(max_length=32, null=True, default=None)
-    country = models.CharField(max_length=32, null=True, default=None)
-    gid_1 = models.CharField(max_length=32, null=True, default=None)
-    name_1 = models.CharField(max_length=32, null=True, default=None)
-    gid_2 = models.CharField(max_length=32, null=True, default=None)
-    name_2 = models.CharField(max_length=32, null=True, default=None)
-    gid_3 = models.CharField(max_length=32, null=True, default=None)
-    name_3 = models.CharField(max_length=32, null=True, default=None)
-    gid_4 = models.CharField(max_length=32, null=True, default=None)
-    name_4 = models.CharField(max_length=32, null=True, default=None)
-    gid_5 = models.CharField(max_length=32, null=True, default=None)
-    name_5 = models.CharField(max_length=32, null=True, default=None)
-    type_5 = models.CharField(max_length=32, null=True, default=None)
-    engtype_5 = models.CharField(max_length=32, null=True, default=None)
-    cc_5 = models.CharField(max_length=32, null=True, default=None)
+    gid_0 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    country = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_5 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    name_5 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    type_5 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    engtype_5 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    cc_5 = models.CharField(max_length=250, null=True, blank=True, default=None)
     geom = models.MultiPolygonField(srid=4326)
 
 
