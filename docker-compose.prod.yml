@@ -48,7 +48,7 @@ services:
     networks:
       - geodjango_project_network_prod
     volumes:
-      - geodjango_pg_data:/var/lib/postgresql
+      - geodjango_pg_data:/var/lib/postgresql/data
 
   nginx:
     build:

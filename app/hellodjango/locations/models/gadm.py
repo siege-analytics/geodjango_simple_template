@@ -84,7 +84,13 @@ class Admin_Level_2(models.Model):
     engtype_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
     cc_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
     hasc_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+
+    # GeoDjango Geometry
     geom = models.MultiPolygonField(srid=4326)
+
+    def __str__(self):
+        representative_string = f"GID:{self.gid_2}, Name 2: {self.name_1} Country:{self.country}"
+        return representative_string
 
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_2 model

@@ -1,3 +1,5 @@
+import hashlib
+
 from django.conf import settings
 import logging
 import pathlib
@@ -122,3 +124,27 @@ def unzip_file_to_its_own_directory(
         message = f"There was an error: {e}"
         logger.error(message)
         return False
+
+# def generate_sha256_hash_for_file(target_file: pathlib.Path):
+# https://gist.github.com/jakekara/078899caaf8d5e6c74ef58d16ce7e703
+#
+#     # Returns string representation of a sha256 hash of a file
+#
+#     # Parameters:
+#     #       target_file     :   the file for which we want a hash
+#
+#     # Returns:
+#     #    string that contains the sha256 hash of the file
+#
+#     try:
+#         text_of_hash = ""
+#         message = "\n"
+#         message += "SUCCESS: Generated hash for {target_file}\n}: {text_of_hash}"
+#         logger.debug(message)
+#         return text_of_hash
+#     except Exception as e:
+#         message = "\n"
+#         message = f"ERROR: Could not generate hash for {target_file}: {e}"
+#         logger.error(message)
+#         return False
+#
