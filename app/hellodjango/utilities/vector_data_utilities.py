@@ -40,7 +40,9 @@ def find_vector_dataset_file_in_directory(
 
         # first get all files in directory
 
-        files_in_directory = [x for x in target_directory.glob("**/*") if x.is_file()]
+        permitted_gdb_substring = 'gdb'
+
+        files_in_directory = [x for x in target_directory.glob("**/*") if x.is_file() or permitted_gdb_substring in pathlib.Path(x.name)]
 
         # now look to see which file matches both the directory name and having a valid suffix
 

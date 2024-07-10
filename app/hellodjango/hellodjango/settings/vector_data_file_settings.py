@@ -4,6 +4,7 @@ VALID_VECTOR_FILE_EXTENSIONS = [
 
     '.dwg',
     '.dxf',
+    '.gdb',
     '.geojson',
     '.gpkg',
     '.json',

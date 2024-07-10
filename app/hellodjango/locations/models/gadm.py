@@ -17,8 +17,9 @@ class Country(models.Model):
     geom = models.MultiPolygonField(srid=4326)
 
     # Returns the string representation of the model.
-    def __unicode__(self):  # __unicode__ on Python 2
-        return self.country
+    def __str__(self):  # __unicode__ on Python 2
+        representative_string = f"GID:{self.gid_0} Country:{self.country}"
+        return representative_string
 
 
 # Auto-generated `LayerMapping` dictionary for Country model

@@ -22,7 +22,7 @@ DOWNLOADS_DISPATCHER = {
         "url": "https://geodata.ucdavis.edu/gadm/gadm4.1/gadm_410-levels.zip",
         "model_to_model": [
             {Country: country_mapping},
-            # {Admin_Level_1: admin_level_1_mapping},
+            {Admin_Level_1: admin_level_1_mapping},
             # {Admin_Level_2: admin_level_2_mapping},
             # {Admin_Level_3: admin_level_3_mapping},
             # {Admin_Level_4: admin_level_4_mapping},

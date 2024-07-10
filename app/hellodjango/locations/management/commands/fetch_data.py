@@ -171,6 +171,11 @@ def load_zipped_data_file_into_orm(
 def fetch_and_unzip_the_file(model_to_work_on: str, url: str, data_type: str):
     # create path to file for download
     try:
+
+        message = "\n"
+        message += f"Working fetching the file for {model_to_work_on} from {url}"
+        logger.info(message)
+
         data_path = DATA_TYPES_TO_PATH[data_type]
 
         local_filename = generate_local_path_from_url(
@@ -214,10 +219,11 @@ def fetch_and_load_all_data(model_to_work_on: str):
         data_type = params["type"].upper()
         model_to_model = params["model_to_model"]
 
+        logger.info(f"About to fetch and unzip the file from {url}")
         data_file = fetch_and_unzip_the_file(
             model_to_work_on=model_to_work_on, url=url, data_type=data_type
         )
-
+        logger.info(f"Successfully fetched and unzipped data file from {url}")
         velvet_underground = load_zipped_data_file_into_orm(
             model_to_model=model_to_model, unzipped_data_file_path=data_file
         )
