@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 from django.contrib.gis.db import models
 
-
 # putting layer mappings next to models for ease of reference
 
 
@@ -45,8 +44,9 @@ class Admin_Level_1(models.Model):
 
     # returns string representation of model
 
-    def __unicode__(self):
-        return self.name_1
+    def __str__(self):
+        representative_string = f"GID:{self.gid_1}, Name 1: {self.name_1} Country:{self.country}"
+        return representative_string
 
     # GeoDjango Geometry
 
