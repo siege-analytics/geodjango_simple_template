@@ -24,9 +24,9 @@ DOWNLOADS_DISPATCHER = {
             {Country: country_mapping},
             {Admin_Level_1: admin_level_1_mapping},
             {Admin_Level_2: admin_level_2_mapping},
-            # {Admin_Level_3: admin_level_3_mapping},
-            # {Admin_Level_4: admin_level_4_mapping},
-            # {Admin_Level_5: admin_level_5_mapping},
+            {Admin_Level_3: admin_level_3_mapping},
+            {Admin_Level_4: admin_level_4_mapping},
+            {Admin_Level_5: admin_level_5_mapping},
         ],
         "type": "VECTOR",
         "unzipped_file_path": settings.VECTOR_SPATIAL_DATA_SUBDIRECTORY

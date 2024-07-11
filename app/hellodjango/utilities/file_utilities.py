@@ -125,26 +125,38 @@ def unzip_file_to_its_own_directory(
         logger.error(message)
         return False
 
-# def generate_sha256_hash_for_file(target_file: pathlib.Path):
-# https://gist.github.com/jakekara/078899caaf8d5e6c74ef58d16ce7e703
-#
-#     # Returns string representation of a sha256 hash of a file
-#
-#     # Parameters:
-#     #       target_file     :   the file for which we want a hash
-#
-#     # Returns:
-#     #    string that contains the sha256 hash of the file
-#
-#     try:
-#         text_of_hash = ""
-#         message = "\n"
-#         message += "SUCCESS: Generated hash for {target_file}\n}: {text_of_hash}"
-#         logger.debug(message)
-#         return text_of_hash
-#     except Exception as e:
-#         message = "\n"
-#         message = f"ERROR: Could not generate hash for {target_file}: {e}"
-#         logger.error(message)
-#         return False
-#
+def generate_sha256_hash_for_file(target_file: pathlib.Path):
+
+
+    # Returns string representation of a sha256 hash of a file
+    # based on # https://gist.github.com/jakekara/078899caaf8d5e6c74ef58d16ce7e703
+
+    # Parameters:
+    #       target_file     :   the file for which we want a hash
+
+    # Returns:
+    #    string that contains the sha256 hash of the file
+
+    # container variables
+    h256 = hashlib.sha256()
+    try:
+        file_check = target_file.is_file()
+        if file_check:
+
+            h256.update(open(target_file, 'rb').read())
+            text_of_hash = h256.hexdigest()
+            message = "\n"
+            message += "SUCCESS: Generated hash for {target_file}\n}: {text_of_hash}"
+            logger.debug(message)
+            return text_of_hash
+        else:
+            message = "\n"
+            message = f"ERROR: Could not generate hash for {target_file} because it is not a file"
+            logger.error(message)
+            return False
+    except Exception as e:
+        message = "\n"
+        message = f"ERROR: Could not generate hash for {target_file}: {e}"
+        logger.error(message)
+        return False
+

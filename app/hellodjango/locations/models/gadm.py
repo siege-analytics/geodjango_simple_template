@@ -176,8 +176,14 @@ class Admin_Level_4(models.Model):
     type_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
     engtype_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
     cc_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
+
+    # GeoDjango geometry field
+
     geom = models.MultiPolygonField(srid=4326)
 
+    def __str__(self):
+        representative_string = f"GID:{self.gid_4}, Name 4: {self.name_4} Country:{self.country}"
+        return representative_string
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_4 model
 admin_level_4_mapping = {
@@ -215,8 +221,13 @@ class Admin_Level_5(models.Model):
     type_5 = models.CharField(max_length=250, null=True, blank=True, default=None)
     engtype_5 = models.CharField(max_length=250, null=True, blank=True, default=None)
     cc_5 = models.CharField(max_length=250, null=True, blank=True, default=None)
+
+    # GeoDjango Geometry Field
     geom = models.MultiPolygonField(srid=4326)
 
+    def __str__(self):
+        representative_string = f"GID:{self.gid_5}, Name 5: {self.name_3} Country:{self.country}"
+        return representative_string
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_5 model
 admin_level_5_mapping = {
