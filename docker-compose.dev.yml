@@ -28,8 +28,8 @@ services:
     ports:
       - 8000:8000
   postgis:
-    #image: postgis/postgis:latest
-    image: tobi312/rpi-postgresql-postgis:15-3.4-alpine-arm
+    image: postgis/postgis:latest
+    #image: tobi312/rpi-postgresql-postgis:15-3.4-alpine-arm
     container_name: geodjango_postgis_dev
     restart: always
     healthcheck:
