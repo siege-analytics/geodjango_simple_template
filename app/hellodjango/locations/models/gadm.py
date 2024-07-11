@@ -89,7 +89,7 @@ class Admin_Level_2(models.Model):
     geom = models.MultiPolygonField(srid=4326)
 
     def __str__(self):
-        representative_string = f"GID:{self.gid_2}, Name 2: {self.name_1} Country:{self.country}"
+        representative_string = f"GID:{self.gid_2}, Name 2: {self.name_2} Country:{self.country}"
         return representative_string
 
 
@@ -129,7 +129,14 @@ class Admin_Level_3(models.Model):
     engtype_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
     cc_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
     hasc_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+
+    # GeoDjango geometry Field
+
     geom = models.MultiPolygonField(srid=4326)
+
+    def __str__(self):
+        representative_string = f"GID:{self.gid_3}, Name 3: {self.name_3} Country:{self.country}"
+        return representative_string
 
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_3 model
