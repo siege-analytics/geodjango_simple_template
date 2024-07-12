@@ -143,7 +143,7 @@ def generate_sha256_hash_for_file(target_file: pathlib.Path)-> str:
             h256.update(open(target_file, 'rb').read())
             text_of_hash = h256.hexdigest()
             message = "\n"
-            message += "SUCCESS: Generated hash for {target_file}\n}: {text_of_hash}"
+            message += f"SUCCESS: Generated hash for {target_file}\n}: {text_of_hash}"
             logger.debug(message)
             return text_of_hash
         else:
