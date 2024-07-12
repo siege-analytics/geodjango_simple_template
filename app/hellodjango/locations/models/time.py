@@ -5,7 +5,7 @@ class  Timezone(models.Model):
     tzid = models.CharField(max_length=80)
 
     # GeoDjango geometry
-    geom = models.MultiPolygonField(srid=4326)
+    geom = models.PolygonField(srid=4326)
 
     def __str__(self):
         representative_string = f"TZID: {self.tzid}"
