@@ -193,7 +193,7 @@ def add_hash_entry_to_dispatcher(target_file: pathlib.Path,
             message += f"Found an entry for {file_name_and_extension} in {confirmation_dict}: {found_hash}"
             haystack[needle] = new_hash_for_file
             message += "\n"
-            message += "SUCCESS: Replaced old hash for {file_name_and_extension} in {confirmation_dict} with: {new_hash_for_file}"
+            message += f"SUCCESS: Replaced old hash for {file_name_and_extension} in {confirmation_dict} with: {new_hash_for_file}"
             logger.info(message)
             return True
 
@@ -202,7 +202,7 @@ def add_hash_entry_to_dispatcher(target_file: pathlib.Path,
             message += f"No entry found for {file_name_and_extension} in {confirmation_dict}, adding {new_hash_for_file} "
             haystack[needle] = new_hash_for_file
             message += "\n"
-            message += "SUCCESS: Replaced old hash for {file_name_and_extension} in {confirmation_dict} with: {new_hash_for_file}"
+            message += f"SUCCESS: Replaced old hash for {file_name_and_extension} in {confirmation_dict} with: {new_hash_for_file}"
             logger.info(message)
             return True
 
@@ -246,7 +246,7 @@ def check_for_hash_in_dispatcher(target_file_path: pathlib.Path,
 
             if testing_hash_string == known_good_hash:
                 message = "\n"
-                message += "SUCCESS: Found hash for {target_file_path} in {confirmation_dict} that matches"
+                message += f"SUCCESS: Found hash for {target_file_path} in {confirmation_dict} that matches"
                 logger.info(message)
                 return True
 

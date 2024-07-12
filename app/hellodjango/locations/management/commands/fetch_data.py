@@ -197,7 +197,7 @@ def fetch_and_unzip_the_file(model_to_work_on: str, url: str, data_type: str):
         # get a hash from local filename
 
         message = "\n"
-        message += "Checking if local file exists for {local_filename}"
+        message += f"Checking if local file exists for {local_filename}"
         logger.info(message)
 
         test_hash = generate_sha256_hash_for_file(local_filename)
@@ -210,7 +210,7 @@ def fetch_and_unzip_the_file(model_to_work_on: str, url: str, data_type: str):
 
         if valid_local_file_exists:
             message = "\n"
-            message += "We already have a valid version of {local_filename}, no need to download"
+            message += f"We already have a valid version of {local_filename}, no need to download"
             logger.info(message)
 
             unzipped_file_path = unzip_file_to_its_own_directory(
