@@ -20,6 +20,9 @@ class Country(models.Model):
         representative_string = f"GID:{self.gid_0} Country:{self.country}"
         return representative_string
 
+    class Meta:
+        ordering = ['country']
+
 
 # Auto-generated `LayerMapping` dictionary for Country model
 country_mapping = {
@@ -42,15 +45,18 @@ class Admin_Level_1(models.Model):
     hasc_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
     iso_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
 
+    # GeoDjango Geometry
+
+    geom = models.MultiPolygonField(srid=4326)
+
     # returns string representation of model
 
     def __str__(self):
         representative_string = f"GID:{self.gid_1}, Name 1: {self.name_1} Country:{self.country}"
         return representative_string
 
-    # GeoDjango Geometry
-
-    geom = models.MultiPolygonField(srid=4326)
+    class Meta:
+        ordering = ['gid_1']
 
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_1 model
@@ -91,6 +97,9 @@ class Admin_Level_2(models.Model):
     def __str__(self):
         representative_string = f"GID:{self.gid_2}, Name 2: {self.name_2} Country:{self.country}"
         return representative_string
+
+    class Meta:
+        ordering = ['gid_2']
 
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_2 model
@@ -137,6 +146,9 @@ class Admin_Level_3(models.Model):
     def __str__(self):
         representative_string = f"GID:{self.gid_3}, Name 3: {self.name_3} Country:{self.country}"
         return representative_string
+
+    class Meta:
+        ordering = ['gid_3']
 
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_3 model
@@ -185,6 +197,9 @@ class Admin_Level_4(models.Model):
         representative_string = f"GID:{self.gid_4}, Name 4: {self.name_4} Country:{self.country}"
         return representative_string
 
+    class Meta:
+        ordering = ['gid_4']
+
 # Auto-generated `LayerMapping` dictionary for Admin_Level_4 model
 admin_level_4_mapping = {
     "gid_4": "GID_4",
@@ -228,6 +243,9 @@ class Admin_Level_5(models.Model):
     def __str__(self):
         representative_string = f"GID:{self.gid_5}, Name 5: {self.name_3} Country:{self.country}"
         return representative_string
+
+    class Meta:
+        ordering = ['gid_5']
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_5 model
 admin_level_5_mapping = {
