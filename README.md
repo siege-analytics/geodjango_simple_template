@@ -16,7 +16,17 @@ The project makes use of some standard technologies:
 - [nginx][3]
 - [PostGIS][4]
 
-Currently adding `redis`.
+# Currently 
+
+Adding a Django application to import and convert vector and raster data formats using OGR/GDAL and Django Rest Framework.
+
+# Immediately to do
+
+- [Make tasks happen asynchronously](13)
+- Add Django REST Framework
+  - [Django REST Framework](16)
+  - [Django REST Framework GIS Extensions](17)
+- Integrate [Siege Analytics Social Warehouse](18)
 
 # Building
 
@@ -46,7 +56,8 @@ I'd like to add
 - Spark
 - Sedona
 - GeoServer
-- Redis/Django Channels
+- RabbitMQ/Django Channels
+
 
 # References:
 
@@ -59,6 +70,10 @@ I'd like to add
   - [where to put pip.conf](9)
 - [ARM64 PostGIS Image for Docker](10)
 - [Adding Spatialite for dev's SQLite](11)
+- [Organizing a settings.py file as a package](12)
+- [Django Management Commmand options/arguments](14)
+- [Useful Logging template](15)
+- [Use Python to generate SHA256 Hash for Files](19)
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 [2]: https://gunicorn.org
@@ -71,3 +86,11 @@ I'd like to add
 [9]: https://stackoverflow.com/questions/38869231/python-cant-find-the-file-pip-conf
 [10]: https://github.com/Tob1as/docker-postgresql-postgis
 [11]: https://zoomadmin.com/HowToInstall/UbuntuPackage/spatialite-bin
+[12]: https://www.reddit.com/r/django/comments/l9s3r4/how_do_you_organize_your_settingspy_file_to_keep/
+[13]: https://pub.aimind.so/download-large-file-in-python-with-beautiful-progress-bar-f4f86b394ad7
+[14]: https://simpleisbetterthancomplex.com/tutorial/2018/08/27/how-to-create-custom-django-management-commands.html
+[15]: https://www.crowdstrike.com/guides/python-logging/logging-with-django/
+[16]: https://www.django-rest-framework.org
+[17]: https://github.com/openwisp/django-rest-framework-gis
+[18]: https://github.com/siege-analytics/socialwarehouse
+[19]: https://gist.github.com/jakekara/078899caaf8d5e6c74ef58d16ce7e703

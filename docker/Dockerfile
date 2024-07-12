@@ -49,12 +49,12 @@ RUN apt-get update \
 
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
-RUN pip install --trusted-host pypi.python.org --upgrade pip GDAL=="$(gdal-config --version).*" \
+RUN pip install --trusted-host pypi.python.org --upgrade pip --default-timeout=1200 GDAL=="$(gdal-config --version).*" \
  && echo "succesfully built python gdal bindings"
 
 # Install PIP requirements
 ADD requirements.txt /tmp/
-RUN pip install --trusted-host pypi.python.org --upgrade pip -r /tmp/requirements.txt
+RUN pip install --trusted-host pypi.python.org --default-timeout=1200 --upgrade pip -r /tmp/requirements.txt
 
 # Container entrypoint
 COPY ./entrypoint.sh /entrypoint.sh

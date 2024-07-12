@@ -31,7 +31,8 @@ services:
       - postgis
 
   postgis:
-    image: tobi312/rpi-postgresql-postgis:15-3.4-alpine-arm
+    #image: tobi312/rpi-postgresql-postgis:15-3.4-alpine-arm
+    postgis/postgis:latest
     container_name: geodjango_postgis_prod
     restart: always
     healthcheck:
@@ -48,7 +49,7 @@ services:
     networks:
       - geodjango_project_network_prod
     volumes:
-      - geodjango_pg_data:/var/lib/postgresql
+      - geodjango_pg_data:/var/lib/postgresql/data
 
   nginx:
     build:

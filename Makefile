@@ -27,6 +27,10 @@ endif
 task-up = $(if $(shell $(DKC) ps -q $(1)),$(1) is running)
 exec-or-run = $(if $(call task-up,$1),exec,run --rm) $1
 
+confirm_amd:
+	export DOCKER_DEFAULT_PLATFORM=linux/amd64
+	echo $DOCKER_DEFAULT_PLATFORM
+
 .env: ${ENV_INCLUDES}
 	cat $^ >$@
 
