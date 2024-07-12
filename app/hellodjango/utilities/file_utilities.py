@@ -1,7 +1,6 @@
 import hashlib
 
 from django.conf import settings
-import logging
 import pathlib
 import requests
 import subprocess
@@ -12,9 +11,7 @@ import zipfile
 # Logging
 
 import logging
-
 logger = logging.getLogger("django")
-
 
 def run_subprocess(command_list):
     # Not sure if this is handling failures properly...
@@ -125,7 +122,7 @@ def unzip_file_to_its_own_directory(
         logger.error(message)
         return False
 
-def generate_sha256_hash_for_file(target_file: pathlib.Path):
+def generate_sha256_hash_for_file(target_file: pathlib.Path)-> str:
 
 
     # Returns string representation of a sha256 hash of a file
@@ -151,12 +148,118 @@ def generate_sha256_hash_for_file(target_file: pathlib.Path):
             return text_of_hash
         else:
             message = "\n"
-            message = f"ERROR: Could not generate hash for {target_file} because it is not a file"
+            message += f"ERROR: Could not generate hash for {target_file} because it is not a file"
             logger.error(message)
             return False
     except Exception as e:
         message = "\n"
-        message = f"ERROR: Could not generate hash for {target_file}: {e}"
+        message += f"ERROR: Could not generate hash for {target_file}: {e}"
         logger.error(message)
         return False
+
+def add_hash_entry_to_dispatcher(target_file: pathlib.Path,
+                                 confirmation_dict: dict) -> bool:
+
+    """
+
+    :param target_file: pathlib.Path object that we are going to add to the dispatcher
+    :param confirmation_dict: dict object that contains file names and valid hashes
+    :return: bool
+    """
+
+    try:
+        # ensure that we have a pathlib.Path object so that we can get a name
+        target_file_path = pathlib.Path(target_file)
+        file_name_and_extension = str(target_file_path.name)
+
+        # get hash for path
+
+        new_hash_for_file = generate_sha256_hash_for_file(target_file_path)
+
+        # file_name_and_extension_is needle, confirmation_dict is haystack
+
+        needle = file_name_and_extension
+        haystack = confirmation_dict
+
+        # logic checks
+
+        # 1. Do we have an entry?
+        # 2. Does the entry match?
+
+        if needle in haystack:
+            found_hash = haystack[needle]
+            message = "\n"
+            message += f"Found an entry for {file_name_and_extension} in {confirmation_dict}: {found_hash}"
+            haystack[needle] = new_hash_for_file
+            message += "\n"
+            message += "SUCCESS: Replaced old hash for {file_name_and_extension} in {confirmation_dict} with: {new_hash_for_file}"
+            logger.info(message)
+            return True
+
+        elif needle not in haystack:
+            message = "\n"
+            message += f"No entry found for {file_name_and_extension} in {confirmation_dict}, adding {new_hash_for_file} "
+            haystack[needle] = new_hash_for_file
+            message += "\n"
+            message += "SUCCESS: Replaced old hash for {file_name_and_extension} in {confirmation_dict} with: {new_hash_for_file}"
+            logger.info(message)
+            return True
+
+        else:
+            message = "\n"
+            message += f"FAILURE: Was not able to add an entry for {file_name_and_extension} to {confirmation_dict}, please add one"
+            logger.error(message)
+
+    except Exception as e:
+        message = "\n"
+        message += f"FAILURE: Exception while searching for hash for {target_file_path} in {confirmation_dict}: {e}"
+        logger.error(message)
+        return False
+
+
+def check_for_hash_in_dispatcher(target_file_path: pathlib.Path,
+                   testing_hash_string: str,
+                   confirmation_dict: dict) -> bool:
+
+    try:
+        # ensure that we have a pathlib.Path object so that we can get a name
+        target_file_path = pathlib.Path(target_file_path)
+        file_name_and_extension = str(target_file_path.name)
+
+        # file_name_and_extension_is needle, confirmation_dict is haystack
+
+        needle = file_name_and_extension
+        haystack = confirmation_dict.keys()
+
+        # logic checks
+
+        # 1. Do we have an entry?
+        # 2. Does the entry match?
+
+        if needle in haystack:
+            message = "\n"
+            message += f"Found an entry for {file_name_and_extension} in {confirmation_dict}"
+            logger.info(message)
+
+            known_good_hash = confirmation_dict[needle]
+
+            if testing_hash_string == known_good_hash:
+                message = "\n"
+                message += "SUCCESS: Found hash for {target_file_path} in {confirmation_dict} that matches"
+                logger.info(message)
+                return True
+
+        else:
+            message = "\n"
+            message += f"FAILURE: Did not find an entry for {file_name_and_extension} in {confirmation_dict}, please add one"
+            logger.error(message)
+            return False
+
+    except Exception as e:
+        message = "\n"
+        message += f"FAILURE: Exception while searching for hash for {target_file_path} in {confirmation_dict}: {e}"
+        logger.error(message)
+        return False
+
+
 
