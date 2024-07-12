@@ -137,13 +137,14 @@ def generate_sha256_hash_for_file(target_file: pathlib.Path)-> str:
     # container variables
     h256 = hashlib.sha256()
     try:
+        target_file = pathlib.Path(target_file)
         file_check = target_file.is_file()
         if file_check:
 
             h256.update(open(target_file, 'rb').read())
             text_of_hash = h256.hexdigest()
             message = "\n"
-            message += f"SUCCESS: Generated hash for {target_file}\n}: {text_of_hash}"
+            message += f"SUCCESS: Generated hash for {target_file}\n: {text_of_hash}"
             logger.debug(message)
             return text_of_hash
         else:

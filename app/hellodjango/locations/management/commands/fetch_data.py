@@ -14,6 +14,10 @@ import sys, os
 # from utilities.file_utilities import *
 from utilities import *
 
+# logging
+
+import logging
+logger = logging.getLogger("django")
 
 class Command(BaseCommand):
     args = ""
@@ -45,8 +49,8 @@ class Command(BaseCommand):
                 m for m in model_set if not m.lower() in known_models
             ]
 
-        print(models_that_cannot_be_worked_on)
-        print(models_to_work_on)
+        logger.info(models_that_cannot_be_worked_on)
+        logger.info(models_to_work_on)
 
         # start work
         try:
@@ -55,9 +59,9 @@ class Command(BaseCommand):
                 fetch_and_load_all_data(m)
                 successes.append(m)
         except Exception as e:
-            message = (
-                "There was an error at the management command level working on {m}: {e}"
-            )
+            message = "\n"
+            message += f"There was an error at the management command level working on {m}: {e}"
+            logger.error(message)
             failures.append(m)
 
         # count failures
@@ -104,7 +108,7 @@ def load_zipped_data_file_into_orm(
             target_directory=unzipped_data_file_path
         )
 
-        print(target_data_file)
+        logger.info(target_data_file)
 
         # iterate through model to model list
         for mtm in model_to_model:
@@ -165,7 +169,6 @@ def load_zipped_data_file_into_orm(
         logger.info(message)
         return True
 
-
 def fetch_and_unzip_the_file(model_to_work_on: str, url: str, data_type: str):
     # create path to file for download
     try:
@@ -180,34 +183,72 @@ def fetch_and_unzip_the_file(model_to_work_on: str, url: str, data_type: str):
             url=url,
             directory_path=data_path,
         )
+
         message = f"Successfully generated {local_filename}"
         logger.debug(message)
 
-        downloaded_file = download_file(
-            url=url,
-            local_filename=local_filename,
+        # checking if the file already exists so we don't lose time in downloading
+        # this seems like an affectation but it will save a tremendous amount of time
+        # over time
+
+        # status variable
+        valid_local_file_exists = False
+
+        # get a hash from local filename
+
+        message = "\n"
+        message += "Checking if local file exists for {local_filename}"
+        logger.info(message)
+
+        test_hash = generate_sha256_hash_for_file(local_filename)
+
+        valid_local_file_exists = check_for_hash_in_dispatcher(
+            target_file_path =local_filename,
+            testing_hash_string = test_hash,
+            confirmation_dict = FILE_NAMES_AND_HASHES
         )
 
-        message = f"Successfully downloaded {downloaded_file}"
-        logger.debug(message)
+        if valid_local_file_exists:
+            message = "\n"
+            message += "We already have a valid version of {local_filename}, no need to download"
+            logger.info(message)
 
-        unzipped_file_path = unzip_file_to_its_own_directory(
-            path_to_zipfile=downloaded_file, new_dir_name=None, new_dir_parent=None
-        )
+            unzipped_file_path = unzip_file_to_its_own_directory(
+                path_to_zipfile=local_filename, new_dir_name=None, new_dir_parent=None
+            )
 
-        message = f"Successfully unzipped {unzipped_file_path}"
-        logger.debug(message)
+            message = f"Successfully unzipped {unzipped_file_path}"
+            logger.debug(message)
 
-        return unzipped_file_path
+            return unzipped_file_path
+
+        else:
+
+            downloaded_file = download_file(
+                url=url,
+                local_filename=local_filename,
+            )
+
+            message = f"Successfully downloaded {downloaded_file}"
+            logger.debug(message)
+
+            unzipped_file_path = unzip_file_to_its_own_directory(
+                path_to_zipfile=downloaded_file, new_dir_name=None, new_dir_parent=None
+            )
+
+            message = f"Successfully unzipped {unzipped_file_path}"
+            logger.debug(message)
+
+            return unzipped_file_path
 
     except Exception as e:
         message = f"There was an error: {e}"
-        print(message)
+        logger.error(message)
 
 
 def fetch_and_load_all_data(model_to_work_on: str):
     message = f"Working on {model_to_work_on}"
-    print(message)
+    logger.info(message)
 
     try:
         # get params
