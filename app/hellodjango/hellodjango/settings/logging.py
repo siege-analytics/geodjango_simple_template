@@ -23,7 +23,7 @@ LOGGING = {
     # Add a verbose formatter
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'format': '{levelname} {asctime} {module} {funcName} {process:d} {thread:d} {message}',
             'style': '{',
         },
     },
@@ -40,6 +40,7 @@ LOGGING = {
             'class': 'logging.FileHandler',
             # Specify a local log file as a raw string. Use your app's directory.
             'filename': LOG_PATH,
+            'formatter': 'verbose',
         },
     },
     # Define the root logger's settings
