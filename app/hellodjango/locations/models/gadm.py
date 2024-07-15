@@ -13,7 +13,7 @@ class Country(models.Model):
 
     # GeoDjango Geometry
 
-    geom = models.MultiPolygonField(srid=4326)
+    geom = models.MultiPolygonField(srid=4326,null=True, blank=True, default=None)
 
     # Returns the string representation of the model.
     def __str__(self):  # __unicode__ on Python 2
