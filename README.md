@@ -74,6 +74,7 @@ I'd like to add
 - [Django Management Commmand options/arguments](14)
 - [Useful Logging template](15)
 - [Use Python to generate SHA256 Hash for Files](19)
+- [PGDATA variable and path](20)
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 [2]: https://gunicorn.org
@@ -94,3 +95,4 @@ I'd like to add
 [17]: https://github.com/openwisp/django-rest-framework-gis
 [18]: https://github.com/siege-analytics/socialwarehouse
 [19]: https://gist.github.com/jakekara/078899caaf8d5e6c74ef58d16ce7e703
+[20]: https://www.postgresql.org/docs/16/storage-file-layout.html
