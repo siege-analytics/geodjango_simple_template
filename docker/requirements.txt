@@ -1,5 +1,7 @@
 black
 Django
+djangorestframework
+djangorestframework-gis
 geopandas
 gunicorn
 pandas
