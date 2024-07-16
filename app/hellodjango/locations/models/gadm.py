@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from django.contrib.gis.db import models
 
 # putting layer mappings next to models for ease of reference
+# For foreign keys we are going to use the gid field for the key
 
 
 class Country(models.Model):
@@ -13,7 +14,7 @@ class Country(models.Model):
 
     # GeoDjango Geometry
 
-    geom = models.MultiPolygonField(srid=4326,null=True, blank=True, default=None)
+    geom = models.MultiPolygonField(srid=4326, null=True, blank=True, default=None)
 
     # Returns the string representation of the model.
     def __str__(self):  # __unicode__ on Python 2
@@ -21,7 +22,7 @@ class Country(models.Model):
         return representative_string
 
     class Meta:
-        ordering = ['country']
+        ordering = ["country"]
 
 
 # Auto-generated `LayerMapping` dictionary for Country model
@@ -33,7 +34,9 @@ country_mapping = {
 
 
 class Admin_Level_1(models.Model):
-    gid_0 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_0 = models.ForeignKey(
+        Country, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
     name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
@@ -52,11 +55,13 @@ class Admin_Level_1(models.Model):
     # returns string representation of model
 
     def __str__(self):
-        representative_string = f"GID:{self.gid_1}, Name 1: {self.name_1} Country:{self.country}"
+        representative_string = (
+            f"GID:{self.gid_1}, Name 1: {self.name_1} Country:{self.country}"
+        )
         return representative_string
 
     class Meta:
-        ordering = ['gid_1']
+        ordering = ["gid_1"]
 
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_1 model
@@ -77,9 +82,13 @@ admin_level_1_mapping = {
 
 
 class Admin_Level_2(models.Model):
-    gid_0 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_0 = models.ForeignKey(
+        Country, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
-    gid_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_1 = models.ForeignKey(
+        Admin_Level_1, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
     nl_name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
@@ -95,11 +104,13 @@ class Admin_Level_2(models.Model):
     geom = models.MultiPolygonField(srid=4326)
 
     def __str__(self):
-        representative_string = f"GID:{self.gid_2}, Name 2: {self.name_2} Country:{self.country}"
+        representative_string = (
+            f"GID:{self.gid_2}, Name 2: {self.name_2} Country:{self.country}"
+        )
         return representative_string
 
     class Meta:
-        ordering = ['gid_2']
+        ordering = ["gid_2"]
 
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_2 model
@@ -122,12 +133,18 @@ admin_level_2_mapping = {
 
 
 class Admin_Level_3(models.Model):
-    gid_0 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_0 = models.ForeignKey(
+        Country, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
-    gid_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_1 = models.ForeignKey(
+        Admin_Level_1, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
     nl_name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
-    gid_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_2 = models.ForeignKey(
+        Admin_Level_2, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
     nl_name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
@@ -144,11 +161,13 @@ class Admin_Level_3(models.Model):
     geom = models.MultiPolygonField(srid=4326)
 
     def __str__(self):
-        representative_string = f"GID:{self.gid_3}, Name 3: {self.name_3} Country:{self.country}"
+        representative_string = (
+            f"GID:{self.gid_3}, Name 3: {self.name_3} Country:{self.country}"
+        )
         return representative_string
 
     class Meta:
-        ordering = ['gid_3']
+        ordering = ["gid_3"]
 
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_3 model
@@ -174,15 +193,23 @@ admin_level_3_mapping = {
 
 
 class Admin_Level_4(models.Model):
-    gid_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
-    gid_0 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_0 = models.ForeignKey(
+        Country, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
-    gid_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_1 = models.ForeignKey(
+        Admin_Level_1, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
-    gid_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_2 = models.ForeignKey(
+        Admin_Level_2, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
-    gid_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_3 = models.ForeignKey(
+        Admin_Level_3, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     name_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
     name_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
     varname_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
     type_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
@@ -194,11 +221,14 @@ class Admin_Level_4(models.Model):
     geom = models.MultiPolygonField(srid=4326)
 
     def __str__(self):
-        representative_string = f"GID:{self.gid_4}, Name 4: {self.name_4} Country:{self.country}"
+        representative_string = (
+            f"GID:{self.gid_4}, Name 4: {self.name_4} Country:{self.country}"
+        )
         return representative_string
 
     class Meta:
-        ordering = ['gid_4']
+        ordering = ["gid_4"]
+
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_4 model
 admin_level_4_mapping = {
@@ -221,15 +251,25 @@ admin_level_4_mapping = {
 
 
 class Admin_Level_5(models.Model):
-    gid_0 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_0 = models.ForeignKey(
+        Country, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
-    gid_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_1 = models.ForeignKey(
+        Admin_Level_1, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
-    gid_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_2 = models.ForeignKey(
+        Admin_Level_2, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
-    gid_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_3 = models.ForeignKey(
+        Admin_Level_3, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     name_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
-    gid_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    gid_4 = models.ForeignKey(
+        Admin_Level_4, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
     name_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_5 = models.CharField(max_length=250, null=True, blank=True, default=None)
     name_5 = models.CharField(max_length=250, null=True, blank=True, default=None)
@@ -241,11 +281,14 @@ class Admin_Level_5(models.Model):
     geom = models.MultiPolygonField(srid=4326)
 
     def __str__(self):
-        representative_string = f"GID:{self.gid_5}, Name 5: {self.name_3} Country:{self.country}"
+        representative_string = (
+            f"GID:{self.gid_5}, Name 5: {self.name_3} Country:{self.country}"
+        )
         return representative_string
 
     class Meta:
-        ordering = ['gid_5']
+        ordering = ["gid_5"]
+
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_5 model
 admin_level_5_mapping = {
