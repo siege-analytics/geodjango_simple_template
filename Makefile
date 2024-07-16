@@ -52,7 +52,6 @@ up: ${docker-files}
 build: ${docker-files} stop
 	$(DKC) $@
 
-
 build-prod:
 	TARGET_ENV=dev make -B build
 	-rm -f ${docker-files}
@@ -81,3 +80,6 @@ migrate collectstatic: ${docker-files}
 
 static: collectstatic
 
+remove_migrations:
+	find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+	find . -path "*/migrations/*.pyc"  -delete
