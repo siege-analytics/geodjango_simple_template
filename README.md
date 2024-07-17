@@ -16,7 +16,7 @@ The project makes use of some standard technologies:
 - [nginx][3]
 - [PostGIS][4]
 
-# Currently 
+# Currently
 
 Adding a Django application to import and convert vector and raster data formats using OGR/GDAL and Django Rest Framework.
 
@@ -38,13 +38,11 @@ Then run `make build` to build the project.
 
 ## Production Builds
 
-**NB:** The production image uses the Dev image as its base. Be sure to build the Dev image first.
-
-The Makefile has a `build-prod` target that builds the dev image, and deletes the docker files in-between switching environments.
+The Makefile has a `build-prod` target that does a `--no-cache` build. It automatically switches the `TARGET_ENV` to `prod` to load the `*prod.env` files.
 
 ## Environment Config
 
-**NB:** The docker compose files (`docker-compose.yml`, `.env`) are auto-generated and git-ignored. The sources are determined by the `TARGET_ENV` env var. See the `Makefile` for more details.
+**NB:** The docker compose `.env` file is auto-generated and git-ignored. The sources are determined by the `TARGET_ENV` env var. See the `Makefile` for more details.
 
 The `conf/` directory contains ingredients for the auto-generated `.env` file. The `Makefile` declares `ENV_INCLUDES` depending on the value of `TARGET_ENV`. The `dev.env` and `prod.env` files are meant for general environment config. Other files are meant for specific services, e.g. django and postgres.
 
