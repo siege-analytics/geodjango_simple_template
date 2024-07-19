@@ -31,7 +31,7 @@ confirm_amd:
 	$(info DOCKER_DEFAULT_PLATFORM: $(DOCKER_DEFAULT_PLATFORM))
 
 up down stop build : .env
-	$(DKC) $@ $(if $(eq $@,up),-d)
+	$(DKC) $@ $(if $(filter $@,up),-d)
 
 build-prod:
 	TARGET_ENV=prod $(MAKE) -B .env rebuild
