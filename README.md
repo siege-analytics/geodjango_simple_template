@@ -74,6 +74,8 @@ I'd like to add
 - [Use Python to generate SHA256 Hash for Files](19)
 - [PGDATA variable and path](20)
 - [Removing Django migrations to start over](21)
+- [Gunicorn Config File](22)
+- [Adding a service in Ubuntu](23)
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 [2]: https://gunicorn.org
@@ -96,3 +98,5 @@ I'd like to add
 [19]: https://gist.github.com/jakekara/078899caaf8d5e6c74ef58d16ce7e703
 [20]: https://www.postgresql.org/docs/16/storage-file-layout.html
 [21]: https://simpleisbetterthancomplex.com/tutorial/2016/07/26/how-to-reset-migrations.html
+[22]: https://stackoverflow.com/questions/12063463/where-is-the-gunicorn-config-file
+[23]: https://superuser.com/questions/1839901/how-to-properly-create-a-service-in-ubuntu
