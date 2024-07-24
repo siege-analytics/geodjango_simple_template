@@ -1,6 +1,7 @@
 # python imports
 
 import os
+from pathlib import Path
 
 #  django imports
 
@@ -9,10 +10,22 @@ from django.conf import settings
 # log file
 
 log_file_name = "django_application.log"
+Path(settings.LOGS_DIRECTORY).mkdir(parents=True, exist_ok=True)
 LOG_PATH = str(settings.LOGS_DIRECTORY / log_file_name)
 
-if not os.path.exists(LOG_PATH):
-    f = open(LOG_PATH, 'a').close()
+# doing something very stupid here
+try:
+    Path(LOG_PATH).touch(exist_ok=True)  # will create file, if it exists will do nothing
+except Exception as e:
+    message ="\n"
+    message +=f"Pathlib method to create the logging file didn't work, trying OS lib method:{e}"
+try:
+    if not os.path.exists(LOG_PATH):
+        f = open(LOG_PATH, 'w+').close()
+except Exception as e:
+    message ="\n"
+    message +=f"OS method to create the logging file didn't work, Alfred E. Neumann:{e}"
+
 
 # Create a LOGGING dictionary
 LOGGING = {

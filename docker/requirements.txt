@@ -1,5 +1,6 @@
 black
 Django
+django-extensions
 djangorestframework
 djangorestframework-gis
 geopandas
