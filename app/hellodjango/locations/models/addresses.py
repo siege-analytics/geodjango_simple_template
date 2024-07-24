@@ -8,13 +8,20 @@ class United_States_Address(models.Model):
     # This is an address in the US
 
 
-    primary_number=models.CharField(max_length=250, null=True, blank=True, default=None)
-    street_name=models.CharField(max_length=250, null=True, blank=True, default=None)
-    street_suffix=models.CharField(max_length=250, null=True, blank=True, default=None)
-    city_name=models.CharField(max_length=250, null=True, blank=True, default=None)
-    default_city_name=models.CharField(max_length=250, null=True, blank=True, default=None)
-    state_abbreviation=models.CharField(max_length=2, null=True, blank=True, default=None)
-    zip5= models.CharField=(max_length=5, null=True, blank=True, default=None)
+    primary_number=models.CharField(
+        max_length=250, null=True, blank=True, default=None)
+    street_name=models.CharField(
+        max_length=250, null=True, blank=True, default=None)
+    street_suffix=models.CharField(
+        max_length=250, null=True, blank=True, default=None)
+    city_name=models.CharField(
+        max_length=250, null=True, blank=True, default=None)
+    default_city_name=models.CharField(
+        max_length=250, null=True, blank=True, default=None)
+    state_abbreviation=models.CharField(
+        max_length=2, null=True, blank=True, default=None)
+    zip5=(models.CharField
+          (max_length=5, null=True, blank=True, default=None))
     plus4_code=models.CharField(max_length=4, null=True, blank=True, default=None),
     delivery_point=models.CharField(max_length=99, null=True, blank=True, default=None)
     delivery_point_check_digit=models.CharField(max_length=99, null=True, blank=True, default=None)
@@ -34,4 +41,4 @@ class United_States_Address(models.Model):
     time_zone=models.CharField(max_length=250, null=True, blank=True, default=None)
     utc_offset=models.CharField(max_length=250, null=True, blank=True, default=None)
 
-    models.PointField(srid=4326,null=True, blank=True, default=None)
+    geom=models.PointField(srid=4326,null=True, blank=True, default=None)
