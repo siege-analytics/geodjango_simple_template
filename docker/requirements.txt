@@ -2,8 +2,10 @@ black
 Django
 geopandas
 gunicorn
+pathlib
 pandas
 psycopg2-binary
 pysal
 python-dotenv
+requests
 
