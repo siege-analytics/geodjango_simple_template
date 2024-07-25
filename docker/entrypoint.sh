@@ -11,6 +11,7 @@ then
     echo "PostgreSQL started"
 fi
 
+python3 hellodjango/manage.py ensure_paths
 python3 hellodjango/manage.py makemigrations
 python3 hellodjango/manage.py migrate
 python3 hellodjango/manage.py collectstatic --no-input
