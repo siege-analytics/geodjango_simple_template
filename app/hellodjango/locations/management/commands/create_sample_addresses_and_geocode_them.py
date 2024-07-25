@@ -1,4 +1,7 @@
 # Imports
+# Generic Python Library Imports
+
+import sys, os
 import pathlib
 import csv
 
@@ -7,18 +10,17 @@ import csv
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
-# Generic Python Library Imports
-
-import sys, os
 # custom functions and data
 
-# from utilities.file_utilities import *
 from utilities import *
+from locations.models import *
 
 # logging
 
 import logging
+
 logger = logging.getLogger("django")
+
 
 class Command(BaseCommand):
     args = ""
@@ -35,14 +37,16 @@ class Command(BaseCommand):
         # specify which models to work on
         # if the user specifies nothing, do them all
 
-        CHICAGO_CRIMES_GEO_CSV = settings.TABULAR_DATA_SUBDIRECTORY / 'Crime.csv'
+        SAMPLE_ADDRESSES_CSV = settings.TABULAR_DATA_SUBDIRECTORY / "address-sample.csv"
 
         # start work
         try:
-            message="\n"
-            message+="Hello Cupcake"
+            message = "\n"
+            message += "Hello Cupcake"
 
-            result=create_addresses_from_data_file(path_to_data_file=CHICAGO_CRIMES_GEO_CSV)
+            result = create_addresses_from_data_file(
+                path_to_data_file=SAMPLE_ADDRESSES_CSV
+            )
 
             successes.append(result)
         except Exception as e:
@@ -67,7 +71,7 @@ class Command(BaseCommand):
             logger.info(message)
 
 
-def create_addresses_from_data_file(path_to_data_file: pathlib.Path)->bool:
+def create_addresses_from_data_file(path_to_data_file: pathlib.Path) -> bool:
 
     # container for bad addresses
 
@@ -75,16 +79,43 @@ def create_addresses_from_data_file(path_to_data_file: pathlib.Path)->bool:
 
     # open the csv and create a DictReader
 
-    inpath = pathlib.Path(path_to_data_file)
+    try:
+        inpath = pathlib.Path(path_to_data_file)
 
-    with inpath.open("r", newline="\n", encoding="utf-8-sig") as infile:
-        reader = csv.DictReader(infile)
-        for row in reader:
-            logger.info(row)
+        with inpath.open("r", newline="\n", encoding="utf-8-sig") as infile:
+            reader = csv.DictReader(infile)
+            for row in reader:
 
-    return True
+                # create concatenated street name
 
+                street_name_fields = [
+                    row["predir"],
+                    row["prequal"],
+                    row["pretyp"],
+                    row["street"],
+                    row["suftyp"],
+                    row["sufqual"],
+                    row["sufdir"],
+                ]
 
+                concatenated_street_name = " ".join(street_name_fields)
 
+                us_address = United_States_Address(
+                    primary_number=row["number"],
+                    street_name=concatenated_street_name,
+                    city_name=row["city"],
+                    state_abbreviation=row["state"],
+                    zip5=row["zip"],
+                )
+                us_address.save()
 
+        message = "\n"
+        message += "Success creating address objects"
+        logger.info(message)
+        return True
 
+    except Exception as e:
+        message = "\n"
+        message += f"There was an error creating address objects: {e}"
+        logger.error(message)
+        return False
