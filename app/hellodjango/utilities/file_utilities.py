@@ -24,7 +24,7 @@ def run_subprocess(command_list):
         raise Exception("Subprocess failed with error: {}".format(stderr))
 
 
-def ensure_path_exists(desired_path) -> pathlib.Path:
+def ensure_path_exists(desired_path: pathlib.Path) -> pathlib.Path:
 
     try:
         desired_path_object = pathlib.Path(desired_path)
