@@ -42,7 +42,7 @@ class Command(BaseCommand):
         # start work
         try:
             message = "\n"
-            message += "Hello Cupcake"
+            message += "About to do the business"
 
             result = create_addresses_from_data_file(
                 path_to_data_file=SAMPLE_ADDRESSES_CSV
@@ -119,3 +119,6 @@ def create_addresses_from_data_file(path_to_data_file: pathlib.Path) -> bool:
         message += f"There was an error creating address objects: {e}"
         logger.error(message)
         return False
+
+def geocode_addresses_with_nominatim()-> bool:
+
