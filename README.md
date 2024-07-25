@@ -76,6 +76,8 @@ I'd like to add
 - [Removing Django migrations to start over](21)
 - [Gunicorn Config File](22)
 - [Adding a service in Ubuntu](23)
+- [Sample Addresses For Testing Geocoder](24)
+- [Get field names for a Django Model in the shell](25)
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 [2]: https://gunicorn.org
@@ -100,3 +102,5 @@ I'd like to add
 [21]: https://simpleisbetterthancomplex.com/tutorial/2016/07/26/how-to-reset-migrations.html
 [22]: https://stackoverflow.com/questions/12063463/where-is-the-gunicorn-config-file
 [23]: https://superuser.com/questions/1839901/how-to-properly-create-a-service-in-ubuntu
+[24]:https://github.com/geocommons/geocoder/blob/master/test/data/address-sample.csv
+[25]:https://stackoverflow.com/questions/3647805/how-to-get-all-fields-for-a-django-model
