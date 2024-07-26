@@ -1,4 +1,3 @@
-
 services:
 
   webserver_python:
@@ -8,7 +7,7 @@ services:
       context: ./docker
       args:
         UBUNTU_BASE_IMAGE: ${UBUNTU_BASE_IMAGE}
-    command: sh -c "cd hellodjango/ &&  /opt/venv/bin/python /opt/venv/bin/gunicorn hellodjango.wsgi:application --bind 0.0.0.0:8000 --error-logfile /usr/src/app/logs/hello_django_gunicorn_errors.log"
+    command: sh -c "cd hellodjango/ &&  /opt/venv/bin/python /opt/venv/bin/gunicorn hellodjango.wsgi:application --bind 0.0.0.0:8000 --error-logfile /usr/src/app/logs/hello_django_gunicorn_errors.log --access-logfile /usr/src/app/logs/hello_django_gunicorn_access.log"
     environment:
       - DEBUG
       - DATABASE
@@ -35,7 +34,7 @@ services:
     container_name: geodjango_postgis
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       retries: 5
     environment:

@@ -1,1 +1,1 @@
-from .serializers import *
+from .gadm import *
