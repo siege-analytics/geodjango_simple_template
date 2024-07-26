@@ -34,7 +34,7 @@ services:
     container_name: geodjango_postgis
     restart: always
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: [ 'CMD-SHELL', 'psql -h localhost -U $${POSTGRES_USER} -c select 1 -d $${POSTGRES_DB}' ]
       interval: 10s
       retries: 5
     environment:
