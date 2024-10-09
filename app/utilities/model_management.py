@@ -1,9 +1,9 @@
 from locations.models import *
 
 
-def create_address_from_supplied_data(
+def create_united_states_address(
     primary_number: str, street_name: str, city_name: str, state_abbreviation: str, zip5
-) -> United_States_Address:
+):
 
     simple_address = (
         f"{primary_number} {street_name} {city_name} {state_abbreviation} {zip5}"

@@ -11,7 +11,9 @@ import zipfile
 # Logging
 
 import logging
+
 logger = logging.getLogger("django")
+
 
 def run_subprocess(command_list):
     # Not sure if this is handling failures properly...
@@ -122,8 +124,8 @@ def unzip_file_to_its_own_directory(
         logger.error(message)
         return False
 
-def generate_sha256_hash_for_file(target_file: pathlib.Path)-> str:
 
+def generate_sha256_hash_for_file(target_file: pathlib.Path) -> str:
 
     # Returns string representation of a sha256 hash of a file
     # based on # https://gist.github.com/jakekara/078899caaf8d5e6c74ef58d16ce7e703
@@ -141,7 +143,7 @@ def generate_sha256_hash_for_file(target_file: pathlib.Path)-> str:
         file_check = target_file.is_file()
         if file_check:
 
-            h256.update(open(target_file, 'rb').read())
+            h256.update(open(target_file, "rb").read())
             text_of_hash = h256.hexdigest()
             message = "\n"
             message += f"SUCCESS: Generated hash for {target_file}\n: {text_of_hash}"
@@ -158,9 +160,10 @@ def generate_sha256_hash_for_file(target_file: pathlib.Path)-> str:
         logger.error(message)
         return False
 
-def add_hash_entry_to_dispatcher(target_file: pathlib.Path,
-                                 confirmation_dict: dict) -> bool:
 
+def add_hash_entry_to_dispatcher(
+    target_file: pathlib.Path, confirmation_dict: dict
+) -> bool:
     """
 
     :param target_file: pathlib.Path object that we are going to add to the dispatcher
@@ -218,9 +221,9 @@ def add_hash_entry_to_dispatcher(target_file: pathlib.Path,
         return False
 
 
-def check_for_hash_in_dispatcher(target_file_path: pathlib.Path,
-                   testing_hash_string: str,
-                   confirmation_dict: dict) -> bool:
+def check_for_hash_in_dispatcher(
+    target_file_path: pathlib.Path, testing_hash_string: str, confirmation_dict: dict
+) -> bool:
 
     try:
         # ensure that we have a pathlib.Path object so that we can get a name
@@ -239,7 +242,9 @@ def check_for_hash_in_dispatcher(target_file_path: pathlib.Path,
 
         if needle in haystack:
             message = "\n"
-            message += f"Found an entry for {file_name_and_extension} in {confirmation_dict}"
+            message += (
+                f"Found an entry for {file_name_and_extension} in {confirmation_dict}"
+            )
             logger.info(message)
 
             known_good_hash = confirmation_dict[needle]
@@ -261,6 +266,3 @@ def check_for_hash_in_dispatcher(target_file_path: pathlib.Path,
         message += f"FAILURE: Exception while searching for hash for {target_file_path} in {confirmation_dict}: {e}"
         logger.error(message)
         return False
-
-
-
