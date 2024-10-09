@@ -120,5 +120,6 @@ def create_addresses_from_data_file(path_to_data_file: pathlib.Path) -> bool:
         logger.error(message)
         return False
 
-def geocode_addresses_with_nominatim()-> bool:
 
+def geocode_addresses_with_nominatim() -> bool:
+    return True

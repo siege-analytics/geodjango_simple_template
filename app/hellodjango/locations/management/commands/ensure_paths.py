@@ -9,15 +9,17 @@ from django.conf import settings
 # Generic Python Library Imports
 
 import sys, os
+
 # custom functions and data
 
-# from utilities.file_utilities import *
-from utilities import *
+from locations.utilities import *
 
 # logging
 
 import logging
+
 logger = logging.getLogger("django")
+
 
 class Command(BaseCommand):
     args = ""
@@ -37,7 +39,6 @@ class Command(BaseCommand):
         directories_that_cannot_be_worked_on = []
         successes = []
         failures = []
-
 
         directories_to_work_on = known_directories
 
@@ -67,6 +68,7 @@ class Command(BaseCommand):
 
             logger.info(message)
 
+
 def create_the_path(desired_path: pathlib.Path) -> bool:
 
     try:
@@ -76,4 +78,3 @@ def create_the_path(desired_path: pathlib.Path) -> bool:
         message = "\n"
         message += f"There was an error at the management command level working on {desired_path}: {e}"
         return False
-

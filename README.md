@@ -88,6 +88,7 @@ I'd like to add
 - [Sample Addresses For Testing Geocoder](24)
 - [Get field names for a Django Model in the shell](25)
 - [Correct healthcheck for PostgreSQL container](26)
+- [Sample Data for Locations: Pharmacies in AZ](27)
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 
@@ -140,3 +141,5 @@ I'd like to add
 [25]:https://stackoverflow.com/questions/3647805/how-to-get-all-fields-for-a-django-model
 
 [26]:https://github.com/peter-evans/docker-compose-healthcheck/issues/16
+
+[27]:https://www.azahcccs.gov/Resources/Downloads/PharmacyUpdates/AIHPFee-For-ServicePharmacyNetwork.pdf

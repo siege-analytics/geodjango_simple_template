@@ -1,5 +1,6 @@
 # Imports
 import pathlib
+import importlib
 
 # Django Management Command Imports
 
@@ -9,15 +10,17 @@ from django.conf import settings
 # Generic Python Library Imports
 
 import sys, os
+
 # custom functions and data
 
-# from utilities.file_utilities import *
 from utilities import *
 
 # logging
 
 import logging
+
 logger = logging.getLogger("django")
+
 
 class Command(BaseCommand):
     args = ""
@@ -27,7 +30,8 @@ class Command(BaseCommand):
         parser.add_argument("models", nargs="*")
 
     def handle(self, *args, **kwargs):
-
+        print(sys.path)
+        print(os.getcwd())
         # get command line specified options
         model_set = kwargs["models"]
         known_models = list(DOWNLOADS_DISPATCHER.keys())
@@ -169,6 +173,7 @@ def load_zipped_data_file_into_orm(
         logger.info(message)
         return True
 
+
 def fetch_and_unzip_the_file(model_to_work_on: str, url: str, data_type: str):
     # create path to file for download
     try:
@@ -203,9 +208,9 @@ def fetch_and_unzip_the_file(model_to_work_on: str, url: str, data_type: str):
         test_hash = generate_sha256_hash_for_file(local_filename)
 
         valid_local_file_exists = check_for_hash_in_dispatcher(
-            target_file_path =local_filename,
-            testing_hash_string = test_hash,
-            confirmation_dict = FILE_NAMES_AND_HASHES
+            target_file_path=local_filename,
+            testing_hash_string=test_hash,
+            confirmation_dict=FILE_NAMES_AND_HASHES,
         )
 
         if valid_local_file_exists:
@@ -280,4 +285,5 @@ def fetch_and_load_all_data(model_to_work_on: str):
         message += (
             f"There was an error fetching and loading for {model_to_work_on}: {e}"
         )
+
         logger.error(message)
