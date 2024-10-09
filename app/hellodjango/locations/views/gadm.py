@@ -12,7 +12,7 @@ from locations.serializers import CountrySerializer
 @csrf_exempt
 def country_list(request):
     """
-    List all code snippets, or create a new snippet.
+    List all countries, or create a new snippet.
     """
     if request.method == "GET":
         countries = Country.objects.all()
