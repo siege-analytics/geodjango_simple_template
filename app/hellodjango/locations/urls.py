@@ -11,5 +11,9 @@ urlpatterns = [
     path("places/<int:pk>/", views.PlaceDetail.as_view(), name="place"),
 ]
 
+# this is licit
+# new_urls = []
+#
+# urlpatterns.extend(new_urls)
 
 urlpatterns = format_suffix_patterns(urlpatterns)

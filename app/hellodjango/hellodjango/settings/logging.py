@@ -67,7 +67,7 @@ LOGGING = {
         'django': {
             # Use the console and file logger
             'handlers': ['console', 'file'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'ERROR'),
             'propagate': False,
         },
     },

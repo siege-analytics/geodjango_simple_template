@@ -12,8 +12,6 @@ import sys, os
 
 # custom functions and data
 
-from locations.utilities import *
-
 # logging
 
 import logging
