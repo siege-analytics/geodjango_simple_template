@@ -36,7 +36,7 @@ LOGGING = {
     # Add a verbose formatter
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {funcName} {process:d} {thread:d} {message}',
+            'format': '{levelname} {asctime} {module} {funcName} {process:d} {thread:d} {filename:s} {lineno:d} {message}',
             'style': '{',
         },
     },

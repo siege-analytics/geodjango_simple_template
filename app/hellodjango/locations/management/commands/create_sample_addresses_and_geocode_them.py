@@ -76,6 +76,7 @@ def create_addresses_from_data_file(path_to_data_file: pathlib.Path) -> bool:
     # container for bad addresses
 
     bad_addresses = []
+    United_States_Address.objects.all().delete()
 
     # open the csv and create a DictReader
 

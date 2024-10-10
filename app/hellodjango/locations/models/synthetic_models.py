@@ -6,8 +6,8 @@ from locations.models import *
 # it's possible that this will need to become subfolers
 # with primitives and synthetics
 
-class Location(models.Model):
 
+class Location(models.Model):
     """This is a model for a Location, which has:
         :Name
         :Nickname
@@ -26,11 +26,19 @@ class Location(models.Model):
     nickname = models.CharField(max_length=500)
 
     # foreign key to address
-    address = models.ForeignKey(United_States_Address, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None)
+    address = models.ForeignKey(
+        United_States_Address,
+        on_delete=models.SET_DEFAULT,
+        null=True,
+        blank=True,
+        default=None,
+    )
 
     # foreign key to timezone
 
-    timezone = models.ForeignKey(Timezone, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None)
+    timezone = models.ForeignKey(
+        Timezone, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
 
     # foreign key to GADM polygons
 
@@ -50,31 +58,35 @@ class Location(models.Model):
         Admin_Level_4, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
     gid_5 = models.ForeignKey(
-        Admin_Level_5, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None)
+        Admin_Level_5, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+    )
+
+    def __str__(self):
+        representative_string = f"{self.name}"
+        return representative_string
 
     class Meta:
         abstract = True
-        verbose_name = 'location'
-        verbose_name_plural = 'locations'
+        verbose_name = "location"
+        verbose_name_plural = "locations"
+
 
 class Place(Location):
-
     """
     This is a model for a Location that has a Point Geometry.
     Strictly speaking, you could get the point Geometry from the Address field, I guess.
     Let's not worry about that for now.
     """
 
-    geom=models.PointField(srid=4326,null=True, blank=True, default=None)
+    geom = models.PointField(srid=4326, null=True, blank=True, default=None)
 
     class Meta:
         abstract = False
-        verbose_name = 'place'
-        verbose_name_plural = 'places'
+        verbose_name = "place"
+        verbose_name_plural = "places"
 
 
 class Locality(Location):
-
     """
     This is a model for a Location that has a Point Geometry.
     Strictly speaking, you could get the point Geometry from the Address field, I guess.
@@ -85,7 +97,5 @@ class Locality(Location):
 
     class Meta:
         abstract = False
-        verbose_name = 'locality'
-        verbose_name_plural = 'localities'
-
-
+        verbose_name = "locality"
+        verbose_name_plural = "localities"

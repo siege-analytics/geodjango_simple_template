@@ -12,8 +12,14 @@ from django.conf import settings
 
 # custom functions and data
 
-from utilities import *
 from locations.models import *
+
+try:
+    from utilities import *
+
+    print("Successfully imported utilities")
+except Exception as e:
+    print(f"Failed to import utilities:{e}")
 
 # logging
 
@@ -24,7 +30,7 @@ logger = logging.getLogger("django")
 
 class Command(BaseCommand):
     args = ""
-    help = "Creates US Address objects from Crime data and uses the Nominatim API to geocode them"
+    help = "Creates Location objects from AZ government data and uses the Nominatim API to geocode them"
 
     def handle(self, *args, **kwargs):
 
@@ -46,7 +52,7 @@ class Command(BaseCommand):
             message = "\n"
             message += "About to do the business"
 
-            result = create_addresses_from_data_file(
+            result = create_places_from_data_file(
                 path_to_data_file=SAMPLE_LOCATIONS_CSV
             )
 
@@ -73,11 +79,11 @@ class Command(BaseCommand):
             logger.info(message)
 
 
-def create_addresses_from_data_file(path_to_data_file: pathlib.Path) -> bool:
+def create_places_from_data_file(path_to_data_file: pathlib.Path) -> bool:
 
     # container for bad addresses
 
-    bad_addresses = []
+    bad_locations = []
 
     # open the csv and create a DictReader
 
@@ -88,36 +94,48 @@ def create_addresses_from_data_file(path_to_data_file: pathlib.Path) -> bool:
             reader = csv.DictReader(infile)
             for row in reader:
 
-                # create concatenated street name
+                # field names
+                # PHARMACY_NAME
+                # PHARMACY_ADDRESS
+                # CITY
+                # STATE
+                # ZIP_CODE
+                # PHONE_NUMBER
 
-                street_name_fields = [
-                    row["predir"],
-                    row["prequal"],
-                    row["pretyp"],
-                    row["street"],
-                    row["suftyp"],
-                    row["sufqual"],
-                    row["sufdir"],
-                ]
+                # Get address fields
 
-                concatenated_street_name = " ".join(street_name_fields)
+                split_address_raw = row["PHARMACY_ADDRESS"].split(" ")
+                split_address = list(map(str, split_address_raw))
 
-                create_addresses_from_supplied_data(
-                    primary_number=row["number"],
-                    street_name=concatenated_street_name,
-                    city_name=row["city"],
-                    state_abbreviation=row["state"],
-                    zip5=row["zip"],
+                primary_number, street_name_list = split_address[0], split_address[1:]
+                street_name = " ".join(street_name_list)
+                city_name = row["CITY"]
+                state_abbreviation = row["STATE"]
+                zip5 = row["ZIP_CODE"]
+
+                place_address = create_united_states_address(
+                    primary_number=primary_number,
+                    street_name=street_name,
+                    city_name=city_name,
+                    state_abbreviation=state_abbreviation,
+                    zip5=zip5,
                 )
-                
-        message = "\n"
-        message += "Success creating address objects"
-        logger.info(message)
-        return True
+                #
+                # get place name
+
+                name = row["PHARMACY_NAME"]
+
+                new_place = Place(name=name, address=place_address)
+                new_place.save()
+        #
+        # message = "\n"
+        # message += "Success creating location objects"
+        # logger.info(message)
+        # return True
 
     except Exception as e:
         message = "\n"
-        message += f"There was an error creating address objects: {e}"
+        message += f"There was an error creating location objects: {e}"
         logger.error(message)
         return False
 
