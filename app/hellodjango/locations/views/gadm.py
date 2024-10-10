@@ -1,56 +1,50 @@
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
 from locations.models import *
 from locations.serializers import *
 
-from locations.models import Country
-from locations.serializers import CountrySerializer
+from django.http import Http404
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 
 # Create your views here.
-@csrf_exempt
-def country_list(request):
-    """
-    List all countries, or create a new snippet.
-    """
-    if request.method == "GET":
+class CountryList(APIView):
+    def get(self, request, format=None):
         countries = Country.objects.all()
         serializer = CountrySerializer(countries, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return Response(serializer.data)
 
-    elif request.method == "POST":
-        data = JSONParser().parse(request)
-        serializer = CountrySerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
+    # This method is hypothetical because we will never add data
+    # def post(self, request, format=None):
+    #     serializer = CountrySerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@csrf_exempt
-def country_detail(request, pk):
-    """
-    Retrieve, update or delete a Country
-    """
-    # find the existing object
-    try:
-        country = Country.objects.get(pk=pk)
-    except Country.DoesNotExist:
-        return HttpResponse(status=404)
+class CountryDetail(APIView):
+    def get_object(self, pk):
+        try:
+            return Country.objects.get(pk=pk)
+        except Country.DoesNotExist:
+            raise Http404
 
-    if request.method == "GET":
+    def get(self, request, pk, format=None):
+        country = self.get_object(pk)
         serializer = CountrySerializer(country)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
 
-    elif request.method == "PUT":
-        data = JSONParser().parse(request)
-        serializer = CountrySerializer(country, data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
+    # these methods are hypothetical
 
-    elif request.method == "DELETE":
-        country.delete()
-        return HttpResponse(status=204)
+    # def put(self, request, pk, format=None):
+    #     country = self.get_object(pk)
+    #     serializer = CountrySerializer(country, data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #
+    # def delete(self, request, pk, format=None):
+    #     country = self.get_object(pk)
+    #     country.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
