@@ -4,6 +4,7 @@ django-extensions
 djangorestframework
 djangorestframework-gis
 geopandas
+geopy
 gunicorn
 httpie
 pandas

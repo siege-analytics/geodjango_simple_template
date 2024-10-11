@@ -9,6 +9,7 @@ urlpatterns = [
     # Synthetics
     path("places/", views.PlaceList.as_view(), name="places"),
     path("places/<int:pk>/", views.PlaceDetail.as_view(), name="place"),
+    path("places/lookup/", views.Filtered_Place_List.as_view(), name="lookup"),
 ]
 
 # this is licit
