@@ -25,15 +25,6 @@ class Location(models.Model):
     name = models.CharField(max_length=500)
     nickname = models.CharField(max_length=500)
 
-    # foreign key to address
-    address = models.ForeignKey(
-        United_States_Address,
-        on_delete=models.SET_DEFAULT,
-        null=True,
-        blank=True,
-        default=None,
-    )
-
     # foreign key to timezone
 
     timezone = models.ForeignKey(
@@ -77,6 +68,16 @@ class Place(Location):
     Strictly speaking, you could get the point Geometry from the Address field, I guess.
     Let's not worry about that for now.
     """
+
+    # foreign key to address
+    address = models.ForeignKey(
+        United_States_Address,
+        related_name="address_set",
+        on_delete=models.SET_DEFAULT,
+        null=True,
+        blank=True,
+        default=None,
+    )
 
     geom = models.PointField(srid=4326, null=True, blank=True, default=None)
 

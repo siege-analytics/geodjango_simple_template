@@ -64,6 +64,8 @@ class Admin_Level_1(models.Model):
         ordering = ["gid_1"]
 
 
+# https://stackoverflow.com/questions/21197483/geodjango-layermapping-foreign-key
+
 # Auto-generated `LayerMapping` dictionary for Admin_Level_1 model
 admin_level_1_mapping = {
     "gid_0": "GID_0",
