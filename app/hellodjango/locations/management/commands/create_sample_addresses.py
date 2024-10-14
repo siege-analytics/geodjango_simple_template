@@ -4,6 +4,7 @@
 import sys, os
 import pathlib
 import csv
+from django.db.models import Q
 
 # Django Management Command Imports
 
@@ -44,11 +45,16 @@ class Command(BaseCommand):
             message = "\n"
             message += "About to do the business"
 
-            result = create_addresses_from_data_file(
-                path_to_data_file=SAMPLE_ADDRESSES_CSV
-            )
+            # result = create_addresses_from_data_file(
+            #     path_to_data_file=SAMPLE_ADDRESSES_CSV
+            # )
+            #
+            # successes.append(result)
+
+            result = geocode_addresses_with_nominatim()
 
             successes.append(result)
+
         except Exception as e:
             message = "\n"
             message += f"There was an error at the management command level working on {message}: {e}"
@@ -123,4 +129,35 @@ def create_addresses_from_data_file(path_to_data_file: pathlib.Path) -> bool:
 
 
 def geocode_addresses_with_nominatim() -> bool:
+
+    ungeocoded_addresses = United_States_Address.objects.filter(
+        (Q(latitude=None) | Q(longitude=None))
+    )
+
+    for uga in ungeocoded_addresses:
+
+        concatenated_street_address = (
+            f"{uga.primary_number} {uga.street_name} {uga.street_suffix}"
+        )
+
+        concatenated_address = f"{concatenated_street_address}, {uga.city_name}, {uga.state_abbreviation} {uga.zip5}".replace(
+            "  ", " "
+        )
+
+        address_information_from_nominatim = geocode_with_nominatim_public(
+            concatenated_address=concatenated_address
+        )
+
+        if address_information_from_nominatim:
+            try:
+                uga.latitude = uga[settings.NOMINATIM_LATITUDE_VARIABLE]
+                uga.longitude = uga[settings.NOMINATIM_LONGITUDE_VARIABLE]
+                uga.save()
+
+            except Exception as e:
+                message = ""
+                message += f"There was an error updating address {uga}: {e}"
+                logger.error(message)
+                return False
+
     return True

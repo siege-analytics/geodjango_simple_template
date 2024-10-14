@@ -8,12 +8,16 @@ logger = logging.getLogger("django")
 
 
 def create_united_states_address(
-    primary_number: str, street_name: str, city_name: str, state_abbreviation: str, zip5
+    primary_number: str,
+    street_name: str,
+    city_name: str,
+    state_abbreviation: str,
+    zip5: str,
+    longitude: float = None,
+    latitude: float = None,
 ):
 
-    simple_address = (
-        f"{primary_number} {street_name} {city_name} {state_abbreviation} {zip5}"
-    )
+    simple_address = f"{primary_number}; {street_name} ;{city_name} ;{state_abbreviation} ;{zip5} ; {longitude} ; {latitude}"
 
     message = ""
     message += f"Trying to create an address for {simple_address}"
@@ -26,6 +30,8 @@ def create_united_states_address(
             city_name=city_name,
             state_abbreviation=state_abbreviation,
             zip5=zip5,
+            longitude=longitude,
+            latitude=latitude,
         )
         print(us_address)
         us_address.save()

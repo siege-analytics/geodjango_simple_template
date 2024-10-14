@@ -45,8 +45,12 @@ class United_States_Address(models.Model):
         max_length=250, null=True, blank=True, default=None
     )
     elot_sort = models.CharField(max_length=250, null=True, blank=True, default=None)
-    latitude = models.FloatField(null=True, blank=True, default=None)
-    longitude = models.FloatField(null=True, blank=True, default=None)
+    latitude = models.DecimalField(
+        max_digits=22, decimal_places=16, null=True, blank=True, default=None
+    )
+    longitude = models.DecimalField(
+        max_digits=22, decimal_places=16, null=True, blank=True, default=None
+    )
     coordinate_license = models.CharField(
         max_length=250, null=True, blank=True, default=None
     )

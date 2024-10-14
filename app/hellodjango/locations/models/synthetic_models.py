@@ -69,16 +69,13 @@ class Place(Location):
     Let's not worry about that for now.
     """
 
-    # foreign key to address
     address = models.ForeignKey(
         United_States_Address,
-        related_name="address_set",
         on_delete=models.SET_DEFAULT,
         null=True,
         blank=True,
         default=None,
     )
-
     geom = models.PointField(srid=4326, null=True, blank=True, default=None)
 
     class Meta:

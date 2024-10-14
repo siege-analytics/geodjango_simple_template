@@ -4,6 +4,7 @@
 import sys, os
 import pathlib
 import csv
+from os.path import split
 
 # Django Management Command Imports
 
@@ -14,12 +15,12 @@ from django.conf import settings
 
 from locations.models import *
 
-try:
-    from utilities import *
+from utilities import *
 
-    print("Successfully imported utilities")
-except Exception as e:
-    print(f"Failed to import utilities:{e}")
+# geography things
+from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import fromstr
+
 
 # logging
 
@@ -40,11 +41,8 @@ class Command(BaseCommand):
         successes = []
         failures = []
 
-        # specify which models to work on
-        # if the user specifies nothing, do them all
-
         SAMPLE_LOCATIONS_CSV = (
-            settings.TABULAR_DATA_SUBDIRECTORY / "list_of_pharmacies_in_az.csv"
+            settings.TABULAR_DATA_SUBDIRECTORY / "az_pharmacies_geocoded.csv"
         )
 
         # start work
@@ -81,9 +79,16 @@ class Command(BaseCommand):
 
 def create_places_from_data_file(path_to_data_file: pathlib.Path) -> bool:
 
+    United_States_Address.objects.all().delete()
+    Place.objects.all().delete()
+
     # container for bad addresses
 
     bad_locations = []
+
+    # match values for evaluation
+
+    ROW_MATCH_VALUE = str("Match").strip()
 
     # open the csv and create a DictReader
 
@@ -94,44 +99,90 @@ def create_places_from_data_file(path_to_data_file: pathlib.Path) -> bool:
             reader = csv.DictReader(infile)
             for row in reader:
 
-                # field names
-                # PHARMACY_NAME
-                # PHARMACY_ADDRESS
-                # CITY
-                # STATE
-                # ZIP_CODE
-                # PHONE_NUMBER
+                if row["match"] != ROW_MATCH_VALUE:
 
-                # Get address fields
+                    message = ""
+                    message += f"There was no geocode match for place {row['name']}"
+                    logging.info(message)
 
-                split_address_raw = row["PHARMACY_ADDRESS"].split(" ")
-                split_address = list(map(str, split_address_raw))
+                    continue
 
-                primary_number, street_name_list = split_address[0], split_address[1:]
-                street_name = " ".join(street_name_list)
-                city_name = row["CITY"]
-                state_abbreviation = row["STATE"]
-                zip5 = row["ZIP_CODE"]
+                else:
 
-                place_address = create_united_states_address(
-                    primary_number=primary_number,
-                    street_name=street_name,
-                    city_name=city_name,
-                    state_abbreviation=state_abbreviation,
-                    zip5=zip5,
-                )
-                #
-                # get place name
+                    message = ""
+                    message += f"There was no geocode match for place {row['name']}"
+                    logging.info(message)
 
-                name = row["PHARMACY_NAME"]
+                    # field names
+                    # name,
+                    # full_address,
+                    # match,
+                    # match_type,
+                    # reduced_address,
+                    # longitude,
+                    # latitude,
+                    # street_side,
+                    # address_check
 
-                new_place = Place(name=name, address=place_address)
-                new_place.save()
-        #
-        # message = "\n"
-        # message += "Success creating location objects"
-        # logger.info(message)
-        # return True
+                    # Get address fields
+
+                    split_address_raw = row["reduced_address"].split(",")
+                    split_address = list(map(str, split_address_raw))
+
+                    street_fields = split_address[0].split(" ")
+                    primary_number, street_name = (
+                        street_fields[0],
+                        street_fields[1:],
+                    )
+                    street_name = " ".join(street_name)
+                    city_name = split_address[1].strip()
+                    state_abbreviation = split_address[2].strip()
+                    zip5 = split_address[3].strip()
+
+                    # coordinates
+                    split_coordinates = row["coordinates"].split(",")
+                    longitude = split_coordinates[0].strip()
+                    latitude = split_coordinates[1].strip()
+
+                    place_address = United_States_Address(
+                        primary_number=primary_number.strip(),
+                        street_name=street_name.strip(),
+                        city_name=city_name,
+                        state_abbreviation=state_abbreviation,
+                        zip5=zip5,
+                        longitude=longitude,
+                        latitude=latitude,
+                        geom=fromstr(f"POINT({longitude} {latitude})", srid=4326),
+                    )
+                    #                     message = ""
+                    #                     message += f"""
+                    #                     pn: {primary_number}, {len(primary_number)}; sn: {street_name}, {len(street_name)}
+                    #                     cn: {city_name}, {len(city_name)}; sa: {state_abbreviation}, {len(state_abbreviation)};
+                    #                     z5: {zip5}, {len(zip5)}; lng: {longitude}, {len(longitude)}; lat: {latitude}, {len(latitude)}
+                    # """
+                    #                     logging.info(message)
+                    place_address.save()
+                    #
+                    # get place name
+
+                    name = row["name"]
+                    if place_address:
+                        new_place = Place(
+                            name=name,
+                            address=place_address,
+                            geom=fromstr(f"POINT({longitude} {latitude})", srid=4326),
+                        )
+                        new_place.save()
+                        message = ""
+                        message += f"Place {name} created successfully."
+                        logging.info(message)
+                    else:
+                        message = ""
+                        message += (
+                            f"Place {name} could not be created because of address: {place_address}"
+                            f""
+                        )
+                        logging.info(message)
 
     except Exception as e:
         message = "\n"
