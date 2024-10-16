@@ -7,8 +7,11 @@ geopandas
 geopy
 gunicorn
 httpie
+pathlib
+main
 pandas
 psycopg2-binary
 pysal
 python-dotenv
+requests
 
