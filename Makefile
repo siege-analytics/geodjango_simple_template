@@ -13,10 +13,8 @@ TARGET_ENV ?= dev
 
 ifeq ($(shell echo ${TARGET_ENV} | tr A-Z a-z),dev)
 ENV_INCLUDES := conf/dev.env conf/django.dev.conf conf/postgres.conf
-COMPOSE_SRC := docker-compose.dev.yml
 else
 ENV_INCLUDES := conf/prod.env conf/django.prod.conf conf/postgres.conf
-COMPOSE_SRC := docker-compose.prod.yml
 endif
 
 #
@@ -27,57 +25,57 @@ endif
 task-up = $(if $(shell $(DKC) ps -q $(1)),$(1) is running)
 exec-or-run = $(if $(call task-up,$1),exec,run --rm) $1
 
+export DOCKER_DEFAULT_PLATFORM ?= linux/amd64
+
 confirm_amd:
-	export DOCKER_DEFAULT_PLATFORM=linux/amd64
-	echo $DOCKER_DEFAULT_PLATFORM
+	$(info DOCKER_DEFAULT_PLATFORM: $(DOCKER_DEFAULT_PLATFORM))
 
-.env: ${ENV_INCLUDES}
-	cat $^ >$@
-
-docker-compose.yml: ${COMPOSE_SRC}
-	cat $^ >$@
-
-# this is a variable, not a command
-docker-files := .env docker-compose.yml
-
-stop:  ${docker-files}
-	$(DKC) $@
-
-down: ${docker-files}
-	$(DKC) $@
-
-up: ${docker-files}
-	$(DKC) $@ -d
-
-build: ${docker-files} stop
-	$(DKC) $@
-
+up down stop build : .env
+	$(DKC) $@ $(if $(filter $@,up),-d)
 
 build-prod:
-	TARGET_ENV=dev make -B build
-	-rm -f ${docker-files}
-	TARGET_ENV=prod make rebuild
+	TARGET_ENV=prod $(MAKE) -B .env rebuild
 
-rebuild: ${docker-files} stop
+rebuild: .env stop
 	$(DKC) build --no-cache
 
-clean: ${docker-files} down
+clean: .env down
 	$(DKC) rm
 
 #
 # Tasks
 #
 
-pg_term: ${docker-files}
+pg_term: .env
 	$(DKC) $(call exec-or-run,postgis) psql -U $(SQL_USER) -d $(SQL_DATABASE)
 
-python_term: ${docker-files}
+python_term: .env
 	$(DKC) $(call exec-or-run,webserver_python) /bin/bash
 
 # Django operations
 
-migrate collectstatic: ${docker-files}
+migrate collectstatic: .env
 	$(DKC) $(call exec-or-run,webserver_python) python3 hellodjango/manage.py $@ --no-input
 
 static: collectstatic
 
+remove_migrations:
+	find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+	find . -path "*/migrations/*.pyc"  -delete
+
+
+.env: ${ENV_INCLUDES}
+ifndef ENV_INCLUDES
+	$(error ENV_INCLUDES is not set)
+endif
+	@# Ensure that each file ends with a newline
+	@for file in $^; do \
+		if [ -n "$$(tail -c 1 "$$file" | tr -d '\n')" ]; then \
+			echo >> "$$file"; \
+		fi; \
+	done
+	@ echo '# ' > $@
+	@ echo '# WARNING: Generated Configuration using - $^' >> $@
+	@ echo '# ' >> $@
+	@cat $^ >>$@
+	@echo "Generated .env using $^"

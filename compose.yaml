@@ -1,0 +1,70 @@
+services:
+
+  webserver_python:
+    image: geogjango_webserver
+    container_name: geodjango_webserver
+    build:
+      context: ./docker
+      args:
+        UBUNTU_BASE_IMAGE: ${UBUNTU_BASE_IMAGE}
+    command: sh -c "cd hellodjango/ &&  /opt/venv/bin/python /opt/venv/bin/gunicorn hellodjango.wsgi:application --bind 0.0.0.0:8000 --error-logfile /usr/src/app/logs/hello_django_gunicorn_errors.log --access-logfile /usr/src/app/logs/hello_django_gunicorn_access.log --timeout 300"
+    environment:
+      - DEBUG
+      - DATABASE
+      - SECRET_KEY
+      - DJANGO_ALLOWED_HOSTS
+      - SQL_ENGINE
+      - SQL_DATABASE
+      - SQL_USER
+      - SQL_PASSWORD
+      - SQL_HOST
+      - SQL_PORT
+    networks:
+      - geodjango_project_network
+    volumes:
+      - ./app:/usr/src/app
+      - static_volume:/home/app/web/staticfiles
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgis
+
+  postgis:
+    image: postgis/postgis:latest
+    container_name: geodjango_postgis
+    restart: always
+    healthcheck:
+      test: [ 'CMD-SHELL', 'psql -h localhost -U $${POSTGRES_USER} -c select 1 -d $${POSTGRES_DB}' ]
+      interval: 10s
+      retries: 5
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_PASSWORD
+      - POSTGRES_USER
+      - POSTGRES_HOST_AUTH_METHOD
+      - PGDATA
+    ports:
+      - 54321:5432
+    networks:
+      - geodjango_project_network
+    volumes:
+      - geodjango_pg_data:${PGDATA}
+
+  nginx:
+    build:
+      context: docker/nginx
+    ports:
+      - 1337:80
+    depends_on:
+      - webserver_python
+    networks:
+      - geodjango_project_network
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+
+networks:
+  geodjango_project_network:
+
+volumes:
+  geodjango_pg_data:
+  static_volume:

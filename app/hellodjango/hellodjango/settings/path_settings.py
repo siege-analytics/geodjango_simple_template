@@ -1,5 +1,4 @@
 import pathlib
-import importlib.util
 
 
 # going to build paths for use relative to the settings file
@@ -32,3 +31,23 @@ LOGS_DIRECTORY = DOCKER_APP_DIRECTORY / 'logs'
 
 UTILITIES_PACKAGE_NAME='utilities'
 PATH_TO_UTILITIES_PACKAGE=DJANGO_PROJECT_DIRECTORY / UTILITIES_PACKAGE_NAME
+
+# Creating a collection for use in a management command to ensure that paths exist
+# Every time I create a new path, I'm just going to add it here
+# There's got to be a better way to do this
+
+NECESSARY_PATHS = [
+    SETTINGS_DIRECTORY,
+    DJANGO_APP_DIRECTORY,
+    DJANGO_PROJECT_DIRECTORY,
+    DOCKER_APP_DIRECTORY,
+    DATA_DIRECTORY,
+    SPATIAL_DATA_SUBDIRECTORY,
+    TABULAR_DATA_SUBDIRECTORY,
+    VECTOR_SPATIAL_DATA_SUBDIRECTORY,
+    RASTER_SPATIAL_DATA_SUBDIRECTORY,
+    POINTCLOUD_SPATIAL_DATA_SUBDIRECTORY,
+    LOGS_DIRECTORY,
+    UTILITIES_PACKAGE_NAME,
+    PATH_TO_UTILITIES_PACKAGE,
+]

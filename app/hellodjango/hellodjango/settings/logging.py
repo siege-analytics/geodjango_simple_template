@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+
 #  django imports
 
 from django.conf import settings
@@ -35,7 +36,7 @@ LOGGING = {
     # Add a verbose formatter
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {funcName} {process:d} {thread:d} {message}',
+            'format': '{levelname} {asctime} {module} {funcName} {process:d} {thread:d} {filename:s} {lineno:d} {message}',
             'style': '{',
         },
     },
@@ -66,7 +67,7 @@ LOGGING = {
         'django': {
             # Use the console and file logger
             'handlers': ['console', 'file'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'ERROR'),
             'propagate': False,
         },
     },
