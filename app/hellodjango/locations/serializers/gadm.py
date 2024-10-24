@@ -2,9 +2,9 @@ from rest_framework import serializers
 from locations.models import *
 
 
-class CountrySerializer(serializers.ModelSerializer):
+class Admin_Level_0Serializer(serializers.ModelSerializer):
     class Meta:
-        model = Country
+        model = Admin_Level_0
         fields = ["gid_0", "country"]
 
 

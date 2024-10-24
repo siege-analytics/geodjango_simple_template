@@ -8,7 +8,6 @@ from django.contrib.gis.utils import LayerMapping
 
 from locations.models import *
 
-
 DATA_TYPES_TO_PATH = {
     "VECTOR": settings.VECTOR_SPATIAL_DATA_SUBDIRECTORY,
     "RASTER": settings.RASTER_SPATIAL_DATA_SUBDIRECTORY,
@@ -21,7 +20,7 @@ DOWNLOADS_DISPATCHER = {
     "gadm": {
         "url": "https://geodata.ucdavis.edu/gadm/gadm4.1/gadm_410-levels.zip",
         "model_to_model": [
-            {Country: country_mapping},
+            {Admin_Level_0: admin_level_0_mapping},
             {Admin_Level_1: admin_level_1_mapping},
             {Admin_Level_2: admin_level_2_mapping},
             {Admin_Level_3: admin_level_3_mapping},

@@ -9,8 +9,8 @@ from rest_framework.response import Response
 # Create your views here.
 class CountryList(APIView):
     def get(self, request, format=None):
-        countries = Country.objects.all()
-        serializer = CountrySerializer(countries, many=True)
+        al0s = Admin_Level_0.objects.all()
+        serializer = Admin_Level_0Serializer(al0s, many=True)
         return Response(serializer.data)
 
     # This method is hypothetical because we will never add data
@@ -25,13 +25,13 @@ class CountryList(APIView):
 class CountryDetail(APIView):
     def get_object(self, pk):
         try:
-            return Country.objects.get(pk=pk)
-        except Country.DoesNotExist:
+            return Admin_Level_0.objects.get(pk=pk)
+        except Admin_Level_0.DoesNotExist:
             raise Http404
 
     def get(self, request, pk, format=None):
-        country = self.get_object(pk)
-        serializer = CountrySerializer(country)
+        al0 = self.get_object(pk)
+        serializer = Admin_Level_0Serializer(al0)
         return Response(serializer.data)
 
     # these methods are hypothetical

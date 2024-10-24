@@ -5,7 +5,7 @@ from django.contrib.gis.db import models
 # For foreign keys we are going to use the gid field for the key
 
 
-class Country(models.Model):
+class Admin_Level_0(models.Model):
     # Admin Level 0
 
     # Regular Django fields
@@ -22,11 +22,11 @@ class Country(models.Model):
         return representative_string
 
     class Meta:
-        ordering = ["country"]
+        ordering = ["gid_0"]
 
 
 # Auto-generated `LayerMapping` dictionary for Country model
-country_mapping = {
+admin_level_0_mapping = {
     "gid_0": "GID_0",
     "country": "COUNTRY",
     "geom": "MULTIPOLYGON",
@@ -35,7 +35,7 @@ country_mapping = {
 
 class Admin_Level_1(models.Model):
     gid_0 = models.ForeignKey(
-        Country, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+        Admin_Level_0, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
@@ -68,7 +68,7 @@ class Admin_Level_1(models.Model):
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_1 model
 admin_level_1_mapping = {
-    "gid_0": "GID_0",
+    "gid_0": {"gid_0": "GID_0"},
     "country": "COUNTRY",
     "gid_1": "GID_1",
     "name_1": "NAME_1",
@@ -85,7 +85,7 @@ admin_level_1_mapping = {
 
 class Admin_Level_2(models.Model):
     gid_0 = models.ForeignKey(
-        Country, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+        Admin_Level_0, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_1 = models.ForeignKey(
@@ -117,7 +117,7 @@ class Admin_Level_2(models.Model):
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_2 model
 admin_level_2_mapping = {
-    "gid_0": "GID_0",
+    "gid_0": {"gid_0": "GID_0"},
     "country": "COUNTRY",
     "gid_1": "GID_1",
     "name_1": "NAME_1",
@@ -136,7 +136,7 @@ admin_level_2_mapping = {
 
 class Admin_Level_3(models.Model):
     gid_0 = models.ForeignKey(
-        Country, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+        Admin_Level_0, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_1 = models.ForeignKey(
@@ -196,7 +196,7 @@ admin_level_3_mapping = {
 
 class Admin_Level_4(models.Model):
     gid_0 = models.ForeignKey(
-        Country, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+        Admin_Level_0, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_1 = models.ForeignKey(
@@ -254,7 +254,7 @@ admin_level_4_mapping = {
 
 class Admin_Level_5(models.Model):
     gid_0 = models.ForeignKey(
-        Country, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+        Admin_Level_0, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_1 = models.ForeignKey(

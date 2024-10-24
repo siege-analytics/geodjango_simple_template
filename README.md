@@ -17,6 +17,8 @@ The project makes use of some standard technologies:
 - [gunicorn][2]
 - [nginx][3]
 - [PostGIS][4]
+- [NVM][28]
+- [Vue/Vite][29]
 
 # Currently
 
@@ -143,3 +145,7 @@ I'd like to add
 [26]:https://github.com/peter-evans/docker-compose-healthcheck/issues/16
 
 [27]:https://www.azahcccs.gov/Resources/Downloads/PharmacyUpdates/AIHPFee-For-ServicePharmacyNetwork.pdf
+
+[28]:https://github.com/nvm-sh/nvm
+
+[29]:https://vite.dev/guide/ 

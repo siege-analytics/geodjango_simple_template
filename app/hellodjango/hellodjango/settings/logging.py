@@ -19,12 +19,14 @@ try:
 except Exception as e:
     message ="\n"
     message +=f"Pathlib method to create the logging file didn't work, trying OS lib method:{e}"
+    logging.error(message)
 try:
     if not os.path.exists(LOG_PATH):
         f = open(LOG_PATH, 'w+').close()
 except Exception as e:
     message ="\n"
     message +=f"OS method to create the logging file didn't work, Alfred E. Neumann:{e}"
+    logging.error(message)
 
 
 # Create a LOGGING dictionary

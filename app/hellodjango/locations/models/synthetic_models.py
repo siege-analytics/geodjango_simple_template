@@ -34,7 +34,7 @@ class Location(models.Model):
     # foreign key to GADM polygons
 
     gid_0 = models.ForeignKey(
-        Country, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
+        Admin_Level_0, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
     gid_1 = models.ForeignKey(
         Admin_Level_1, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
