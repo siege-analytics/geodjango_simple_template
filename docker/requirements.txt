@@ -1,5 +1,6 @@
 black
 Django
+django-cors-headers
 django-extensions
 djangorestframework
 djangorestframework-gis
@@ -8,10 +9,15 @@ geopy
 gunicorn
 httpie
 pathlib
-main
+matplotlib
 pandas
 psycopg2-binary
 pysal
 python-dotenv
 requests
-
+reportlab
+reportlab[pycairo]
+reportlab[accel]
+reportlab[renderpm]
+reportlab[pycairo]
+scikit-learn
