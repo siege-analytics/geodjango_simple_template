@@ -91,6 +91,7 @@ I'd like to add
 - [Get field names for a Django Model in the shell](25)
 - [Correct healthcheck for PostgreSQL container](26)
 - [Sample Data for Locations: Pharmacies in AZ](27)
+- [GeoDjango ForeignKeys in LayerMapping](30)
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 
@@ -148,4 +149,6 @@ I'd like to add
 
 [28]:https://github.com/nvm-sh/nvm
 
-[29]:https://vite.dev/guide/ 
+[29]:https://vite.dev/guide/
+
+[30]:https://stackoverflow.com/questions/21197483/geodjango-layermapping-foreign-key
