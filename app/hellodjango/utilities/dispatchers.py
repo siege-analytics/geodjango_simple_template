@@ -16,6 +16,15 @@ DATA_TYPES_TO_PATH = {
 }
 
 
+GADM_MODEL_FIELD_NAMES = [
+    "gid_0",
+    "gid_1",
+    "gid_2",
+    "gid_3",
+    "gid_4",
+    "gid_5",
+]
+
 DOWNLOADS_DISPATCHER = {
     "gadm": {
         "url": "https://geodata.ucdavis.edu/gadm/gadm4.1/gadm_410-levels.zip",
