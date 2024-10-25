@@ -1,9 +1,11 @@
 black
+boto3
 Django
 django-cors-headers
 django-extensions
 djangorestframework
 djangorestframework-gis
+fiona
 geopandas
 geopy
 gunicorn
