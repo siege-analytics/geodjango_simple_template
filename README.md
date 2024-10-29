@@ -92,6 +92,7 @@ I'd like to add
 - [Correct healthcheck for PostgreSQL container](26)
 - [Sample Data for Locations: Pharmacies in AZ](27)
 - [GeoDjango ForeignKeys in LayerMapping](30)
+- [CSS FlexBox]()
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 
@@ -152,3 +153,5 @@ I'd like to add
 [29]:https://vite.dev/guide/
 
 [30]:https://stackoverflow.com/questions/21197483/geodjango-layermapping-foreign-key
+
+[31]: https://css-tricks.com/snippets/css/a-guide-to-flexbox/
