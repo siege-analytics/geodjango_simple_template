@@ -17,12 +17,12 @@ DATA_TYPES_TO_PATH = {
 
 
 GADM_MODEL_FIELD_NAMES = [
-    "gid_0",
-    "gid_1",
-    "gid_2",
-    "gid_3",
-    "gid_4",
-    "gid_5",
+    "GID_0",
+    "GID_1",
+    "GID_2",
+    "GID_3",
+    "GID_4",
+    "GID_5",
 ]
 
 DOWNLOADS_DISPATCHER = {
@@ -41,14 +41,14 @@ DOWNLOADS_DISPATCHER = {
         / "gadm_410-levels"
         / "gadm_410-levels.gpkg",
     },
-    "timezone": {
-        "url": "https://github.com/evansiroky/timezone-boundary-builder/releases/download/2024a/timezones-with-oceans-now.shapefile.zip",
-        "model_to_model": [
-            {Timezone: timezone_mapping},
-        ],
-        "type": "VECTOR",
-        "unzipped_file_path": settings.VECTOR_SPATIAL_DATA_SUBDIRECTORY
-        / "timezones-with-oceans-now.shapefile "
-        / "combined-shapefile-with-oceans-now.shp",
-    },
+    # "timezone": {
+    #     "url": "https://github.com/evansiroky/timezone-boundary-builder/releases/download/2024a/timezones-with-oceans-now.shapefile.zip",
+    #     "model_to_model": [
+    #         {Timezone: timezone_mapping},
+    #     ],
+    #     "type": "VECTOR",
+    #     "unzipped_file_path": settings.VECTOR_SPATIAL_DATA_SUBDIRECTORY
+    #     / "timezones-with-oceans-now.shapefile "
+    #     / "combined-shapefile-with-oceans-now.shp",
+    # },
 }

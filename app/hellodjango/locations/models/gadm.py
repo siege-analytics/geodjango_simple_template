@@ -119,7 +119,7 @@ class Admin_Level_2(models.Model):
 admin_level_2_mapping = {
     "gid_0": {"gid_0": "GID_0"},
     "country": "COUNTRY",
-    "gid_1": "GID_1",
+    "gid_1": {"gid_1": "GID_1"},
     "name_1": "NAME_1",
     "nl_name_1": "NL_NAME_1",
     "gid_2": "GID_2",
@@ -174,12 +174,12 @@ class Admin_Level_3(models.Model):
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_3 model
 admin_level_3_mapping = {
-    "gid_0": "GID_0",
+    "gid_0": {"gid_0": "GID_0"},
     "country": "COUNTRY",
-    "gid_1": "GID_1",
+    "gid_1": {"gid_1": "GID_1"},
     "name_1": "NAME_1",
     "nl_name_1": "NL_NAME_1",
-    "gid_2": "GID_2",
+    "gid_2": {"gid_2": "GID_2"},
     "name_2": "NAME_2",
     "nl_name_2": "NL_NAME_2",
     "gid_3": "GID_3",
@@ -235,13 +235,13 @@ class Admin_Level_4(models.Model):
 # Auto-generated `LayerMapping` dictionary for Admin_Level_4 model
 admin_level_4_mapping = {
     "gid_4": "GID_4",
-    "gid_0": "GID_0",
+    "gid_0": {"gid_0": "GID_0"},
     "country": "COUNTRY",
-    "gid_1": "GID_1",
+    "gid_1": {"gid_1": "GID_1"},
     "name_1": "NAME_1",
-    "gid_2": "GID_2",
+    "gid_2": {"gid_2": "GID_2"},
     "name_2": "NAME_2",
-    "gid_3": "GID_3",
+    "gid_3": {"gid_3": "GID_3"},
     "name_3": "NAME_3",
     "name_4": "NAME_4",
     "varname_4": "VARNAME_4",
@@ -294,15 +294,15 @@ class Admin_Level_5(models.Model):
 
 # Auto-generated `LayerMapping` dictionary for Admin_Level_5 model
 admin_level_5_mapping = {
-    "gid_0": "GID_0",
+    "gid_0": {"gid_0": "GID_0"},
     "country": "COUNTRY",
-    "gid_1": "GID_1",
+    "gid_1": {"gid_1": "GID_1"},
     "name_1": "NAME_1",
-    "gid_2": "GID_2",
+    "gid_2": {"gid_2": "GID_2"},
     "name_2": "NAME_2",
-    "gid_3": "GID_3",
+    "gid_3": {"gid_3": "GID_3"},
     "name_3": "NAME_3",
-    "gid_4": "GID_4",
+    "gid_4": {"gid_4": "GID_4"},
     "name_4": "NAME_4",
     "gid_5": "GID_5",
     "name_5": "NAME_5",

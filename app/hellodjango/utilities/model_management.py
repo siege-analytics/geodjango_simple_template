@@ -6,6 +6,7 @@ import logging
 
 logger = logging.getLogger("django")
 
+
 def create_united_states_address(
     primary_number: str,
     street_name: str,
@@ -44,23 +45,18 @@ def create_united_states_address(
         message += f"Failed to create an address for {simple_address}: {e}"
         return False
 
+
 def update_model_fields_to_single_value(
-        target_model,
-        fields_to_update: list,
-        existing_value,
-        intended_value) ->bool :
+    target_model, fields_to_update: list, existing_value, intended_value
+) -> bool:
 
-        for field in fields_to_update:
-            try:
-                target_objects = target_model.objects.filter(field=existing_value)
-                # this is what I think should work
-                target_objects.update(field=intended_value).update(field=None)
+    for field in fields_to_update:
+        try:
+            target_objects = target_model.objects.filter(field=existing_value)
+            # this is what I think should work
+            target_objects.update(field=intended_value).update(field=None)
 
-            except Exception as e:
-                message = ""
-                message += f"Failed to update {field} for {target_model}: {e}"
-                logging.error(message)
-
-
-
-)
+        except Exception as e:
+            message = ""
+            message += f"Failed to update {field} for {target_model}: {e}"
+            logging.error(message)

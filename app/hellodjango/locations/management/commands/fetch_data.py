@@ -7,6 +7,14 @@ import importlib
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
+# geospatial libraries
+
+import geopandas as gpd
+
+# python libraries
+
+import numpy as np
+
 # Generic Python Library Imports
 
 import sys, os
@@ -30,8 +38,6 @@ class Command(BaseCommand):
         parser.add_argument("models", nargs="*")
 
     def handle(self, *args, **kwargs):
-        print(sys.path)
-        print(os.getcwd())
         # get command line specified options
         model_set = kwargs["models"]
         known_models = list(DOWNLOADS_DISPATCHER.keys())
@@ -111,6 +117,18 @@ def load_zipped_data_file_into_orm(
         target_data_file = find_vector_dataset_file_in_directory(
             target_directory=unzipped_data_file_path
         )
+
+        # GADM has a problem, see referred function docstring
+        gadm_needle = "gadm_410-levels"
+        logging.info(target_data_file.stem)
+        if target_data_file.stem == gadm_needle:
+            message = ""
+            message += f"Working on GADM, {target_data_file}"
+            logging.info(message)
+            target_data_file = fix_gadm_null_foreign_keys(
+                columns_to_fix=GADM_MODEL_FIELD_NAMES,
+                source_gadm_dataset=target_data_file,
+            )
 
         logger.info(target_data_file)
 
