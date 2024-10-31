@@ -94,6 +94,7 @@ I'd like to add
 - [GeoDjango ForeignKeys in LayerMapping](30)
 - [CSS FlexBox](31)
 - [Check if Django object has attributes](32)
+- [GeoDjango get layers from DataSource](33)
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 
@@ -158,3 +159,5 @@ I'd like to add
 [31]: https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 
 [32]: https://stackoverflow.com/questions/12906933/how-to-check-if-a-model-object-has-a-given-attribute-property-field-django
+
+[33]: https://gis.stackexchange.com/questions/413084/listing-every-layer-in-geopackage-using-fiona
