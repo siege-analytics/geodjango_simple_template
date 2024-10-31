@@ -92,7 +92,8 @@ I'd like to add
 - [Correct healthcheck for PostgreSQL container](26)
 - [Sample Data for Locations: Pharmacies in AZ](27)
 - [GeoDjango ForeignKeys in LayerMapping](30)
-- [CSS FlexBox]()
+- [CSS FlexBox](31)
+- [Check if Django object has attributes](32)
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 
@@ -155,3 +156,5 @@ I'd like to add
 [30]:https://stackoverflow.com/questions/21197483/geodjango-layermapping-foreign-key
 
 [31]: https://css-tricks.com/snippets/css/a-guide-to-flexbox/
+
+[32]: https://stackoverflow.com/questions/12906933/how-to-check-if-a-model-object-has-a-given-attribute-property-field-django
