@@ -161,7 +161,7 @@ def load_zipped_data_file_into_orm(
                 transform=True,
                 layer=layer_index,
             )
-            lm.save(verbose=False, strict=True)
+            lm.save(verbose=False, strict=False)
 
             message = "\n"
             message += f"Successfully loaded data from {unzipped_data_file_path} for {model_definition}"
