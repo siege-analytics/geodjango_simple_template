@@ -148,7 +148,7 @@ I'd like to add
 
 [26]:https://github.com/peter-evans/docker-compose-healthcheck/issues/16
 
-[27]:https://www.azahcccs.gov/Resources/Downloads/PharmacyUpdates/AIHPFee-For-ServicePharmacyNetwork.pdf
+[27]:https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.azahcccs.gov/Resources/Downloads/PharmacyUpdates/2024/AIHPFee-For-ServicePharmacyNetwork.xlsx&ved=2ahUKEwiUkeX3x8aJAxVxw8kDHVi7EL4QFnoECBEQAQ&usg=AOvVaw1EJLz9kev_tqXZMChl15fj
 
 [28]:https://github.com/nvm-sh/nvm
 
