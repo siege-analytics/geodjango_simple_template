@@ -1,7 +1,6 @@
 from locations.models import *
 from locations.serializers import *
 
-from django.http import Http404
 from rest_framework import generics
 from django.conf import settings
 
