@@ -86,8 +86,7 @@ class Place(Location):
 
 class Locality(Location):
     """
-    This is a model for a Location that has a Point Geometry.
-    Strictly speaking, you could get the point Geometry from the Address field, I guess.
+    This is a model for a Location that has a MultiPolygon Geometry.
     Let's not worry about that for now.
     """
 

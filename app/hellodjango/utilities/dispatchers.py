@@ -3,6 +3,7 @@
 from django.conf import settings
 from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.utils import LayerMapping
+from locations.models import *
 
 # Django models imports
 
@@ -24,6 +25,24 @@ GADM_MODEL_FIELD_NAMES = [
     "GID_4",
     "GID_5",
 ]
+
+GADM_MODEL_NAMES = [
+    Admin_Level_0,
+    Admin_Level_1,
+    Admin_Level_2,
+    Admin_Level_3,
+    Admin_Level_4,
+    Admin_Level_5,
+]
+
+GADM_MODEL_FIELD_NAMES_AND_MODEL_NAMES = {
+    GADM_MODEL_FIELD_NAMES[i].lower(): GADM_MODEL_NAMES[i]
+    for i in range(len(GADM_MODEL_FIELD_NAMES))
+}
+
+MODEL_FIELDS_AND_NAMES_TO_TEST = {}
+MODEL_FIELDS_AND_NAMES_TO_TEST.update(GADM_MODEL_FIELD_NAMES_AND_MODEL_NAMES)
+
 
 DOWNLOADS_DISPATCHER = {
     # "gadm": {

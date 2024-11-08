@@ -10,6 +10,7 @@ geopandas
 geopy
 gunicorn
 httpie
+ipdb
 pathlib
 matplotlib
 pandas
