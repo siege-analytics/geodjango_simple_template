@@ -55,8 +55,10 @@ class Command(BaseCommand):
             result = create_places_from_data_file(
                 path_to_data_file=SAMPLE_LOCATIONS_CSV
             )
+            result_of_update = update_place_foreign_keys()
 
             successes.append(result)
+            successes.append(result_of_update)
         except Exception as e:
             message = "\n"
             message += f"There was an error at the management command level working on {message}: {e}"
@@ -153,13 +155,6 @@ def create_places_from_data_file(path_to_data_file: pathlib.Path) -> bool:
                     latitude=latitude,
                     geom=fromstr(f"POINT({longitude} {latitude})", srid=4326),
                 )
-                #                     message = ""
-                #                     message += f"""
-                #                     pn: {primary_number}, {len(primary_number)}; sn: {street_name}, {len(street_name)}
-                #                     cn: {city_name}, {len(city_name)}; sa: {state_abbreviation}, {len(state_abbreviation)};
-                #                     z5: {zip5}, {len(zip5)}; lng: {longitude}, {len(longitude)}; lat: {latitude}, {len(latitude)}
-                # """
-                #                     logging.info(message)
                 place_address.save()
                 #
                 # get place name
@@ -187,6 +182,37 @@ def create_places_from_data_file(path_to_data_file: pathlib.Path) -> bool:
         message = "\n"
         message += f"There was an error creating location objects: {e}"
         logger.error(message)
+        return False
+
+
+def update_place_foreign_keys() -> bool:
+    """
+    This function takes a list of Place objects and updates the foreign keys from them.
+    :return: bool
+    """
+    try:
+        qs = Place.objects.all()
+
+        updated_places = [
+            update_model_geometry_foreign_keys(
+                target_object=p, model_keys_and_names=MODEL_FIELDS_AND_NAMES_TO_TEST
+            )
+            for p in qs
+        ]
+
+        fields_to_update = MODEL_FIELDS_AND_NAMES_TO_TEST.keys()
+
+        Place.objects.bulk_update(updated_places, fields_to_update)
+
+        return True
+
+    except Exception as e:
+        message = ""
+        message += f"There was an error updating foreign keys: {e}"
+        logger.error(message)
+        import ipdb
+
+        ipdb.set_trace()
         return False
 
 

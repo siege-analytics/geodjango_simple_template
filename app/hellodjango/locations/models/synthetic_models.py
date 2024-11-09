@@ -56,6 +56,15 @@ class Location(models.Model):
         representative_string = f"{self.name}"
         return representative_string
 
+    def save(self, *args, **kwargs):
+        if self.geom is not None:
+            try:
+                new_al1 = Admin_Level_1.objects.filter(geom__intersects=self.geom)
+                self.gid1 = new_al1
+            except Exception as e:
+                logging.info(f"{e}")
+        super(Location, self).save(*args, **kwargs)
+
     class Meta:
         abstract = True
         verbose_name = "location"

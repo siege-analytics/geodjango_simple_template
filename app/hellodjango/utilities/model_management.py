@@ -64,26 +64,17 @@ def update_model_fields_to_single_value(
             logging.error(message)
 
 
-def update_model_geometry_foreign_keys(
-    target_object,
-):
+def update_model_geometry_foreign_keys(target_object, model_keys_and_names: dict):
     """
     This function takes a GeoDjango object and updates the foreign keys based on the geometry value.
     The foreign keys are spatial relationships, so it is an intersection.
     This function relies on the fact that you have followed OSGeo convention and used "geom" as the name of your
     geometry columns. Have fun refactoring if you haven't.
     :param target_object: this is the object itself
+    :param model_keys_and_names: dict showing the name of the foreign key attribute on your model definition and the name of the model
+
     :return: the object to be saved
     """
-
-    model_keys_and_names = {
-        "gid_0": Admin_Level_0,
-        "gid_1": Admin_Level_1,
-        "gid_2": Admin_Level_2,
-        "gid_3": Admin_Level_3,
-        "gid_4": Admin_Level_4,
-        "gid_5": Admin_Level_5,
-    }
 
     # get all object model fields that we need to test
     target_object_fields = [
@@ -105,8 +96,8 @@ def update_model_geometry_foreign_keys(
             # Use getattr/setattr to interact with values of object
             setattr(target_object, k, foreign_geom_object)
         except Exception as e:
-            message = ""
-            message += f"Failed to update {k} for {target_object}: {e}"
-            logging.info(message)
+            foreign_geom_object = None
+            # Use getattr/setattr to interact with values of object
+            setattr(target_object, k, foreign_geom_object)
 
     return target_object
