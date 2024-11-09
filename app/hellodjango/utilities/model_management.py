@@ -1,3 +1,7 @@
+# stdlib imports
+
+import random
+
 from locations.models import *
 
 # logging
@@ -7,6 +11,22 @@ import logging
 logger = logging.getLogger("django")
 
 # django imports
+
+from django.db.models import Max
+
+
+def get_random_object(django_model):
+    """
+    This function implements the third way of creating random objects from Django ORM Cookbook
+    :param django_model:
+    :return: object
+    """
+    max_id = django_model.objects.all().aggregate(max_id=Max("id"))["max_id"]
+    while True:
+        pk = random.randint(1, max_id)
+        target_object = django_model.objects.filter(pk=pk).first()
+        if target_object:
+            return target_object
 
 
 def create_united_states_address(
