@@ -83,10 +83,10 @@ DATABASES = {
         #"ENGINE": os.environ.get("SQL_ENGINE", "django.contrib.gis.db.backends.spatialite"),
         "ENGINE": "django.contrib.gis.db.backends.postgis",
         # "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
-        "NAME": "geodjango",
-        "USER": os.environ.get("SQL_USER", "dheerajchand"),
-        "PASSWORD": os.environ.get("SQL_PASSWORD", "dessert"),
-        "HOST": os.environ.get("SQL_HOST", "localhost"),
+        "NAME": os.environ.get('SQL_DATABASE', None),
+        "USER": os.environ.get("SQL_USER", None),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", None),
+        "HOST": os.environ.get("SQL_HOST", None),
         "PORT": os.environ.get("SQL_PORT", "5432"),
     }
 }

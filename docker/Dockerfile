@@ -31,6 +31,9 @@ RUN apt-get install -y \
     netcat-traditional \
     sqlite3 \
     spatialite-bin \
+    libcairo2-dev \
+    libjpeg-dev \
+    libgif-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
