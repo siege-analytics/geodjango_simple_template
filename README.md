@@ -19,18 +19,36 @@ The project makes use of some standard technologies:
 - [PostGIS][4]
 - [NVM][28]
 - [Vue/Vite][29]
+- [Django REST Framework](16)
+- [Django REST Framework GIS Extensions](17)
+
+# Make Live Data Available
+
+There are currently data that are made available through Django management commands in an app called `locations`.
+I should probably wrap these in `make` commands to make it easier, as you currently have to `ssh` into the
+webserver container to issue them.
+
+1. `make python_term`
+2. `root@61c21188aa79:/usr/src/app# python hellodjango/manage.py fetch_data`
+3. `root@61c21188aa79:/usr/src/app# python hellodjango/manage.py create_sample_places`
+
+The webserver is currently set up to run on port `8000`, so in your browser, you will need to go to:
+
+http://127.0.0.1:8000/locations/places/
 
 # Currently
 
-Adding a Django application to import and convert vector and raster data formats using OGR/GDAL and Django Rest
-Framework.
+- Working on making all `locations` models accessible through Django REST Framework API
+- Adding fetch and load for US Census
+- Adding geocoding API for addresses through Nominatim
+
+# Long term goal
+
+This should be a complete spatial management tool.
 
 # Immediately to do
 
 - [Make tasks happen asynchronously](13)
-- Add Django REST Framework
-    - [Django REST Framework](16)
-    - [Django REST Framework GIS Extensions](17)
 - Integrate [Siege Analytics Social Warehouse](18)
 
 # Building
