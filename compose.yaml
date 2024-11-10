@@ -10,7 +10,6 @@ services:
     command: sh -c "cd hellodjango/ &&  /opt/venv/bin/python /opt/venv/bin/gunicorn hellodjango.wsgi:application --bind 0.0.0.0:8000 --error-logfile /usr/src/app/logs/hello_django_gunicorn_errors.log --access-logfile /usr/src/app/logs/hello_django_gunicorn_access.log --timeout 300"
     environment:
       - DEBUG
-      - DATABASE
       - SECRET_KEY
       - DJANGO_ALLOWED_HOSTS
       - SQL_ENGINE
