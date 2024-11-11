@@ -51,30 +51,24 @@ This should be a complete spatial management tool.
 - [Make tasks happen asynchronously](13)
 - Integrate [Siege Analytics Social Warehouse](18)
 
-# Building
+# Building (Docker Images)
 
-The `TARGET_ENV` env variable determines the environment to build. The default is `dev`. To build the project for
-production, set `TARGET_ENV=prod` (case in-sensitive). **You should delete the `docker-compose.yml` and `.env` files
-before switching environments.**
+Building the docker images using the Makefile manages the environment variables for you. The `.env` file is auto-generated from partial files in the `conf/` directory.
 
-Override UBUNTU_BASE_IMAGE in the `.env` file to use a different base image,
-e.g. `UBUNTU_BASE_IMAGE=arm64v8/ubuntu:latest`.
+The `conf/build.conf` file is for variables that effect Docker, such as `DOCKER_DEFAULT_PLATFORM`, and `UBUNTU_BASE_IMAGE`.
 
 Then run `make build` to build the project.
 
-## Production Builds
+## Build Cache
 
-The Makefile has a `build-prod` target that does a `--no-cache` build. It automatically switches the `TARGET_ENV`
-to `prod` to load the `*prod.env` files.
+Reminder that docker uses cache to speed up builds. If system package dependencies change, you may need to rebuild without using cache. The Makefile has a `rebuild` target that does this. (`docker compose build --no-cache`)
 
 ## Environment Config
 
-**NB:** The docker compose `.env` file is auto-generated and git-ignored. The sources are determined by the `TARGET_ENV`
-env var. See the `Makefile` for more details.
+**NB:** The docker compose `.env` file is auto-generated and git-ignored. The sources are determined by the `ENV_INCLUDES`
+env var. See the `Makefile` for more details. Changes to any of the files listed in `ENV_INCLUDES` will cause the `.env` file to be regenerated.
 
-The `conf/` directory contains ingredients for the auto-generated `.env` file. The `Makefile` declares `ENV_INCLUDES`
-depending on the value of `TARGET_ENV`. The `dev.env` and `prod.env` files are meant for general environment config.
-Other files are meant for specific services, e.g. django and postgres.
+If you are unsure of the status of your `.env`, you can force (always-re-make) it by running `make -B .env`.
 
 # Goals
 

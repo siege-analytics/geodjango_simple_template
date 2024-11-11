@@ -1,7 +1,9 @@
 
 default: up
 
-include .env # enable use of SQL_ env's in make recipes
+# enable use of SQL_ env's in make recipes
+# and help keep .env up to date since includes are always prerequisites
+include .env
 
 DKC ?= docker compose
 
@@ -9,13 +11,8 @@ DKC ?= docker compose
 # Config
 #
 
-TARGET_ENV ?= dev
-
-ifeq ($(shell echo ${TARGET_ENV} | tr A-Z a-z),dev)
-ENV_INCLUDES := conf/dev.env conf/django.dev.conf conf/postgres.conf
-else
-ENV_INCLUDES := conf/prod.env conf/django.prod.conf conf/postgres.conf
-endif
+# partials to make the .env file
+ENV_INCLUDES := conf/postgres.conf conf/django.conf conf/build.conf
 
 #
 # Docker
@@ -32,9 +29,6 @@ confirm_amd:
 
 up down stop build : .env
 	$(DKC) $@ $(if $(filter $@,up),-d)
-
-build-prod:
-	TARGET_ENV=prod $(MAKE) -B .env rebuild
 
 rebuild: .env stop
 	$(DKC) build --no-cache
