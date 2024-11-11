@@ -12,6 +12,11 @@ DOCKER_APP_DIRECTORY = ALL_PARENTS[3]           # directory on docker that conta
 
 # now build paths to useful directories
 
+# Docker App Directory paths
+
+SCRATCH_FILES_DIRECTORY = DOCKER_APP_DIRECTORY / 'scratch'
+REFERENCES_DIRECTORY = DOCKER_APP_DIRECTORY / 'references'
+
 # Data
 
 DATA_DIRECTORY = DOCKER_APP_DIRECTORY / 'data'
@@ -50,4 +55,6 @@ NECESSARY_PATHS = [
     LOGS_DIRECTORY,
     UTILITIES_PACKAGE_NAME,
     PATH_TO_UTILITIES_PACKAGE,
+    SCRATCH_FILES_DIRECTORY,
+    REFERENCES_DIRECTORY,
 ]
