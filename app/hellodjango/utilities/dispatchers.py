@@ -48,7 +48,6 @@ LOCATION_MODEL_FIELDS_AND_NAMES_TO_TEST = {"timezone": Timezone}
 
 MODEL_FIELDS_AND_NAMES_TO_TEST.update(LOCATION_MODEL_FIELDS_AND_NAMES_TO_TEST)
 
-
 DOWNLOADS_DISPATCHER = {
     "gadm": {
         "url": "https://geodata.ucdavis.edu/gadm/gadm4.1/gadm_410-levels.zip",
