@@ -7,7 +7,8 @@ services:
       context: ./docker
       args:
         UBUNTU_BASE_IMAGE: ${UBUNTU_BASE_IMAGE}
-    command: sh -c "/opt/venv/bin/python /opt/venv/bin/gunicorn hellodjango.wsgi:application"
+    #command: sh -c "/opt/venv/bin/python /opt/venv/bin/gunicorn hellodjango.wsgi:application"
+    command: sh -c "/opt/venv/bin/python /usr/src/app/hellodjango/manage.py runserver 8000"
     environment:
       - DEBUG
       - SECRET_KEY

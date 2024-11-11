@@ -73,8 +73,10 @@ gadm = [
 ]
 
 time = [
-    path("timezones/", views.TimezoneList.as_view(), name="timezone_list"),
-    path("timezones/<int:pk>/", views.TimezoneDetail.as_view(), name="timezone_detail"),
+    path("timezones/", views.Timezone_List.as_view(), name="timezone_list"),
+    path(
+        "timezones/<int:pk>/", views.Timezone_Detail.as_view(), name="timezone_detail"
+    ),
 ]
 
 synthetics = [

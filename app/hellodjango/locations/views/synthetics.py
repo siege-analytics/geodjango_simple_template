@@ -25,7 +25,7 @@ class PlaceDetail(APIView):
     def get_object(self, pk):
         try:
             return Place.objects.get(pk=pk)
-        except Country.DoesNotExist:
+        except Place.DoesNotExist:
             raise Http404
 
     def get(self, request, pk, format=None):

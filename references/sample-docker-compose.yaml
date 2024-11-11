@@ -1,0 +1,391 @@
+version: '3'
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: confluentinc/cp-zookeeper:7.1.9
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_LOG4J_ROOT_LOGLEVEL: INFO
+    healthcheck:
+      test: [ "CMD-SHELL", "echo srvr | nc localhost 2181 | grep Mode" ]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    ports:
+      - "2181:2181"
+    restart: on-failure
+  kafka:
+    container_name: kafka
+    image: confluentinc/cp-kafka:7.1.9
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENERS: LISTENER_DOCKER://kafka:29092,LISTENER_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER://kafka:29092,LISTENER_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER:PLAINTEXT,LISTENER_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9101
+      KAFKA_LOG4J_LOGGERS: "kafka.coordinator=WARN,kafka.controller=WARN,kafka.log=WARN,kafka.server=WARN,state.change=WARN"
+      KAFKA_TOOLS_LOG4J_LOGLEVEL: INFO
+      KAFKA_TOOLS_LOG4J_LOGGERS: "state.change=WARN"
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-topics --bootstrap-server kafka:29092 --list" ]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    links:
+      - "zookeeper:zookeeper"
+    restart: on-failure
+  zos:
+    container_name: zos
+    image: docker.repo.local.sfdc.net/docker-sfci-dev/zero/zos-universe:latest
+    ports:
+      - 5000:5000
+    environment:
+      JAVA_OPTS: "-Dlogging.config=/app/logback-test.xml"
+      PORT: "5000"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -s -o /dev/null -w %{http_code} --url 'http://localhost:5000/healthcheck' | grep -q 200" ]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    restart: on-failure
+    volumes:
+      - "./emg-config/src/test/resources/logback-test.zos.xml:/app/logback-test.xml"
+  minio:
+    container_name: minio
+    image: minio/minio
+    ports:
+      - 19000:9000
+      - 19001:9001
+    environment:
+      MINIO_API_DISABLE_ODIRECT: "on"
+      MINIO_DOMAIN: localhost,minio
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: minioadmin
+      MINIO_STORAGE_USE_HTTPS: "False"
+    command: server --address ":9000" --console-address ":9001" /home/shared
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+  miniosetup:
+    container_name: miniosetup
+    image: minio/minio
+    entrypoint: bash -c -x
+    command:
+      - |
+        mc alias set minioadmin http://minio:9000 minioadmin minioadmin
+        mc admin info minioadmin
+        mc admin user add minioadmin miniouser miniopassword
+        mc admin user svcacct add --access-key accesskey --secret-key secretkey minioadmin miniouser
+        mc admin user info minioadmin miniouser
+        mc mb minioadmin/mce-metrics-guard
+        mc admin policy attach minioadmin readwrite --user=miniouser
+        mc alias set minio http://minio:9000 miniouser miniopassword
+        mc ls minio/
+        mc ls minio/mce-metrics-guard
+    links:
+      - "minio:minio"
+    depends_on:
+      minio:
+        condition: service_healthy
+    restart: no
+  otel:
+    container_name: otel
+    image: otel/opentelemetry-collector-contrib:latest
+    ports:
+      - 4317:4317   # OTLP emg-ws protobuf receiver
+      - 8888:8888   # Prometheus metrics exposed by the collector
+      - 8889:8889   # Prometheus exporter emg-ws metrics
+      - 13133:13133 # health_check extension
+      - 55679:55679 # zpages extension
+    links:
+      - "jaeger:jaeger"
+      - "loki:loki"
+    #      - "prometheus:prometheus"
+    command:
+      - "--config=/etc/otel/config.yaml"
+    depends_on:
+      jaeger:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    #      prometheus:
+    #        condition: service_healthy
+    volumes:
+      - "./emg-config/src/test/resources/otel/config.yaml:/etc/otel/config.yaml"
+      - "./target/otel:/tmp:rw"
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    environment:
+      - "GF_AUTH_DISABLE_LOGIN_FORM=true"
+      - "GF_AUTH_ANONYMOUS_ENABLED=true"
+      - "GF_AUTH_ANONYMOUS_ORG_ROLE=Admin"
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-cache --spider http://localhost:3000/" ]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    ports:
+      - 3000:3000
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    links:
+      - "loki:loki"
+      - "prometheus:prometheus"
+    volumes:
+      - "./emg-config/src/test/resources/grafana/dashboards:/var/lib/grafana/dashboards"
+      - "./emg-config/src/test/resources/grafana/grafana.ini:/etc/grafana/grafana.ini"
+      - "./emg-config/src/test/resources/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards"
+      - "./emg-config/src/test/resources/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources"
+      - "./target/grafana:/tmp:rw"
+  loki:
+    container_name: loki
+    image: grafana/loki:latest
+    environment:
+      JAEGER_AGENT_HOST: "jaeger"
+    ports:
+      - 3100:3100
+      - 9095:9095
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-cache --spider http://localhost:3100/ready" ]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    command:
+      - "-config.expand-env"
+      - "-config.file=/etc/loki/config.yaml"
+      - "-target=all"
+      - "-log.level=info"
+      - "-log-config-reverse-order"
+      - "-print-config-stderr"
+    links:
+      - "jaeger:jaeger"
+    volumes:
+      - "./emg-config/src/test/resources/loki/config.yaml:/etc/loki/config.yaml"
+      - "./target/loki:/tmp:rw"
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-cache --spider http://localhost:9090/-/healthy" ]
+      interval: 15s
+      timeout: 30s
+      retries: 5
+    ports:
+      - 9090:9090
+      - 9464:9464
+    links:
+      - "otel:otel"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--log.level=debug"
+      - "--web.enable-remote-write-receiver"
+      - "--log.format=json"
+    volumes:
+      - "./emg-config/src/test/resources/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "./target/prometheus:/tmp:rw"
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/all-in-one
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-cache --spider http://localhost:14269/" ]
+      interval: 15s
+      timeout: 30s
+      retries: 5
+    ports:
+      - 5778:5778
+      - 6831:6831
+      - 9411:9411
+      - 14268:14268
+      - 14269:14269
+      - 16686:16686
+    command:
+      - "--admin.http.host-port=:14269"
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+      COLLECTOR_ZIPKIN_HOST_PORT: "9411"
+    volumes:
+      - "./emg-config/src/test/resources/jaeger/config.json:/etc/jaeger/config.json"
+      - "./target/jaeger:/tmp:rw"
+  promtail:
+    container_name: promtail
+    image: grafana/promtail
+    depends_on:
+      loki:
+        condition: service_healthy
+    links:
+      - "loki:loki"
+    command: -config.file=/etc/promtail/config.yaml
+    volumes:
+      - "./emg-config/src/test/resources/promtail/config.yaml:/etc/promtail/config.yaml"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+  emg-actors:
+    container_name: emg-actors
+    build:
+      context: ../../../../../../Downloads
+      dockerfile: emg-actors/emg-actors.Dockerfile
+    depends_on:
+      minio:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      otel:
+        condition: service_started
+      zos:
+        condition: service_healthy
+    #    healthcheck:
+    #      test: [ "CMD-SHELL", "curl -s -o /dev/null -w %{http_code} --url 'http://localhost:15372/manage/health/liveness' | grep -q 200" ]
+    #      interval: 15s
+    #      timeout: 30s
+    #      retries: 10
+    image: sfci/mc-einstein/mce-metrics-guard/emg-actors
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+    environment:
+      AWS_ACCESS_KEY_ID: "accesskey"
+      AWS_REGION": "us-east1"
+      AWS_SECRET_ACCESS_KEY: "secretkey"
+      JAVA_OPTS: >
+        -Dconfig.file=/conf/tests.docker-compose.conf
+        -Dlogback.configurationFile=/conf/tests.docker-compose.logback.xml
+        -Dlogging.config=/conf/tests.docker-compose.logback.xml
+        -Dspring.config.location=/conf/application-test.yml
+        -Dspring.profiles.active=test
+      JAVA_TOOL_OPTS: >
+        -javaagent:/opt/sfapmagent/opentelemetry-javaagent.jar
+        -Dotel.javaagent.extensions=/opt/sfapmagent/salesforce-opentelemetry-extension.jar
+        -Dotel.javaagent.configuration-file=/conf/sfdc_apm.emg-ws.properties
+    ports:
+      - "7626:7626"
+    links:
+      - "minio:minio"
+      - "otel:otel"
+      - "kafka:kafka"
+      - "zos:zos"
+    restart: on-failure
+    volumes:
+      - "./target/emg-actors:/tmp:rw"
+  emg-ws:
+    container_name: emg-ws
+    build:
+      context: ../../../../../../Downloads
+      dockerfile: emg-ws/emg-ws.Dockerfile
+    depends_on:
+      emg-actors:
+        condition: service_started
+      minio:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      otel:
+        condition: service_started
+      zos:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -s -o /dev/null -w %{http_code} --url 'http://localhost:15372/manage/health/liveness' | grep -q 200" ]
+      interval: 15s
+      timeout: 30s
+      retries: 10
+    image: sfci/mc-einstein/mce-metrics-guard/emg-ws
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+    environment:
+      ADMIN_PORT: "15372"
+      AWS_ACCESS_KEY_ID: "accesskey"
+      AWS_REGION": "us-east1"
+      AWS_SECRET_ACCESS_KEY: "secretkey"
+      MICROSERVICE_PORT: "7442"
+      JAVA_OPTS: >
+        -Dconfig.file=/conf/tests.docker-compose.conf
+        -Dlogback.configurationFile=/conf/tests.docker-compose.logback.xml
+        -Dlogging.config=/conf/tests.docker-compose.logback.xml
+        -Dspring.config.location=/conf/application-test.yml
+        -Dspring.profiles.active=test
+      JAVA_TOOL_OPTS: >
+        -javaagent:/opt/sfapmagent/opentelemetry-javaagent.jar
+        -Dotel.javaagent.extensions=/opt/sfapmagent/salesforce-opentelemetry-extension.jar
+        -Dotel.javaagent.configuration-file=/conf/sfdc_apm.emg-ws.properties
+    ports:
+      - "7442:7442"
+      - "15372:15372"
+    links:
+      - "emg-actors:emg-actors"
+      - "minio:minio"
+      - "otel:otel"
+      - "kafka:kafka"
+      - "zos:zos"
+    restart: on-failure
+    volumes:
+      - "./target/emg-ws:/tmp:rw"
+  fit-bundle:
+    container_name: fit-bundle
+    build:
+      context: ../../../../../../Downloads
+      dockerfile: fit/Dockerfile
+    depends_on:
+      emg-actors:
+        condition: service_started
+      emg-ws:
+        condition: service_healthy
+      miniosetup:
+        condition: service_completed_successfully
+      jaeger:
+        condition: service_healthy
+      otel:
+        condition: service_started
+      prometheus:
+        condition: service_healthy
+    image: sfci/mc-einstein/mce-metrics-guard/fit-bundle
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+    environment:
+      AWS_ACCESS_KEY_ID: "accesskey"
+      AWS_REGION": "us-east1"
+      AWS_SECRET_ACCESS_KEY: "secretkey"
+      MICROSERVICE_ENABLE: "false"
+      MICROSERVICE_HOST: "emg-ws"
+      MICROSERVICE_PORT: "7442"
+      MICROSERVICE_SCHEME: "http"
+      JAVA_OPTS: >
+        -Dconfig.file=/opt/integration-test-service/conf/tests.fit-bundle.conf
+        -Dlogback.configurationFile=/opt/integration-test-service/conf/tests.docker-compose.logback.xml
+        -Dsut_config=/opt/integration-test-service/conf/stc-config.fit-bundle.json
+    links:
+      - "jaeger:jaeger"
+      - "kafka:kafka"
+      - "loki:loki"
+      - "emg-ws:emg-ws"
+      - "minio:minio"
+      - "otel:otel"
+      - "prometheus:prometheus"
+      - "zos:zos"
+    volumes:
+      - "./target/fit-bundle:/cix/tmp:rw"

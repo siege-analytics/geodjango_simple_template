@@ -25,7 +25,7 @@ class Timezone_List(APIView):
     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class Admin_Level_0_Detail(APIView):
+class Timezone_Detail(APIView):
     def get_object(self, pk):
         try:
             return Timezone.objects.get(pk=pk)
