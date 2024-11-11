@@ -19,8 +19,8 @@ The project makes use of some standard technologies:
 - [PostGIS][4]
 - [NVM][28]
 - [Vue/Vite][29]
-- [Django REST Framework](16)
-- [Django REST Framework GIS Extensions](17)
+- [Django REST Framework][16]
+- [Django REST Framework GIS Extensions][17]
 
 # Make Live Data Available
 
@@ -48,25 +48,30 @@ This should be a complete spatial management tool.
 
 # Immediately to do
 
-- [Make tasks happen asynchronously](13)
-- Integrate [Siege Analytics Social Warehouse](18)
+- [Make tasks happen asynchronously][13]
+- Integrate [Siege Analytics Social Warehouse][18]
 
 # Building (Docker Images)
 
-Building the docker images using the Makefile manages the environment variables for you. The `.env` file is auto-generated from partial files in the `conf/` directory.
+Building the docker images using the Makefile manages the environment variables for you. The `.env` file is
+auto-generated from partial files in the `conf/` directory.
 
-The `conf/build.conf` file is for variables that effect Docker, such as `DOCKER_DEFAULT_PLATFORM`, and `UBUNTU_BASE_IMAGE`.
+The `conf/build.conf` file is for variables that effect Docker, such as `DOCKER_DEFAULT_PLATFORM`, and
+`UBUNTU_BASE_IMAGE`.
 
 Then run `make build` to build the project.
 
 ## Build Cache
 
-Reminder that docker uses cache to speed up builds. If system package dependencies change, you may need to rebuild without using cache. The Makefile has a `rebuild` target that does this. (`docker compose build --no-cache`)
+Reminder that docker uses cache to speed up builds. If system package dependencies change, you may need to rebuild
+without using cache. The Makefile has a `rebuild` target that does this. (`docker compose build --no-cache`)
 
 ## Environment Config
 
-**NB:** The docker compose `.env` file is auto-generated and git-ignored. The sources are determined by the `ENV_INCLUDES`
-env var. See the `Makefile` for more details. Changes to any of the files listed in `ENV_INCLUDES` will cause the `.env` file to be regenerated.
+**NB:** The docker compose `.env` file is auto-generated and git-ignored. The sources are determined by the
+`ENV_INCLUDES`
+env var. See the `Makefile` for more details. Changes to any of the files listed in `ENV_INCLUDES` will cause the `.env`
+file to be regenerated.
 
 If you are unsure of the status of your `.env`, you can force (always-re-make) it by running `make -B .env`.
 
@@ -85,30 +90,30 @@ I'd like to add
 - [TestDriven's Django on Docker][1]
 - [Runitrupam's Django with Celery/Redis][5]
 - [Spark on Docker][6]
-- [SSL problem with pip in Docker](7)
+- [SSL problem with pip in Docker][7]
 - Pip running into SSL problems inside Docker
-    - [pip.conf file](8)
-    - [where to put pip.conf](9)
-- [ARM64 PostGIS Image for Docker](10)
-- [Adding Spatialite for dev's SQLite](11)
-- [Organizing a settings.py file as a package](12)
-- [Django Management Commmand options/arguments](14)
-- [Useful Logging template](15)
-- [Use Python to generate SHA256 Hash for Files](19)
-- [PGDATA variable and path](20)
-- [Removing Django migrations to start over](21)
-- [Gunicorn Config File](22)
-- [Adding a service in Ubuntu](23)
-- [Sample Addresses For Testing Geocoder](24)
-- [Get field names for a Django Model in the shell](25)
-- [Correct healthcheck for PostgreSQL container](26)
-- [Sample Data for Locations: Pharmacies in AZ](27)
-- [GeoDjango ForeignKeys in LayerMapping](30)
-- [CSS FlexBox](31)
-- [Check if Django object has attributes](32)
-- [GeoDjango get layers from DataSource](33)
-- [Geocoding the Pharmacies](34)
-- [Get Random Object](35)
+    - [pip.conf file][8]
+    - [where to put pip.conf][9]
+- [ARM64 PostGIS Image for Docker][10]
+- [Adding Spatialite for dev's SQLite][11]
+- [Organizing a settings.py file as a package][12]
+- [Django Management Commmand options/arguments][14]
+- [Useful Logging template][15]
+- [Use Python to generate SHA256 Hash for Files][19]
+- [PGDATA variable and path][20]
+- [Removing Django migrations to start over][21]
+- [Gunicorn Config File][22]
+- [Adding a service in Ubuntu][23]
+- [Sample Addresses For Testing Geocoder][24]
+- [Get field names for a Django Model in the shell][25]
+- [Correct healthcheck for PostgreSQL container][26]
+- [Sample Data for Locations: Pharmacies in AZ][27]
+- [GeoDjango ForeignKeys in LayerMapping][30]
+- [CSS FlexBox][31]
+- [Check if Django object has attributes][32]
+- [GeoDjango get layers from DataSource][33]
+- [Geocoding the Pharmacies][34]
+- [Get Random Object][35]
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 

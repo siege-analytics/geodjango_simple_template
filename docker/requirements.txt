@@ -5,6 +5,7 @@ django-cors-headers
 django-extensions
 djangorestframework
 djangorestframework-gis
+django-postgres-copy
 fiona
 geopandas
 geopy
