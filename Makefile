@@ -12,7 +12,7 @@ DKC ?= docker compose
 #
 
 # partials to make the .env file
-ENV_INCLUDES := conf/postgres.conf conf/django.conf conf/build.conf
+ENV_INCLUDES := conf/postgres.conf conf/django.conf conf/gunicorn.conf conf/build.conf
 
 #
 # Docker

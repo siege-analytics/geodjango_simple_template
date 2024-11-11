@@ -1,4 +1,6 @@
-# Sample Gunicorn configuration file.
+# Gunicorn configuration file.
+
+import os
 
 #
 # Server socket
@@ -18,7 +20,7 @@
 #       range.
 #
 
-bind = "0.0.0.0:8000"
+bind = os.getenv('GUNICORN_HOST', '0.0.0.0') + ":" + os.getenv('GUNICORN_PORT', '8000')
 backlog = 2048
 
 #
@@ -65,10 +67,10 @@ backlog = 2048
 #       A positive integer. Generally set in the 1-5 seconds range.
 #
 
-workers = 4
+workers = int(os.getenv('GUNICORN_WORKERS', '3'))
 worker_class = "sync"
-worker_connections = 1000
-timeout = 120
+# worker_connections = 1000
+timeout = int(os.getenv('GUNICORN_TIMEOUT', '120'))
 keepalive = 5
 
 #
@@ -122,7 +124,10 @@ spew = False
 #       None to signal that Python should choose one on its own.
 #
 
-daemon = True
+# daemon = True
+# set to false for containerization
+daemon = False
+
 # raw_env = [
 #     'DJANGO_SECRET_KEY=something',
 #     'SPAM=eggs',
@@ -145,9 +150,9 @@ tmp_upload_dir = None
 #       A string of "debug", "info", "warning", "error", "critical"
 #
 
-errorlog = "/usr/src//app/logs/hello_django_gunicorn_errors.log"
-loglevel = "info"
-accesslog = "/usr/src/app/logs/hello_django_gunicorn_access.log"
+errorlog = os.getenv('GUNICORN_ERROR_LOG', "/gunicorn_error.log")
+loglevel = os.getenv('GUNICORN_LOG_LEVEL', "info")
+accesslog = os.getenv('GUNICORN_ACCESS_LOG', "/gunicorn_access.log")
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 error_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 #
