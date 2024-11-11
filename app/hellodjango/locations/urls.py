@@ -5,7 +5,7 @@ from locations import views
 
 urlpatterns = []
 
-# There are a lot of URLs, so we're going to separate them into separate lists and then flatten into one..
+# There are a lot of URLs, so we're going to separate them into separate lists and then flatten into one.
 
 gadm = [
     # AL0

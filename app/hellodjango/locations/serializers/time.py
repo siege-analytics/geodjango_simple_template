@@ -5,7 +5,7 @@ from locations.models import *
 
 class Timezone_Serializer(GeoFeatureModelSerializer):
     class Meta:
-        model = Admin_Level_0
+        model = Timezone
         geo_field = "geom"
         pagination_class = GeoJsonPagination
         fields = [
