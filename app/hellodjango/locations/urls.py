@@ -72,6 +72,11 @@ gadm = [
     ),
 ]
 
+time = [
+    path("timezones/", views.TimezoneList.as_view(), name="timezone_list"),
+    path("timezones/<int:pk>/", views.TimezoneDetail.as_view(), name="timezone_detail"),
+]
+
 synthetics = [
     path("places/", views.PlaceList.as_view(), name="places_list"),
     path("places/<int:pk>/", views.PlaceDetail.as_view(), name="places_detail"),
@@ -82,6 +87,7 @@ synthetics = [
 # new_urls = []
 #
 urlpatterns.extend(gadm)
+urlpatterns.extend(time)
 urlpatterns.extend(synthetics)
 
 urlpatterns = format_suffix_patterns(urlpatterns)
