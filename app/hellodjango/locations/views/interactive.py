@@ -12,6 +12,8 @@ from django.contrib.gis.db.models.functions import Transform
 # utilities
 
 from utilities import *
+from rest_framework_gis.pagination import GeoJsonPagination
+
 
 # logging
 
@@ -24,7 +26,7 @@ logger = logging.getLogger("django")
 class Filtered_Place_List(generics.ListAPIView):
 
     # serializer for filtered results
-    serializer_class = PlaceSerializer
+    serializer_class = Place_Serializer
 
     # names of variables in url
 
@@ -53,16 +55,22 @@ class Filtered_Place_List(generics.ListAPIView):
             )
             logging.info(f"Reprojected reference point: {reference_geom.srid}")
 
-            queryset = Place.objects.annotate(
-                distance_geom=Transform(
-                    "geom", settings.PREFERRED_PROJECTION_FOR_US_DISTANCE_SEARCH
+            queryset = (
+                Place.objects.annotate(
+                    distance_geom=Transform(
+                        "geom", settings.PREFERRED_PROJECTION_FOR_US_DISTANCE_SEARCH
+                    )
                 )
-            ).filter(distance_geom__dwithin=(reference_geom, radius))
+                .filter(distance_geom__dwithin=(reference_geom, radius))
+                .order_by("pk")
+            )
+            paginator = GeoJsonPagination()
 
-            # queryset = Place.objects.filter(
-            #     distance_geom__dwithin=(reference_geom, radius)
-            # )
-            logging.info(queryset)
+            page = paginator.paginate_queryset(queryset, request)
+
+            serializer = Place_Serializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
         except Exception as e:
             message = ""
             message += f"There was an error getting the radius results for Place: {e}"

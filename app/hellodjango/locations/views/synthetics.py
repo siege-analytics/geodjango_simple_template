@@ -9,9 +9,14 @@ from rest_framework.response import Response
 # Create your views here.
 class PlaceList(APIView):
     def get(self, request, format=None):
-        places = Place.objects.all()
-        serializer = PlaceSerializer(places, many=True)
-        return Response(serializer.data)
+        geo_objects = Place.objects.all().order_by("pk")
+
+        paginator = GeoJsonPagination()
+
+        page = paginator.paginate_queryset(geo_objects, request)
+
+        serializer = Place_Serializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     def post(self, request, format=None):
         serializer = CountrySerializer(data=request.data)

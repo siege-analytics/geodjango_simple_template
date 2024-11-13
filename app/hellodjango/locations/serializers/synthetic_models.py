@@ -3,7 +3,7 @@ from locations.models import *
 from .addresses import United_States_AddressSerializer
 
 
-class PlaceSerializer(serializers.ModelSerializer):
+class Place_Serializer(serializers.ModelSerializer):
 
     address = United_States_AddressSerializer(many=False, read_only=True)
 
