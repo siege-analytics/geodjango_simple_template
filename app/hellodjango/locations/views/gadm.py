@@ -17,10 +17,14 @@ from rest_framework_gis.pagination import GeoJsonPagination
 
 class Admin_Level_0_List(APIView):
     def get(self, request, format=None):
-        al_objects = Admin_Level_0.objects.all()
-        serializer = Admin_Level_0_Serializer(al_objects, many=True)
-        pagination_class = GeoJsonPagination
-        return Response(serializer.data)
+        geo_objects = Admin_Level_0.objects.all().order_by("pk")
+
+        paginator = GeoJsonPagination()
+
+        page = paginator.paginate_queryset(geo_objects, request)
+
+        serializer = Admin_Level_0_Serializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     # This method is hypothetical because we will never add data
     # def post(self, request, format=None):
@@ -64,10 +68,14 @@ class Admin_Level_0_Detail(APIView):
 
 class Admin_Level_1_List(APIView):
     def get(self, request, format=None):
-        al_objects = Admin_Level_1.objects.all()
-        serializer = Admin_Level_1_Serializer(al_objects, many=True)
-        pagination_class = GeoJsonPagination
-        return Response(serializer.data)
+        geo_objects = Admin_Level_1.objects.all().order_by("pk")
+
+        paginator = GeoJsonPagination()
+
+        page = paginator.paginate_queryset(geo_objects, request)
+
+        serializer = Admin_Level_1_Serializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     # This method is hypothetical because we will never add data
     # def post(self, request, format=None):
@@ -111,10 +119,14 @@ class Admin_Level_1_Detail(APIView):
 
 class Admin_Level_2_List(APIView):
     def get(self, request, format=None):
-        al_objects = Admin_Level_2.objects.all()
-        serializer = Admin_Level_2_Serializer(al_objects, many=True)
-        pagination_class = GeoJsonPagination
-        return Response(serializer.data)
+        geo_objects = Admin_Level_2.objects.all().order_by("pk")
+
+        paginator = GeoJsonPagination()
+
+        page = paginator.paginate_queryset(geo_objects, request)
+
+        serializer = Admin_Level_2_Serializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     # This method is hypothetical because we will never add data
     # def post(self, request, format=None):
@@ -158,10 +170,14 @@ class Admin_Level_2_Detail(APIView):
 
 class Admin_Level_3_List(APIView):
     def get(self, request, format=None):
-        al_objects = Admin_Level_3.objects.all()
-        serializer = Admin_Level_3_Serializer(al_objects, many=True)
-        pagination_class = GeoJsonPagination
-        return Response(serializer.data)
+        geo_objects = Admin_Level_3.objects.all().order_by("pk")
+
+        paginator = GeoJsonPagination()
+
+        page = paginator.paginate_queryset(geo_objects, request)
+
+        serializer = Admin_Level_3_Serializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     # This method is hypothetical because we will never add data
     # def post(self, request, format=None):
@@ -205,10 +221,14 @@ class Admin_Level_3_Detail(APIView):
 
 class Admin_Level_4_List(APIView):
     def get(self, request, format=None):
-        al_objects = Admin_Level_4.objects.all()
-        serializer = Admin_Level_4_Serializer(al_objects, many=True)
-        pagination_class = GeoJsonPagination
-        return Response(serializer.data)
+        geo_objects = Admin_Level_4.objects.all().order_by("pk")
+
+        paginator = GeoJsonPagination()
+
+        page = paginator.paginate_queryset(geo_objects, request)
+
+        serializer = Admin_Level_4_Serializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     # This method is hypothetical because we will never add data
     # def post(self, request, format=None):
@@ -252,10 +272,14 @@ class Admin_Level_4_Detail(APIView):
 
 class Admin_Level_5_List(APIView):
     def get(self, request, format=None):
-        al_objects = Admin_Level_5.objects.all()
-        serializer = Admin_Level_5_Serializer(al_objects, many=True)
-        pagination_class = GeoJsonPagination
-        return Response(serializer.data)
+        geo_objects = Admin_Level_5.objects.all().order_by("pk")
+
+        paginator = GeoJsonPagination()
+
+        page = paginator.paginate_queryset(geo_objects, request)
+
+        serializer = Admin_Level_5_Serializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     # This method is hypothetical because we will never add data
     # def post(self, request, format=None):
