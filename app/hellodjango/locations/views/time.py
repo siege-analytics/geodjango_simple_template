@@ -5,15 +5,18 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from rest_framework_gis.pagination import GeoJsonPagination
+
 # Create your views here.
 
-# AL0
+# Timezone
 
 
 class Timezone_List(APIView):
     def get(self, request, format=None):
         geo_objects = Timezone.objects.all()
         serializer = Timezone_Serializer(geo_objects, many=True)
+        pagination_class = GeoJsonPagination
         return Response(serializer.data)
 
     # This method is hypothetical because we will never add data

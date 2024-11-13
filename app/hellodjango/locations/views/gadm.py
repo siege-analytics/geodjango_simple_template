@@ -5,6 +5,11 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+# pagination
+
+from rest_framework_gis.pagination import GeoJsonPagination
+
+
 # Create your views here.
 
 # AL0
@@ -14,6 +19,7 @@ class Admin_Level_0_List(APIView):
     def get(self, request, format=None):
         al_objects = Admin_Level_0.objects.all()
         serializer = Admin_Level_0_Serializer(al_objects, many=True)
+        pagination_class = GeoJsonPagination
         return Response(serializer.data)
 
     # This method is hypothetical because we will never add data
@@ -60,6 +66,7 @@ class Admin_Level_1_List(APIView):
     def get(self, request, format=None):
         al_objects = Admin_Level_1.objects.all()
         serializer = Admin_Level_1_Serializer(al_objects, many=True)
+        pagination_class = GeoJsonPagination
         return Response(serializer.data)
 
     # This method is hypothetical because we will never add data
@@ -106,6 +113,7 @@ class Admin_Level_2_List(APIView):
     def get(self, request, format=None):
         al_objects = Admin_Level_2.objects.all()
         serializer = Admin_Level_2_Serializer(al_objects, many=True)
+        pagination_class = GeoJsonPagination
         return Response(serializer.data)
 
     # This method is hypothetical because we will never add data
@@ -152,6 +160,7 @@ class Admin_Level_3_List(APIView):
     def get(self, request, format=None):
         al_objects = Admin_Level_3.objects.all()
         serializer = Admin_Level_3_Serializer(al_objects, many=True)
+        pagination_class = GeoJsonPagination
         return Response(serializer.data)
 
     # This method is hypothetical because we will never add data
@@ -198,6 +207,7 @@ class Admin_Level_4_List(APIView):
     def get(self, request, format=None):
         al_objects = Admin_Level_4.objects.all()
         serializer = Admin_Level_4_Serializer(al_objects, many=True)
+        pagination_class = GeoJsonPagination
         return Response(serializer.data)
 
     # This method is hypothetical because we will never add data
@@ -244,6 +254,7 @@ class Admin_Level_5_List(APIView):
     def get(self, request, format=None):
         al_objects = Admin_Level_5.objects.all()
         serializer = Admin_Level_5_Serializer(al_objects, many=True)
+        pagination_class = GeoJsonPagination
         return Response(serializer.data)
 
     # This method is hypothetical because we will never add data
