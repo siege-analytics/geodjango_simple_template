@@ -7,17 +7,29 @@ from rest_framework.response import Response
 
 from rest_framework_gis.pagination import GeoJsonPagination
 
+import logging
+
+logger = logging.getLogger("django")
+
 # Create your views here.
+
 
 # Timezone
 
 
 class Timezone_List(APIView):
     def get(self, request, format=None):
-        geo_objects = Timezone.objects.all()
-        serializer = Timezone_Serializer(geo_objects, many=True)
-        pagination_class = GeoJsonPagination
-        return Response(serializer.data)
+
+        geo_objects = Timezone.objects.all().order_by("pk")
+
+        paginator = GeoJsonPagination()
+
+        page = paginator.paginate_queryset(geo_objects, request)
+
+        serializer = Timezone_Serializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+        # return Response(serializer.data)
 
     # This method is hypothetical because we will never add data
     # def post(self, request, format=None):

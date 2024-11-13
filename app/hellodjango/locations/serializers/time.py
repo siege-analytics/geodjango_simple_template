@@ -6,7 +6,6 @@ class Timezone_Serializer(GeoFeatureModelSerializer):
     class Meta:
         model = Timezone
         geo_field = "geom"
-        pagination_class = GeoJsonPagination
         fields = [
             "tzid",
         ]
