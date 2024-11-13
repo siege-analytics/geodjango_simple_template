@@ -5,21 +5,31 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from rest_framework_gis.pagination import GeoJsonPagination
+
+# logging
+
+import logging
+
+logger = logging.getLogger("django")
+
 
 # Create your views here.
 class PlaceList(APIView):
     def get(self, request, format=None):
+        logger.info("In the Place_List view")
         geo_objects = Place.objects.all().order_by("pk")
-
+        logger.info(f"Got the queryset: {len(geo_objects)}")
         paginator = GeoJsonPagination()
-
+        logger.info("Set the paginator")
         page = paginator.paginate_queryset(geo_objects, request)
-
+        logger.info(f"Create a page: {page}")
         serializer = Place_Serializer(page, many=True)
+        logger.info(f"Serializer created")
         return paginator.get_paginated_response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = CountrySerializer(data=request.data)
+        serializer = PlaceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
