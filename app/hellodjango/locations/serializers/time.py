@@ -7,5 +7,6 @@ class Timezone_Serializer(GeoFeatureModelSerializer):
         model = Timezone
         geo_field = "geom"
         fields = [
+            "pk",
             "tzid",
         ]
