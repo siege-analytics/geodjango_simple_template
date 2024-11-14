@@ -78,7 +78,7 @@ class Admin_Level_4_List(generics.ListAPIView):
     pagination_class = GeoJsonPagination
 
 
-class Admin_Level_4_Detail(APIView):
+class Admin_Level_4_Detail(generics.RetrieveAPIView):
     queryset = Admin_Level_4.objects.all()
     serializer_class = Admin_Level_4_Serializer
 
@@ -86,12 +86,12 @@ class Admin_Level_4_Detail(APIView):
 # AL5
 
 
-class Admin_Level_5_List(APIView):
+class Admin_Level_5_List(generics.ListAPIView):
     queryset = Admin_Level_5.objects.all()
     serializer_class = Admin_Level_5_Serializer
     pagination_class = GeoJsonPagination
 
 
-class Admin_Level_5_Detail(APIView):
+class Admin_Level_5_Detail(generics.RetrieveAPIView):
     queryset = Admin_Level_5.objects.all()
     serializer_class = Admin_Level_5_Serializer
