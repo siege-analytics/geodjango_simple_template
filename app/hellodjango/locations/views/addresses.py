@@ -14,11 +14,11 @@ logger = logging.getLogger("django")
 
 
 # Create your views here.
-class PlaceList(generics.ListAPIView):
+class United_States_Address_List(generics.ListAPIView):
     queryset = Place.objects.all()
     serializer_class = Place_Serializer
 
 
-class PlaceDetail(generics.RetrieveUpdateDestroyAPIView):
+class United_States_Address_Detail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Place.objects.all()
     serializer_class = Place_Serializer

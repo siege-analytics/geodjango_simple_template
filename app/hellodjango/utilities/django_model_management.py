@@ -15,6 +15,14 @@ logger = logging.getLogger("django")
 from django.db.models import Max
 
 
+def reset_primary_keys(target_app: str) -> bool:
+    """
+
+    :param target_app: string for name of Django app whose keys need to be reset
+    :return: Boolean
+    """
+
+
 def get_random_object(django_model):
     """
     This function implements the third way of creating random objects from Django ORM Cookbook

@@ -115,6 +115,8 @@ I'd like to add
 - [Geocoding the Pharmacies][34]
 - [Get Random Object][35]
 - [Django REST Framework Paginator for ListAPIView][36]
+- [Django Reset Primary Key for Models][37]
+- [Django call management commands from inside Python][38]
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 
@@ -187,3 +189,7 @@ I'd like to add
 [35]: https://books.agiliq.com/projects/django-orm-cookbook/en/latest/random.html
 
 [36]: https://github.com/AlisherXujanov/Fullstack-Project1/blob/0b7ea1eb103adf49c97287752bae5d1f246fb2f3/DRF.md?plain=1#L834
+
+[37]: https://stackoverflow.com/questions/544791/django-postgresql-how-to-reset-primary-key
+
+[38]: https://docs.djangoproject.com/en/4.0/ref/django-admin/#running-management-commands-from-your-code

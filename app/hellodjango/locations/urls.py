@@ -75,7 +75,22 @@ gadm = [
 time = [
     path("timezones/", views.Timezone_List.as_view(), name="timezone_list"),
     path(
-        "timezones/<int:pk>/", views.Timezone_Detail.as_view(), name="timezone_detail"
+        "timezones/<int:pk>/",
+        views.Timezone_Detail.as_view(),
+        name="timezone_detail",
+    ),
+]
+
+addresses = [
+    path(
+        "united_states_addresses",
+        views.United_States_Address_List.as_view(),
+        name="us_address_list",
+    ),
+    path(
+        "united_states_addresses",
+        views.United_States_Address_Detail.as_view(),
+        name="us_address_detail",
     ),
 ]
 
