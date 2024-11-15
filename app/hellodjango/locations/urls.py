@@ -106,5 +106,6 @@ synthetics = [
 urlpatterns.extend(gadm)
 urlpatterns.extend(time)
 urlpatterns.extend(synthetics)
+urlpatterns.extend(addresses)
 
 urlpatterns = format_suffix_patterns(urlpatterns)
