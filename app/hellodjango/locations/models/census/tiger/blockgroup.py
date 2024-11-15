@@ -2,7 +2,7 @@
 from django.contrib.gis.db import models
 
 
-class US_Census_Block_Group(models.Model):
+class United_States_Census_Block_Group(models.Model):
 
     # given fields
     statefp = models.CharField(max_length=2)
@@ -33,7 +33,7 @@ class US_Census_Block_Group(models.Model):
 
 
 # Auto-generated `LayerMapping` dictionary for US_Census_Block_Group model
-us_census_block_group_mapping = {
+united_states_census_block_group_mapping = {
     "statefp": "STATEFP",
     "countyfp": "COUNTYFP",
     "tractce": "TRACTCE",

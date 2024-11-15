@@ -2,7 +2,7 @@
 from django.contrib.gis.db import models
 
 
-class United_States_Tribal_Tract(models.Model):
+class United_States_Census_Tribal_Tract(models.Model):
     region = models.CharField(max_length=2)
     division = models.CharField(max_length=2)
     statefp = models.CharField(max_length=2)
@@ -22,7 +22,7 @@ class United_States_Tribal_Tract(models.Model):
 
 
 # Auto-generated `LayerMapping` dictionary for United_States_Tribal_Tract model
-united_states_tribal_tract_mapping = {
+united_states_census_tribal_tract_mapping = {
     "region": "REGION",
     "division": "DIVISION",
     "statefp": "STATEFP",

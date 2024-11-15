@@ -1,7 +1,7 @@
 from django.contrib.gis.db import models
 
 
-class United_States_State_Legislative_District_Lower(models.Model):
+class United_States_Census_State_Legislative_District_Lower(models.Model):
     statefp = models.CharField(max_length=2)
     sldlst = models.CharField(max_length=3)
     geoid = models.CharField(max_length=5)
@@ -31,7 +31,7 @@ class United_States_State_Legislative_District_Lower(models.Model):
 
 
 # Auto-generated `LayerMapping` dictionary for United_States_State_Legislative_District_Lower model
-united_states_state_legislative_district_lower_mapping = {
+united_states_census_state_legislative_district_lower_mapping = {
     "statefp": "STATEFP",
     "sldlst": "SLDLST",
     "geoid": "GEOID",

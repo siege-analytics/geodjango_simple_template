@@ -29,7 +29,7 @@ I should probably wrap these in `make` commands to make it easier, as you curren
 webserver container to issue them.
 
 1. `make python_term`
-2. `root@61c21188aa79:/usr/src/app# python hellodjango/manage.py fetch_data`
+2. `root@61c21188aa79:/usr/src/app# python hellodjango/manage.py fetch_and_load_standard_spatial_data`
 3. `root@61c21188aa79:/usr/src/app# python hellodjango/manage.py create_sample_places`
 
 The webserver is currently set up to run on port `8000`, so in your browser, you will need to go to:

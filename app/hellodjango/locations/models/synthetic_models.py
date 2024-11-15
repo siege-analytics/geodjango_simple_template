@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from django.contrib.gis.db import models
 from locations.models import *
 
+
 # this is a file that will describe synthetic models
 # it's possible that this will need to become subfolers
 # with primitives and synthetics
@@ -51,6 +52,72 @@ class Location(models.Model):
     gid_5 = models.ForeignKey(
         Admin_Level_5, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+
+    # foreign key to census polygons
+
+    # census_blockgroup = models.ForeignKey(
+    #     United_States_Census_Block_Group,
+    #     on_delete=models.SET_DEFAULT,
+    #     null=True,
+    #     blank=True,
+    #     default=None,
+    # )
+
+    # census_cd = models.ForeignKey(
+    #     United_States_Census_Congressional_District,
+    #     on_delete=models.SET_DEFAULT,
+    #     null=True,
+    #     blank=True,
+    #     default=None,
+    # )
+    #
+    # census_sldl = models.ForeignKey(
+    #     United_States_Census_State_Legislative_District_Lower,
+    #     on_delete=models.SET_DEFAULT,
+    #     null=True,
+    #     blank=True,
+    #     default=None,
+    # )
+    #
+    # census_sldu = models.ForeignKey(
+    #     United_States_Census_State_Legislative_District_Upper,
+    #     on_delete=models.SET_DEFAULT,
+    #     null=True,
+    #     blank=True,
+    #     default=None,
+    # )
+    #
+    # census_state = models.ForeignKey(
+    #     United_States_Census_State,
+    #     on_delete=models.SET_DEFAULT,
+    #     null=True,
+    #     blank=True,
+    #     default=None,
+    # )
+    #
+    # census_tabblock = models.ForeignKey(
+    #     United_States_Census_Tabulation_Block,
+    #     on_delete=models.SET_DEFAULT,
+    #     null=True,
+    #     blank=True,
+    #     default=None,
+    # )
+    #
+    # census_tract = models.ForeignKey(
+    #     United_States_Census_Tract,
+    #     on_delete=models.SET_DEFAULT,
+    #     null=True,
+    #     blank=True,
+    #     default=None,
+    # )
+    #
+    # census_ttract = models.ForeignKey(
+    #     United_States_Census_Tribal_Tract,
+    #     on_delete=models.SET_DEFAULT,
+    #     null=True,
+    #     blank=True,
+    #     default=None,
+    # )
 
     def __str__(self):
         representative_string = f"{self.name}"

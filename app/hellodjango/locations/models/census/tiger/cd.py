@@ -2,7 +2,7 @@
 from django.contrib.gis.db import models
 
 
-class United_States_Congressional_District(models.Model):
+class United_States_Census_Congressional_District(models.Model):
     statefp = models.CharField(max_length=2)
     cd118fp = models.CharField(max_length=2)
     geoid = models.CharField(max_length=4)
@@ -32,7 +32,7 @@ class United_States_Congressional_District(models.Model):
 
 
 # Auto-generated `LayerMapping` dictionary for United_States_Congressional_District model
-united_states_congressional_district_mapping = {
+united_states_census_congressional_district_mapping = {
     "statefp": "STATEFP",
     "cd118fp": "CD118FP",
     "geoid": "GEOID",

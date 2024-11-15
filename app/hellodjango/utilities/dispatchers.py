@@ -1,8 +1,6 @@
 # Django functionality imports
 
 from django.conf import settings
-from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.utils import LayerMapping
 from locations.models import *
 
 # Django models imports
@@ -35,18 +33,47 @@ GADM_MODEL_NAMES = [
     Admin_Level_5,
 ]
 
+CENSUS_TIGER_LINE_FIELD_NAMES = [
+    "census_blockgroup",
+    "census_cd",
+    "census_county",
+    "census_sldl",
+    "census_sldu",
+    "census_state",
+    "census_tabblock",
+    "census_tract",
+    "census_ttract",
+]
+
+CENSUS_TIGER_LINE_MODEL_NAMES = [
+    United_States_Census_Block_Group,
+    United_States_Census_Congressional_District,
+    United_States_Census_County,
+    United_States_Census_State_Legislative_District_Lower,
+    United_States_Census_State_Legislative_District_Upper,
+    United_States_Census_State,
+    United_States_Census_Tabulation_Block,
+    United_States_Census_Tract,
+    United_States_Census_Tribal_Tract,
+]
+
+LOCATION_MODEL_FIELDS_AND_NAMES_TO_TEST = {"timezone": Timezone}
+
 GADM_MODEL_FIELD_NAMES_AND_MODEL_NAMES = {
     GADM_MODEL_FIELD_NAMES[i].lower(): GADM_MODEL_NAMES[i]
     for i in range(len(GADM_MODEL_FIELD_NAMES))
 }
 
+CENSUS_TIGER_LINE_FIELD_NAMES_AND_MODEL_NAMES = {
+    CENSUS_TIGER_LINE_FIELD_NAMES[i].lower(): CENSUS_TIGER_LINE_MODEL_NAMES[i]
+    for i in range(len(CENSUS_TIGER_LINE_FIELD_NAMES))
+}
+
 
 MODEL_FIELDS_AND_NAMES_TO_TEST = {}
 MODEL_FIELDS_AND_NAMES_TO_TEST.update(GADM_MODEL_FIELD_NAMES_AND_MODEL_NAMES)
-
-LOCATION_MODEL_FIELDS_AND_NAMES_TO_TEST = {"timezone": Timezone}
-
 MODEL_FIELDS_AND_NAMES_TO_TEST.update(LOCATION_MODEL_FIELDS_AND_NAMES_TO_TEST)
+MODEL_FIELDS_AND_NAMES_TO_TEST.update(CENSUS_TIGER_LINE_FIELD_NAMES_AND_MODEL_NAMES)
 
 DOWNLOADS_DISPATCHER = {
     "gadm": {
