@@ -18,6 +18,8 @@ import logging
 
 logger = logging.getLogger("django")
 
+from utilities import *
+
 
 class Command(BaseCommand):
     args = ""
