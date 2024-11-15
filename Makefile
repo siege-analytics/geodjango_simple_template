@@ -46,6 +46,9 @@ pg_term: .env
 python_term: .env
 	$(DKC) $(call exec-or-run,webserver_python) /bin/bash
 
+nginx_term: .env
+	$(DKC) $(call exec-or-run,nginx) /bin/bash
+
 # Django operations
 
 migrate collectstatic: .env
