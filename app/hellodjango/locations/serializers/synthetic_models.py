@@ -4,6 +4,20 @@ from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from .addresses import United_States_AddressSerializer
 
+LOCATION_FIELDS = [
+    "id",
+    "name",
+    "nickname",
+    "address",
+    "timezone",
+    "gid_0",
+    "gid_1",
+    "gid_2",
+    "gid_3",
+    "gid_4",
+    "gid_5",
+]
+
 
 class Place_Serializer(GeoFeatureModelSerializer):
 
@@ -35,19 +49,7 @@ class Place_Serializer(GeoFeatureModelSerializer):
         model = Place
         geo_field = "geom"
         # fields = "__all__"
-        fields = [
-            "id",
-            "name",
-            "nickname",
-            "address",
-            "timezone",
-            "gid_0",
-            "gid_1",
-            "gid_2",
-            "gid_3",
-            "gid_4",
-            "gid_5",
-        ]
+        fields = LOCATION_FIELDS
         depth = 1
 
 
@@ -56,9 +58,7 @@ class LocalitySerializer(GeoFeatureModelSerializer):
         model = Locality
 
         # foreign keys
-        timezone = serializers.HyperlinkedRelatedField(
-            view_name="timezone_detail", many=False, read_only=True
-        )
+
         gid_0 = serializers.HyperlinkedRelatedField(
             view_name="admin_level_0_detail", many=False, read_only=True
         )
@@ -77,18 +77,9 @@ class LocalitySerializer(GeoFeatureModelSerializer):
         gid_5 = serializers.HyperlinkedRelatedField(
             view_name="admin_level_5_detail", many=False, read_only=True
         )
-
+        timezone = serializers.HyperlinkedRelatedField(
+            view_name="timezone_detail", many=False, read_only=True
+        )
 
         geo_field = "geom"
-        fields = [
-            "id",
-            "name",
-            "nickname",
-            "address",
-            "timezone",
-            "gid_0",
-            "gid_1",
-            "gid_2",
-            "gid_3",
-            "gid_4",
-            "gid_5",]
+        fields = LOCATION_FIELDS
