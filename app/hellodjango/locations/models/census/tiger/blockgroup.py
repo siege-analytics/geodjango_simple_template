@@ -33,19 +33,19 @@ class United_States_Census_Block_Group(models.Model):
 
 
 # Auto-generated `LayerMapping` dictionary for US_Census_Block_Group model
-united_states_census_block_group_mapping = {
-    "statefp": "STATEFP",
-    "countyfp": "COUNTYFP",
-    "tractce": "TRACTCE",
-    "blkgrpce": "BLKGRPCE",
-    "geoid": "GEOID",
-    "geoidfq": "GEOIDFQ",
-    "namelsad": "NAMELSAD",
-    "mtfcc": "MTFCC",
-    "funcstat": "FUNCSTAT",
-    "aland": "ALAND",
-    "awater": "AWATER",
-    "intptlat": "INTPTLAT",
-    "intptlon": "INTPTLON",
-    "geom": "POLYGON",
-}
+# united_states_census_block_group_mapping = {
+#     "statefp": "STATEFP",
+#     "countyfp": "COUNTYFP",
+#     "tractce": "TRACTCE",
+#     "blkgrpce": "BLKGRPCE",
+#     "geoid": "GEOID",
+#     "geoidfq": "GEOIDFQ",
+#     "namelsad": "NAMELSAD",
+#     "mtfcc": "MTFCC",
+#     "funcstat": "FUNCSTAT",
+#     "aland": "ALAND",
+#     "awater": "AWATER",
+#     "intptlat": "INTPTLAT",
+#     "intptlon": "INTPTLON",
+#     "geom": "POLYGON",
+# }

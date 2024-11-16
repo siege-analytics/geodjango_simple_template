@@ -27,8 +27,9 @@ class Filtered_Place_List(generics.ListAPIView):
 
     # serializer for filtered results
     serializer_class = Place_Serializer
+    pagination_class = GeoJsonPagination
 
-    # names of variables in url
+    # override the queryset with a custom method using the params from URL
 
     def get_queryset(self):
 
@@ -44,9 +45,7 @@ class Filtered_Place_List(generics.ListAPIView):
                 )
             )
             logging.info(f"Received params: {longitude}, {latitude}, {radius}, {epsg}")
-            # radius_in_degrees = distance_to_decimal_degrees(
-            #     distance=radius, latitude=latitude
-            # )
+
             reference_geom = Point((longitude, latitude), srid=epsg)
             logging.info(f"Made reference geom: {reference_geom}")
 
@@ -54,7 +53,7 @@ class Filtered_Place_List(generics.ListAPIView):
                 settings.PREFERRED_PROJECTION_FOR_US_DISTANCE_SEARCH
             )
             logging.info(f"Reprojected reference point: {reference_geom.srid}")
-
+            logging.info("About to start queryset")
             queryset = (
                 Place.objects.annotate(
                     distance_geom=Transform(
@@ -64,12 +63,9 @@ class Filtered_Place_List(generics.ListAPIView):
                 .filter(distance_geom__dwithin=(reference_geom, radius))
                 .order_by("pk")
             )
-            paginator = GeoJsonPagination()
+            logging.info(f"Queried queryset: {len(queryset)}")
 
-            page = paginator.paginate_queryset(queryset, request)
-
-            serializer = Place_Serializer(page, many=True)
-            return paginator.get_paginated_response(serializer.data)
+            return queryset
 
         except Exception as e:
             message = ""
