@@ -1,8 +1,14 @@
+# Models and serializers
 from locations.models import *
 from locations.serializers import *
 
+# DRF
 from rest_framework import generics
 from django.conf import settings
+
+# DRF GIS
+from rest_framework_gis.pagination import GeoJsonPagination
+
 
 # geography things
 from django.contrib.gis.geos import Point
@@ -12,8 +18,6 @@ from django.contrib.gis.db.models.functions import Transform
 # utilities
 
 from utilities import *
-from rest_framework_gis.pagination import GeoJsonPagination
-
 
 # logging
 
