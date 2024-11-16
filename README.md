@@ -36,20 +36,39 @@ The webserver is currently set up to run on port `8000`, so in your browser, you
 
 http://127.0.0.1:8000/locations/places/
 
-# Currently
+# Goals
+
+## Currently
 
 - Working on making all `locations` models accessible through Django REST Framework API
-- Adding fetch and load for US Census
+    - All GADM and Timezone Models work
+    - Synthetic models are giving difficulty with serialization
+- Adding models, fetch and load for US Census
+    - Models are added, debugging mappings
+    - Debugging foreign keys
 - Adding geocoding API for addresses through Nominatim
+- Fixing `nginx` and static files service
 
-# Long term goal
-
-This should be a complete spatial management tool.
-
-# Immediately to do
+## Next in queue
 
 - [Make tasks happen asynchronously][13]
 - Integrate [Siege Analytics Social Warehouse][18]
+
+## Mid-term plans
+
+I'd like to add
+
+- Daphne
+- Spark
+- Sedona
+- GeoServer
+- RabbitMQ/Django Channels
+- Whitenoise / media
+- Grapelli for admin
+
+## Long-term Vision
+
+This should be a complete spatial management tool.
 
 # Building (Docker Images)
 
@@ -74,16 +93,6 @@ env var. See the `Makefile` for more details. Changes to any of the files listed
 file to be regenerated.
 
 If you are unsure of the status of your `.env`, you can force (always-re-make) it by running `make -B .env`.
-
-# Goals
-
-I'd like to add
-
-- Daphne
-- Spark
-- Sedona
-- GeoServer
-- RabbitMQ/Django Channels
 
 # References:
 
@@ -117,6 +126,7 @@ I'd like to add
 - [Django REST Framework Paginator for ListAPIView][36]
 - [Django Reset Primary Key for Models][37]
 - [Django call management commands from inside Python][38]
+- [Reset Django Migrations][39]
 
 [1]: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/?utm_source=pocket_saves
 
@@ -193,3 +203,5 @@ I'd like to add
 [37]: https://stackoverflow.com/questions/544791/django-postgresql-how-to-reset-primary-key
 
 [38]: https://docs.djangoproject.com/en/4.0/ref/django-admin/#running-management-commands-from-your-code
+
+[39]: https://medium.com/@mustahibmajgaonkar/how-to-reset-django-migrations-6787b2a1e723
