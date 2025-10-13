@@ -1,79 +1,85 @@
+# Simplified Docker Compose for GeoDjango
+# No complex abstractions, just straightforward service definitions
+
 services:
-
-  webserver_python:
-    image: geogjango_webserver
-    container_name: geodjango_webserver
-    build:
-      context: ./docker
-      args:
-        UBUNTU_BASE_IMAGE: ${UBUNTU_BASE_IMAGE}
-    command: sh -c "/opt/venv/bin/python /opt/venv/bin/gunicorn hellodjango.wsgi:application"
-    #    command: sh -c "/opt/venv/bin/python /usr/src/app/hellodjango/manage.py runserver 8000"
-    environment:
-      - DEBUG
-      - SECRET_KEY
-      - DJANGO_ALLOWED_HOSTS
-      - SQL_ENGINE
-      - SQL_DATABASE
-      - SQL_USER
-      - SQL_PASSWORD
-      - SQL_HOST
-      - SQL_PORT
-      - GUNICORN_HOST
-      - GUNICORN_PORT
-      - GUNICORN_WORKERS
-      - GUNICORN_TIMEOUT
-      - GUNICORN_ERROR_LOG
-      - GUNICORN_ACCESS_LOG
-      - GUNICORN_LOG_LEVEL
-      - GUNICORN_WORKER_TMP_DIR
-      - GUNICORN_CMD_ARGS
-    networks:
-      - geodjango_project_network
-    volumes:
-      - ./app:/usr/src/app
-      - static_volume:/home/app/web/staticfiles
-    ports:
-      - 8000:8000
-    depends_on:
-      - postgis
-
   postgis:
     image: postgis/postgis:latest
     container_name: geodjango_postgis
-    restart: always
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: geodjango_database
+      POSTGRES_USER: dheerajchand
+      POSTGRES_PASSWORD: strongpasswd
+      POSTGRES_HOST_AUTH_METHOD: trust
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "54321:5432"
+    volumes:
+      - geodjango_pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ 'CMD-SHELL', 'psql -h localhost -U $${POSTGRES_USER} -c select 1 -d $${POSTGRES_DB}' ]
+      test: ["CMD-SHELL", "pg_isready -U dheerajchand -d geodjango_database"]
       interval: 10s
       retries: 5
-    environment:
-      - POSTGRES_DB
-      - POSTGRES_PASSWORD
-      - POSTGRES_USER
-      - POSTGRES_HOST_AUTH_METHOD
-      - PGDATA
-    ports:
-      - 54321:5432
     networks:
-      - geodjango_project_network
+      - geodjango_network
+
+  webserver:
+    build:
+      context: ./docker
+      args:
+        UBUNTU_BASE_IMAGE: ubuntu:jammy
+    image: geodjango_webserver
+    container_name: geodjango_webserver
+    restart: unless-stopped
+    environment:
+      # Django
+      DEBUG: 1
+      SECRET_KEY: afdawango
+      DJANGO_ALLOWED_HOSTS: "*"
+      # Database
+      SQL_ENGINE: django.contrib.gis.db.backends.postgis
+      SQL_HOST: postgis
+      SQL_DATABASE: geodjango_database
+      SQL_USER: dheerajchand
+      SQL_PASSWORD: strongpasswd
+      SQL_PORT: 5432
+      # Gunicorn
+      GUNICORN_HOST: 0.0.0.0
+      GUNICORN_PORT: 8000
+      GUNICORN_WORKERS: 4
+      GUNICORN_TIMEOUT: 120
+    ports:
+      - "8000:8000"
     volumes:
-      - geodjango_pg_data:${PGDATA}
+      - ./app:/usr/src/app
+      - static_volume:/home/app/web/staticfiles
+    depends_on:
+      postgis:
+        condition: service_healthy
+    networks:
+      - geodjango_network
+    command: sh -c "/opt/venv/bin/python /opt/venv/bin/gunicorn hellodjango.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120 --chdir /usr/src/app/hellodjango"
 
   nginx:
     build:
       context: docker/nginx
+    image: geodjango_nginx
+    container_name: geodjango_nginx
+    restart: unless-stopped
     ports:
-      - 1337:80
-    depends_on:
-      - webserver_python
-    networks:
-      - geodjango_project_network
+      - "1337:80"
     volumes:
       - static_volume:/home/app/web/staticfiles
+    depends_on:
+      - webserver
+    networks:
+      - geodjango_network
 
 networks:
-  geodjango_project_network:
+  geodjango_network:
+    driver: bridge
 
 volumes:
   geodjango_pg_data:
   static_volume:
+

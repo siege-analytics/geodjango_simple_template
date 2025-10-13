@@ -1,78 +1,79 @@
+# Simplified Makefile for GeoDjango
+# No complex abstractions, just clear commands
 
-default: up
+.PHONY: help build up down restart logs shell pg-shell migrate collectstatic clean test
 
-# enable use of SQL_ env's in make recipes
-# and help keep .env up to date since includes are always prerequisites
-include .env
+# Default target
+.DEFAULT_GOAL := help
 
-DKC ?= docker compose
+# Docker Compose command
+DC := docker compose
 
-#
-# Config
-#
+help:  ## Show this help message
+	@echo "GeoDjango Simple Template - Available Commands:"
+	@echo ""
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-# partials to make the .env file
-ENV_INCLUDES := conf/postgres.conf conf/django.conf conf/gunicorn.conf conf/build.conf
+build:  ## Build all Docker images
+	$(DC) build
 
-#
-# Docker
-#
+up:  ## Start all services
+	$(DC) up -d
+	@echo "✅ Services started!"
+	@echo "   Django:  http://localhost:8000"
+	@echo "   Nginx:   http://localhost:1337"
+	@echo "   PostGIS: localhost:54321"
 
-# Helper functions
-task-up = $(if $(shell $(DKC) ps -q $(1)),$(1) is running)
-exec-or-run = $(if $(call task-up,$1),exec,run --rm) $1
+down:  ## Stop all services
+	$(DC) down
 
-export DOCKER_DEFAULT_PLATFORM ?= linux/amd64
+restart:  ## Restart all services
+	$(DC) restart
 
-confirm_amd:
-	$(info DOCKER_DEFAULT_PLATFORM: $(DOCKER_DEFAULT_PLATFORM))
+logs:  ## Show logs (use 'make logs SERVICE=webserver' for specific service)
+	$(DC) logs -f $(SERVICE)
 
-up down stop build : .env
-	$(DKC) $@ $(if $(filter $@,up),-d)
+shell:  ## Open shell in webserver container
+	$(DC) exec webserver /bin/bash
 
-rebuild: .env stop
-	$(DKC) build --no-cache
+pg-shell:  ## Open PostgreSQL shell
+	$(DC) exec postgis psql -U dheerajchand -d geodjango_database
 
-clean: .env down
-	$(DKC) rm
+migrate:  ## Run Django migrations
+	$(DC) exec webserver python3 hellodjango/manage.py migrate
 
-#
-# Tasks
-#
+makemigrations:  ## Create Django migrations
+	$(DC) exec webserver python3 hellodjango/manage.py makemigrations
 
-pg_term: .env
-	$(DKC) $(call exec-or-run,postgis) psql -U $(SQL_USER) -d $(SQL_DATABASE)
+collectstatic:  ## Collect static files
+	$(DC) exec webserver python3 hellodjango/manage.py collectstatic --no-input
 
-python_term: .env
-	$(DKC) $(call exec-or-run,webserver_python) /bin/bash
+createsuperuser:  ## Create Django superuser
+	$(DC) exec webserver python3 hellodjango/manage.py createsuperuser
 
-nginx_term: .env
-	$(DKC) $(call exec-or-run,nginx) /bin/bash
+test:  ## Run Django tests
+	$(DC) exec webserver python3 hellodjango/manage.py test
 
-# Django operations
+clean:  ## Remove containers and volumes
+	$(DC) down -v
+	@echo "✅ Cleaned up containers and volumes"
 
-migrate collectstatic: .env
-	$(DKC) $(call exec-or-run,webserver_python) python3 hellodjango/manage.py $@ --no-input
+rebuild:  ## Rebuild images without cache
+	$(DC) build --no-cache
 
-static: collectstatic
+status:  ## Show container status
+	$(DC) ps
 
-remove_migrations:
-	find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
-	find . -path "*/migrations/*.pyc"  -delete
+# Data loading commands
+load-spatial:  ## Load standard spatial data (GADM, timezones)
+	$(DC) exec webserver python3 hellodjango/manage.py fetch_and_load_standard_spatial_data
 
+load-census:  ## Load US Census TIGER data
+	$(DC) exec webserver python3 hellodjango/manage.py fetch_and_load_census_tiger_data
 
-.env: ${ENV_INCLUDES}
-ifndef ENV_INCLUDES
-	$(error ENV_INCLUDES is not set)
-endif
-	@# Ensure that each file ends with a newline
-	@for file in $^; do \
-		if [ -n "$$(tail -c 1 "$$file" | tr -d '\n')" ]; then \
-			echo >> "$$file"; \
-		fi; \
-	done
-	@ echo '# ' > $@
-	@ echo '# WARNING: Generated Configuration using - $^' >> $@
-	@ echo '# ' >> $@
-	@cat $^ >>$@
-	@echo "Generated .env using $^"
+create-places:  ## Create sample places
+	$(DC) exec webserver python3 hellodjango/manage.py create_sample_places
+
+create-addresses:  ## Create sample addresses
+	$(DC) exec webserver python3 hellodjango/manage.py create_sample_addresses
+
