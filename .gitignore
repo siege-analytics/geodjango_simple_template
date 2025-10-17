@@ -218,3 +218,11 @@ GitHub.sublime-settings
 .vscode/launch.json
 .vscode/extensions.json
 .history
+
+# Analysis and planning documents (internal)
+GEODJANGO_STATUS.md
+CONSOLIDATION_REPORT.md
+SIMPLIFICATION_COMPLETE.md
+*_ANALYSIS.md
+*_REPORT.md
+*_STATUS.md
