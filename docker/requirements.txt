@@ -3,6 +3,7 @@ boto3
 Django
 django-cors-headers
 django-extensions
+django-grappelli
 djangorestframework
 djangorestframework-gis
 django-postgres-copy
