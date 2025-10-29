@@ -2,6 +2,10 @@ black
 boto3
 Django
 daphne
+channels
+channels-redis
+celery
+redis
 django-cors-headers
 django-extensions
 django-grappelli

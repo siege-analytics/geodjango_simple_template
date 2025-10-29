@@ -323,3 +323,6 @@ The GeoDjango Simple Template is now:
 
 **Next Step:** Merge useful features from branches and replace old configuration files.
 
+
+
+

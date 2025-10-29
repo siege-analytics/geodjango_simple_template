@@ -52,3 +52,6 @@ echo ""
 echo "💡 Tip: The generated content uses your .env configuration"
 echo "   and can be safely used in private repositories without"
 echo "   exposing template defaults."
+
+
+

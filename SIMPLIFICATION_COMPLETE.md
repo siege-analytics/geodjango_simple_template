@@ -253,3 +253,6 @@ The GeoDjango Simple Template is now:
 
 **The simplification is complete and tested. The system is ready for use!**
 
+
+
+

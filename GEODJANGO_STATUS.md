@@ -297,3 +297,6 @@ The GeoDjango Simple Template is **functional and well-structured**. The main is
 
 The codebase is ready for consolidation and integration into the Socialwarehouse project.
 
+
+
+

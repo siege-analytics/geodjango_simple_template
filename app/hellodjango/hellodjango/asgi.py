@@ -16,12 +16,17 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'hellodjango.settings')
 # is populated before importing code that may import ORM models.
 django_asgi_app = get_asgi_application()
 
-# Daphne automatically handles WSGI compatibility
-# For future WebSocket/Django Channels support, wrap here:
-# from channels.routing import ProtocolTypeRouter
-# application = ProtocolTypeRouter({
-#     "http": django_asgi_app,
-#     "websocket": websocket_application,  # Add when needed
-# })
+# Import Channels routing after Django setup
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from locations import routing as locations_routing
 
-application = django_asgi_app
+# Configure routing for HTTP and WebSocket
+application = ProtocolTypeRouter({
+    "http": django_asgi_app,
+    "websocket": AuthMiddlewareStack(
+        URLRouter(
+            locations_routing.websocket_urlpatterns
+        )
+    ),
+})
