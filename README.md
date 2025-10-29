@@ -1,98 +1,113 @@
-# GeoDjango Template
+# GeoDjango Simple Template
 
-This repository contains a simple template for building GeoDjango applications. I wrote it to make life easier for
-people trying to make simple applications, borrowing from [this project][1].
+A production-ready template for building GeoDjango applications with spatial data support, REST APIs, and real-time capabilities.
 
-It currently supports two environments
+## Tech Stack
 
-- Dev (default)
-- Prod
+### Core Components
+- **Django 5.2** with GeoDjango
+- **Daphne** - ASGI server (supports WSGI + WebSockets)
+- **PostGIS** - Spatial database
+- **nginx** - Reverse proxy
+- **Django REST Framework** + GIS extensions
+- **Grappelli** - Enhanced Django admin
 
-The `Makefile` has parallel commands for most things relating to building the project. Default commands relate to
-the `dev` environment, `prod` commands have a flag on them.
-It's a good idea to use the Makefile.
+### Frontend (Optional)
+- **Vue 3** + Vite
+- **NVM** for Node.js version management
 
-The project makes use of some standard technologies:
+## Quick Start
 
-- [gunicorn][2]
-- [nginx][3]
-- [PostGIS][4]
-- [NVM][28]
-- [Vue/Vite][29]
-- [Django REST Framework][16]
-- [Django REST Framework GIS Extensions][17]
+```bash
+# Build and start all services
+make build
+make up
 
-# Make Live Data Available
+# Access the application
+# Django API:  http://localhost:8000/locations/places/
+# Nginx:       http://localhost:8001
+# Admin:       http://localhost:8000/admin/
+# PostGIS:     localhost:54322
+```
 
-There are currently data that are made available through Django management commands in an app called `locations`.
-I should probably wrap these in `make` commands to make it easier, as you currently have to `ssh` into the
-webserver container to issue them.
+## Load Sample Data
 
-1. `make python_term`
-2. `root@61c21188aa79:/usr/src/app# python hellodjango/manage.py fetch_and_load_standard_spatial_data`
-3. `root@61c21188aa79:/usr/src/app# python hellodjango/manage.py create_sample_places`
+```bash
+# Shell into webserver container
+make shell
 
-The webserver is currently set up to run on port `8000`, so in your browser, you will need to go to:
+# Load standard spatial data (GADM, timezones)
+python hellodjango/manage.py fetch_and_load_standard_spatial_data
 
-http://127.0.0.1:8000/locations/places/
+# Create sample places
+python hellodjango/manage.py create_sample_places
 
-# Goals
+# Load Census TIGER data
+python hellodjango/manage.py fetch_and_load_census_tiger_data
+```
 
-## Currently
+## API Endpoints
 
-- Working on making all `locations` models accessible through Django REST Framework API
-    - All GADM and Timezone Models work
-    - Synthetic models are giving difficulty with serialization
-- Adding models, fetch and load for US Census
-    - Models are added, debugging mappings
-    - Debugging foreign keys
-- Adding geocoding API for addresses through Nominatim
-- Fixing `nginx` and static files service
+- `/locations/places/` - GeoJSON places API
+- `/locations/admin_level_0s/` - Country-level admin boundaries
+- `/locations/admin_level_1s/` - State/province-level
+- `/locations/timezones/` - Timezone data
+- `/admin/` - Django admin interface
 
-## Next in queue
+## Features
 
-- [Make tasks happen asynchronously][13]
-- Integrate [Siege Analytics Social Warehouse][18]
+### ✅ Complete
+- Daphne ASGI server (WSGI + WebSocket support)
+- PostGIS spatial database
+- Django REST Framework with GIS extensions
+- Grappelli enhanced admin interface
+- GADM administrative boundaries (global)
+- Timezone data
+- US Census TIGER data support
+- Geocoding via Nominatim
+- nginx with static file serving
 
-## Mid-term plans
+### 🔄 In Progress
+- Synthetic location models refinement
+- Additional US Census data integration
 
-I'd like to add
+### 📋 Planned
+- Django Channels (WebSocket support)
+- Apache Spark integration
+- Apache Sedona (geospatial Spark)
+- GeoServer for tile serving
+- RabbitMQ for task queue
+- Whitenoise for media files
 
-- ✅ Daphne (COMPLETE - ASGI + WSGI support implemented)
-- Spark
-- Sedona
-- GeoServer
-- RabbitMQ/Django Channels
-- Whitenoise / media
-- ✅ Grappelli for admin (COMPLETE)
+## Makefile Commands
 
-## Long-term Vision
+```bash
+make build          # Build all Docker images
+make up             # Start all services
+make down           # Stop all services
+make restart        # Restart all services
+make logs           # Show logs (add SERVICE=webserver for specific service)
+make shell          # Open shell in webserver container
+make pg-shell       # Open PostgreSQL shell
+make migrate        # Run Django migrations
+make collectstatic  # Collect static files
+make clean          # Remove containers and volumes
+```
 
-This should be a complete spatial management tool.
+## Building
 
-# Building (Docker Images)
+```bash
+# First time setup
+make build
+make up
+make migrate
+make collectstatic
 
-Building the docker images using the Makefile manages the environment variables for you. The `.env` file is
-auto-generated from partial files in the `conf/` directory.
-
-The `conf/build.conf` file is for variables that effect Docker, such as `DOCKER_DEFAULT_PLATFORM`, and
-`UBUNTU_BASE_IMAGE`.
-
-Then run `make build` to build the project.
-
-## Build Cache
-
-Reminder that docker uses cache to speed up builds. If system package dependencies change, you may need to rebuild
-without using cache. The Makefile has a `rebuild` target that does this. (`docker compose build --no-cache`)
-
-## Environment Config
-
-**NB:** The docker compose `.env` file is auto-generated and git-ignored. The sources are determined by the
-`ENV_INCLUDES`
-env var. See the `Makefile` for more details. Changes to any of the files listed in `ENV_INCLUDES` will cause the `.env`
-file to be regenerated.
-
-If you are unsure of the status of your `.env`, you can force (always-re-make) it by running `make -B .env`.
+# Load sample data (optional)
+make shell
+python hellodjango/manage.py fetch_and_load_standard_spatial_data
+python hellodjango/manage.py create_sample_places
+```
 
 # References:
 
