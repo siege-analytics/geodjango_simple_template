@@ -107,10 +107,12 @@ def load_single_spatial_model(self, model_name):
     try:
         logger.info(f"[Worker {self.request.hostname}] Loading model: {model_name}")
         
-        from utilities.vector_data_utilities import fetch_and_load_all_data
+        # Call the management command synchronously within this task
+        # This is OK because each model loads independently across workers
+        from django.core.management import call_command
         
         # Slow operations: download → unzip → transform → load to PostGIS
-        result = fetch_and_load_all_data(model_name.lower())
+        call_command('fetch_and_load_standard_spatial_data', model_name.lower())
         
         elapsed = time.time() - start_time
         logger.info(f"[Worker {self.request.hostname}] Loaded {model_name} in {elapsed:.2f}s")
@@ -170,25 +172,19 @@ def fetch_and_load_standard_spatial_data_async(self, models=None):
             for model_name in models_to_load
         )
         
-        # Execute across all available workers
+        # Execute across all available workers (don't block - fire and return)
         result = job.apply_async()
-        results = result.get(timeout=900)  # 15 minute timeout for parallel load
         
-        # Aggregate results
-        successful = [r for r in results if r['status'] == 'success']
-        failed = [r for r in results if r['status'] == 'error']
-        total_time = sum(r.get('elapsed_seconds', 0) for r in successful)
+        logger.info(f"[Task {self.request.id}] Queued {len(models_to_load)} parallel tasks. Group ID: {result.id}")
+        logger.info(f"[Task {self.request.id}] Tasks will execute independently. Monitor via Flower or logs.")
         
-        logger.info(f"[Task {self.request.id}] Parallel load complete: {len(successful)} OK, {len(failed)} failed")
-        logger.info(f"[Task {self.request.id}] Total processing time: {total_time:.2f}s (parallelized!)")
-        
+        # Return immediately with group ID for tracking
         return {
-            'status': 'success',
+            'status': 'queued',
             'task_id': self.request.id,
-            'models_loaded': len(successful),
-            'models_failed': len(failed),
-            'total_processing_seconds': round(total_time, 2),
-            'results': results
+            'group_id': result.id,
+            'models_queued': models_to_load,
+            'message': f'Queued {len(models_to_load)} models for parallel loading. Check Flower or logs for progress.'
         }
     except Exception as e:
         logger.error(f"[Task {self.request.id}] Parallel load failed: {e}")
