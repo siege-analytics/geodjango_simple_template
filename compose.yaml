@@ -43,11 +43,9 @@ services:
       SQL_USER: dheerajchand
       SQL_PASSWORD: strongpasswd
       SQL_PORT: 5432
-      # Gunicorn
-      GUNICORN_HOST: 0.0.0.0
-      GUNICORN_PORT: 8000
-      GUNICORN_WORKERS: 4
-      GUNICORN_TIMEOUT: 120
+      # Daphne
+      DAPHNE_HOST: 0.0.0.0
+      DAPHNE_PORT: 8000
     ports:
       - "8000:8000"
     volumes:
@@ -58,7 +56,7 @@ services:
         condition: service_healthy
     networks:
       - geodjango_network
-    command: sh -c "/opt/venv/bin/python /opt/venv/bin/gunicorn hellodjango.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120 --chdir /usr/src/app/hellodjango"
+    command: sh -c "cd /usr/src/app/hellodjango && /opt/venv/bin/daphne -b 0.0.0.0 -p 8000 hellodjango.asgi:application"
 
   nginx:
     build:

@@ -58,13 +58,13 @@ http://127.0.0.1:8000/locations/places/
 
 I'd like to add
 
-- Daphne
+- ✅ Daphne (COMPLETE - ASGI + WSGI support implemented)
 - Spark
 - Sedona
 - GeoServer
 - RabbitMQ/Django Channels
 - Whitenoise / media
-- Grapelli for admin
+- ✅ Grappelli for admin (COMPLETE)
 
 ## Long-term Vision
 

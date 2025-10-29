@@ -1,6 +1,7 @@
 black
 boto3
 Django
+daphne
 django-cors-headers
 django-extensions
 django-grappelli
