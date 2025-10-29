@@ -36,8 +36,25 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("models", nargs="*")
+        parser.add_argument(
+            '--async',
+            action='store_true',
+            help='Run as Celery task (async)',
+        )
 
     def handle(self, *args, **kwargs):
+        # Check if async flag is set
+        use_async = kwargs.get('async', False)
+        
+        if use_async:
+            from locations.tasks import fetch_and_load_standard_spatial_data_async
+            result = fetch_and_load_standard_spatial_data_async.delay(kwargs.get("models"))
+            self.stdout.write(
+                self.style.SUCCESS(f'✅ Task queued: {result.id}')
+            )
+            self.stdout.write(f'Monitor progress: docker logs geodjango_celery_1 -f')
+            return
+        
         # get command line specified options
         model_set = kwargs["models"]
         known_models = list(DOWNLOADS_DISPATCHER.keys())

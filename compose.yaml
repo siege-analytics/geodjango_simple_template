@@ -81,13 +81,13 @@ services:
       - geodjango_network
     command: sh -c "cd /usr/src/app/hellodjango && /opt/venv/bin/daphne -b 0.0.0.0 -p 8000 hellodjango.asgi:application"
 
-  celery_worker:
+  celery_worker_1:
     build:
       context: ./docker
       args:
         UBUNTU_BASE_IMAGE: ubuntu:jammy
     image: geodjango_webserver
-    container_name: geodjango_celery
+    container_name: geodjango_celery_1
     restart: unless-stopped
     environment:
       # Django
@@ -116,7 +116,81 @@ services:
         condition: service_healthy
     networks:
       - geodjango_network
-    command: sh -c "cd /usr/src/app/hellodjango && /opt/venv/bin/celery -A hellodjango worker -l info"
+    command: sh -c "cd /usr/src/app/hellodjango && /opt/venv/bin/celery -A hellodjango worker -n worker1@%h -l info"
+
+  celery_worker_2:
+    build:
+      context: ./docker
+      args:
+        UBUNTU_BASE_IMAGE: ubuntu:jammy
+    image: geodjango_webserver
+    container_name: geodjango_celery_2
+    restart: unless-stopped
+    environment:
+      # Django
+      DEBUG: 1
+      SECRET_KEY: afdawango
+      DJANGO_ALLOWED_HOSTS: "*"
+      # Database
+      SQL_ENGINE: django.contrib.gis.db.backends.postgis
+      SQL_HOST: postgis
+      SQL_DATABASE: geodjango_database
+      SQL_USER: dheerajchand
+      SQL_PASSWORD: strongpasswd
+      SQL_PORT: 5432
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      # Celery
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    volumes:
+      - ./app:/usr/src/app
+    depends_on:
+      postgis:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - geodjango_network
+    command: sh -c "cd /usr/src/app/hellodjango && /opt/venv/bin/celery -A hellodjango worker -n worker2@%h -l info"
+
+  celery_worker_3:
+    build:
+      context: ./docker
+      args:
+        UBUNTU_BASE_IMAGE: ubuntu:jammy
+    image: geodjango_webserver
+    container_name: geodjango_celery_3
+    restart: unless-stopped
+    environment:
+      # Django
+      DEBUG: 1
+      SECRET_KEY: afdawango
+      DJANGO_ALLOWED_HOSTS: "*"
+      # Database
+      SQL_ENGINE: django.contrib.gis.db.backends.postgis
+      SQL_HOST: postgis
+      SQL_DATABASE: geodjango_database
+      SQL_USER: dheerajchand
+      SQL_PASSWORD: strongpasswd
+      SQL_PORT: 5432
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      # Celery
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    volumes:
+      - ./app:/usr/src/app
+    depends_on:
+      postgis:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - geodjango_network
+    command: sh -c "cd /usr/src/app/hellodjango && /opt/venv/bin/celery -A hellodjango worker -n worker3@%h -l info"
 
   nginx:
     build:

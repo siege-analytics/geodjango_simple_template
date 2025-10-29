@@ -5,6 +5,7 @@ Celery tasks for locations app
 from celery import shared_task
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance
+from django.core.management import call_command
 from .models import Place
 import logging
 
@@ -81,4 +82,132 @@ def cleanup_old_locations():
     logger.info("Running location cleanup task")
     # Implement cleanup logic
     return {'status': 'success', 'message': 'Cleanup complete'}
+
+
+# === Management Command Tasks ===
+# These wrap existing management commands for async execution
+
+@shared_task(bind=True)
+def fetch_and_load_standard_spatial_data_async(self, models=None):
+    """
+    Async task: Fetch and load standard spatial data (GADM, timezones, etc.)
+    
+    Args:
+        models (list): Optional list of models to load. If None, loads all.
+    
+    Returns:
+        dict: Status and results
+    """
+    try:
+        logger.info(f"[Task {self.request.id}] Starting spatial data fetch")
+        
+        # Call the management command
+        if models:
+            call_command('fetch_and_load_standard_spatial_data', *models)
+        else:
+            call_command('fetch_and_load_standard_spatial_data')
+        
+        logger.info(f"[Task {self.request.id}] Spatial data fetch complete")
+        return {
+            'status': 'success',
+            'task_id': self.request.id,
+            'message': 'Spatial data loaded successfully'
+        }
+    except Exception as e:
+        logger.error(f"[Task {self.request.id}] Failed to load spatial data: {e}")
+        return {
+            'status': 'error',
+            'task_id': self.request.id,
+            'message': str(e)
+        }
+
+
+@shared_task(bind=True)
+def fetch_and_load_census_tiger_data_async(self, models=None):
+    """
+    Async task: Fetch and load US Census TIGER data
+    
+    Args:
+        models (list): Optional list of models to load
+    
+    Returns:
+        dict: Status and results
+    """
+    try:
+        logger.info(f"[Task {self.request.id}] Starting Census TIGER data fetch")
+        
+        if models:
+            call_command('fetch_and_load_census_tiger_data', *models)
+        else:
+            call_command('fetch_and_load_census_tiger_data')
+        
+        logger.info(f"[Task {self.request.id}] Census TIGER data fetch complete")
+        return {
+            'status': 'success',
+            'task_id': self.request.id,
+            'message': 'Census TIGER data loaded successfully'
+        }
+    except Exception as e:
+        logger.error(f"[Task {self.request.id}] Failed to load Census TIGER data: {e}")
+        return {
+            'status': 'error',
+            'task_id': self.request.id,
+            'message': str(e)
+        }
+
+
+@shared_task(bind=True)
+def create_sample_places_async(self):
+    """
+    Async task: Create sample places from pharmacy data
+    
+    Returns:
+        dict: Status and results
+    """
+    try:
+        logger.info(f"[Task {self.request.id}] Creating sample places")
+        
+        call_command('create_sample_places')
+        
+        logger.info(f"[Task {self.request.id}] Sample places created")
+        return {
+            'status': 'success',
+            'task_id': self.request.id,
+            'message': 'Sample places created successfully'
+        }
+    except Exception as e:
+        logger.error(f"[Task {self.request.id}] Failed to create sample places: {e}")
+        return {
+            'status': 'error',
+            'task_id': self.request.id,
+            'message': str(e)
+        }
+
+
+@shared_task(bind=True)
+def create_sample_addresses_async(self):
+    """
+    Async task: Create sample addresses
+    
+    Returns:
+        dict: Status and results
+    """
+    try:
+        logger.info(f"[Task {self.request.id}] Creating sample addresses")
+        
+        call_command('create_sample_addresses')
+        
+        logger.info(f"[Task {self.request.id}] Sample addresses created")
+        return {
+            'status': 'success',
+            'task_id': self.request.id,
+            'message': 'Sample addresses created successfully'
+        }
+    except Exception as e:
+        logger.error(f"[Task {self.request.id}] Failed to create sample addresses: {e}")
+        return {
+            'status': 'error',
+            'task_id': self.request.id,
+            'message': str(e)
+        }
 
