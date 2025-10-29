@@ -46,6 +46,105 @@ python hellodjango/manage.py create_sample_places
 python hellodjango/manage.py fetch_and_load_census_tiger_data
 ```
 
+## Celery (Idiot‑Proof Guide)
+
+Use Celery workers to split big/slow tasks across multiple containers so the web app stays fast.
+
+### 1) Start everything
+
+```bash
+make build
+make up
+
+# You should see these services running:
+# - geodjango_webserver (Daphne)
+# - geodjango_postgis (PostGIS)
+# - geodjango_redis (Redis)
+# - geodjango_celery_1, geodjango_celery_2, geodjango_celery_3 (Celery workers)
+```
+
+### 2) Run heavy commands ASYNC (don’t block your terminal)
+
+```bash
+make shell
+
+# Load spatial data in the background (parallelized across 3 workers)
+python hellodjango/manage.py fetch_and_load_standard_spatial_data --async
+
+# Load Census TIGER data in the background
+python hellodjango/manage.py fetch_and_load_census_tiger_data --async
+
+# Create sample data in the background
+python hellodjango/manage.py create_sample_places --async
+```
+
+You’ll get back a Task ID immediately. Work happens on the workers.
+
+### 3) How to tell if workers are alive
+
+```bash
+# See workers listed
+docker ps | grep geodjango_celery
+
+# See a worker become ready
+docker logs geodjango_celery_1 | grep ready
+
+# Inspect workers (registered tasks, stats)
+docker exec geodjango_celery_1 /opt/venv/bin/celery -A hellodjango inspect stats
+docker exec geodjango_celery_1 /opt/venv/bin/celery -A hellodjango inspect registered
+```
+
+### 4) Watch task progress (no UI)
+
+```bash
+# Stream logs from all workers in separate terminals
+docker logs -f geodjango_celery_1
+docker logs -f geodjango_celery_2
+docker logs -f geodjango_celery_3
+
+# See currently running tasks
+docker exec geodjango_celery_1 /opt/venv/bin/celery -A hellodjango inspect active
+```
+
+### 5) Submit tasks from Python (advanced, still idiot‑proof)
+
+```python
+from locations.tasks import fetch_and_load_standard_spatial_data_async
+
+result = fetch_and_load_standard_spatial_data_async.delay(['gadm', 'timezone'])
+print(result.id)      # Task ID
+print(result.status)  # PENDING → STARTED → SUCCESS/FAILURE
+
+# (Optional) wait for result (blocks)
+result.get(timeout=900)
+```
+
+### 6) Optional: Web UI with Flower
+
+Flower gives you a dashboard to see tasks, states, and workers.
+
+Steps:
+- Flower is included as a service; just bring the stack up.
+- Open Flower: http://localhost:5555
+
+What you’ll see:
+- Workers online/offline
+- Task list with live states
+- Per‑task details, retries, errors
+
+If the UI isn’t reachable, run:
+
+```bash
+make up
+docker logs -f geodjango_flower
+```
+
+### FAQ
+
+- "It looks stuck." → Check `docker logs -f geodjango_celery_1` for progress. Big downloads/unzips take time.
+- "I want to use all workers." → You already are. Tasks are split automatically.
+- "How do I retry?" → Re‑run the manage.py command with `--async`. Failed tasks are independent.
+
 ## API Endpoints
 
 - `/locations/places/` - GeoJSON places API

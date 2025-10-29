@@ -207,6 +207,23 @@ services:
     networks:
       - geodjango_network
 
+  flower:
+    image: geodjango_webserver
+    container_name: geodjango_flower
+    restart: unless-stopped
+    environment:
+      DEBUG: 1
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - geodjango_network
+    ports:
+      - "5555:5555"
+    command: sh -c "cd /usr/src/app/hellodjango && /opt/venv/bin/celery -A hellodjango flower --port=5555"
+
 networks:
   geodjango_network:
     driver: bridge

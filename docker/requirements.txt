@@ -6,6 +6,7 @@ channels
 channels-redis
 celery
 redis
+flower
 django-cors-headers
 django-extensions
 django-grappelli
