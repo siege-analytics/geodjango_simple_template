@@ -88,33 +88,110 @@ def cleanup_old_locations():
 # These wrap existing management commands for async execution
 
 @shared_task(bind=True)
-def fetch_and_load_standard_spatial_data_async(self, models=None):
+def load_single_spatial_model(self, model_name):
     """
-    Async task: Fetch and load standard spatial data (GADM, timezones, etc.)
+    Task: Load a single spatial model (can run in parallel with others)
+    
+    This breaks down the monolithic load into per-model tasks that can be
+    distributed across workers, speeding up the total load time significantly.
     
     Args:
-        models (list): Optional list of models to load. If None, loads all.
+        model_name (str): Model to load (e.g., 'gadm', 'timezones')
     
     Returns:
-        dict: Status and results
+        dict: Status, timing, and worker info
+    """
+    import time
+    start_time = time.time()
+    
+    try:
+        logger.info(f"[Worker {self.request.hostname}] Loading model: {model_name}")
+        
+        from utilities.vector_data_utilities import fetch_and_load_all_data
+        
+        # Slow operations: download → unzip → transform → load to PostGIS
+        result = fetch_and_load_all_data(model_name.lower())
+        
+        elapsed = time.time() - start_time
+        logger.info(f"[Worker {self.request.hostname}] Loaded {model_name} in {elapsed:.2f}s")
+        
+        return {
+            'status': 'success',
+            'model': model_name,
+            'worker': self.request.hostname,
+            'elapsed_seconds': round(elapsed, 2)
+        }
+    except Exception as e:
+        elapsed = time.time() - start_time
+        logger.error(f"[Worker {self.request.hostname}] Failed {model_name}: {e}")
+        return {
+            'status': 'error',
+            'model': model_name,
+            'worker': self.request.hostname,
+            'elapsed_seconds': round(elapsed, 2),
+            'error': str(e)
+        }
+
+
+@shared_task(bind=True)
+def fetch_and_load_standard_spatial_data_async(self, models=None):
+    """
+    Orchestrator: Load multiple spatial models in PARALLEL using Celery groups
+    
+    Instead of loading sequentially (slow), this distributes models across
+    the 3 Celery workers for parallel execution.
+    
+    Example: Loading gadm (6 levels) + timezones sequentially = ~15 minutes
+             Loading in parallel across 3 workers = ~5-7 minutes
+    
+    Args:
+        models (list): Models to load. None = all models
+    
+    Returns:
+        dict: Aggregate results from all parallel tasks
     """
     try:
-        logger.info(f"[Task {self.request.id}] Starting spatial data fetch")
+        logger.info(f"[Task {self.request.id}] Starting PARALLEL spatial data load")
         
-        # Call the management command
-        if models:
-            call_command('fetch_and_load_standard_spatial_data', *models)
+        from utilities.dispatchers import DOWNLOADS_DISPATCHER
+        from celery import group
+        
+        # Determine models to load
+        if not models:
+            models_to_load = list(DOWNLOADS_DISPATCHER.keys())
         else:
-            call_command('fetch_and_load_standard_spatial_data')
+            models_to_load = [m for m in models if m.lower() in DOWNLOADS_DISPATCHER]
         
-        logger.info(f"[Task {self.request.id}] Spatial data fetch complete")
+        logger.info(f"[Task {self.request.id}] Loading {len(models_to_load)} models in parallel: {models_to_load}")
+        
+        # Create parallel task group - each model loads independently
+        job = group(
+            load_single_spatial_model.s(model_name) 
+            for model_name in models_to_load
+        )
+        
+        # Execute across all available workers
+        result = job.apply_async()
+        results = result.get(timeout=900)  # 15 minute timeout for parallel load
+        
+        # Aggregate results
+        successful = [r for r in results if r['status'] == 'success']
+        failed = [r for r in results if r['status'] == 'error']
+        total_time = sum(r.get('elapsed_seconds', 0) for r in successful)
+        
+        logger.info(f"[Task {self.request.id}] Parallel load complete: {len(successful)} OK, {len(failed)} failed")
+        logger.info(f"[Task {self.request.id}] Total processing time: {total_time:.2f}s (parallelized!)")
+        
         return {
             'status': 'success',
             'task_id': self.request.id,
-            'message': 'Spatial data loaded successfully'
+            'models_loaded': len(successful),
+            'models_failed': len(failed),
+            'total_processing_seconds': round(total_time, 2),
+            'results': results
         }
     except Exception as e:
-        logger.error(f"[Task {self.request.id}] Failed to load spatial data: {e}")
+        logger.error(f"[Task {self.request.id}] Parallel load failed: {e}")
         return {
             'status': 'error',
             'task_id': self.request.id,
