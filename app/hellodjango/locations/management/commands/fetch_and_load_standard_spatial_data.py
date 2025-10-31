@@ -52,16 +52,35 @@ class Command(BaseCommand):
             action='store_true',
             help='Use pipelined approach: preprocess→load per worker, all parallel (GADM only)',
         )
+        parser.add_argument(
+            '--sedonadb',
+            action='store_true',
+            help='Use SedonaDB (Arrow-based) for preprocessing - FASTEST option (GADM only)',
+        )
 
     def handle(self, *args, **kwargs):
         # Check if async flag is set
         use_async = kwargs.get('async', False)
         use_optimized = kwargs.get('optimized', False)
         use_pipelined = kwargs.get('pipelined', False)
+        use_sedonadb = kwargs.get('sedonadb', False)
         models = kwargs.get("models")
         
         if use_async:
-            # Check for pipelined GADM loading (BEST option)
+            # Check for SedonaDB GADM loading (FASTEST option)
+            if use_sedonadb and models and 'gadm' in models:
+                from locations.tasks_sedonadb import load_gadm_sedonadb
+                result = load_gadm_sedonadb.delay()
+                self.stdout.write(
+                    self.style.SUCCESS(f'✅ SedonaDB GADM load queued: {result.id}')
+                )
+                self.stdout.write('Engine: SedonaDB (Arrow + DataFusion)')
+                self.stdout.write('Pipeline: 6 parallel SedonaDB preprocess → load → FK population')
+                self.stdout.write('Expected time: ~5-8 minutes (vs 25+ sequential)')
+                self.stdout.write(f'Monitor: docker logs geodjango_celery_1 geodjango_celery_2 geodjango_celery_3 -f')
+                return
+            
+            # Check for pipelined GADM loading (GOOD option)
             if use_pipelined and models and 'gadm' in models:
                 from locations.tasks_gadm_pipeline import load_gadm_pipelined
                 result = load_gadm_pipelined.delay()
