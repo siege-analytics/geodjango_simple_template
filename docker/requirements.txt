@@ -7,6 +7,7 @@ channels-redis
 celery
 redis
 flower
+apache-sedona[db]
 django-cors-headers
 django-extensions
 django-grappelli
