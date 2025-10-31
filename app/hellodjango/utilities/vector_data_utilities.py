@@ -156,18 +156,20 @@ def fix_gadm_null_foreign_keys(
             gdf = gpd.read_file(source_gadm_dataset, layer=g)
             logging.info(f"Layer {g} has columns: {list(gdf)}")
 
+            # Fix ALL columns first, THEN write once (not per column!)
+            columns_fixed = []
             for c in columns_to_fix:
                 if c in list(gdf):
-                    message = f"Layer {g} has a column that needs to be fixed: {c}"
+                    message = f"Layer {g} fixing column: {c}"
                     logging.info(message)
                     gdf[c] = gdf[c].replace("NA", np.nan)
-
-                    result = gdf.to_file(target_gpkg, driver="GPKG", layer=g)
-                    message = ""
-                    message += f"Layer {g} to {target_gpkg}: {result}"
-                    logging.info(message)
-                else:
-                    pass
+                    columns_fixed.append(c)
+            
+            # Write ONCE after all columns fixed
+            if columns_fixed:
+                result = gdf.to_file(target_gpkg, driver="GPKG", layer=g)
+                message = f"Layer {g} written with {len(columns_fixed)} columns fixed: {columns_fixed}"
+                logging.info(message)
 
         return target_gpkg
 

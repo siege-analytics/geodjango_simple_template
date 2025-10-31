@@ -57,13 +57,14 @@ class Command(BaseCommand):
         if use_async:
             # Check for optimized GADM loading
             if use_optimized and models and 'gadm' in models:
-                from locations.tasks_gadm import load_gadm_parallel
-                result = load_gadm_parallel.delay()
+                from locations.tasks_gadm_optimized import load_gadm_parallel_optimized
+                result = load_gadm_parallel_optimized.delay()
                 self.stdout.write(
                     self.style.SUCCESS(f'✅ Optimized GADM load queued: {result.id}')
                 )
-                self.stdout.write('This will: download→6 parallel layer loads')
-                self.stdout.write(f'Monitor: docker logs geodjango_celery_1 geodjango_celery_2 geodjango_celery_3')
+                self.stdout.write('This will: 6 parallel layer loads → FK population')
+                self.stdout.write('Expected time: ~8-10 minutes (vs 25+ sequential)')
+                self.stdout.write(f'Monitor: docker logs geodjango_celery_1 geodjango_celery_2 geodjango_celery_3 -f')
                 return
             
             # Standard async (current behavior)

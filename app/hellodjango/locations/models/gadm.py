@@ -34,9 +34,14 @@ admin_level_0_mapping = {
 
 
 class Admin_Level_1(models.Model):
+    # Foreign keys (populated after parallel load)
     gid_0 = models.ForeignKey(
         Admin_Level_0, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    # String field for initial parallel load (before FK resolution)
+    gid_0_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
     name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
@@ -84,13 +89,21 @@ admin_level_1_mapping = {
 
 
 class Admin_Level_2(models.Model):
+    # Foreign keys (populated after parallel load)
     gid_0 = models.ForeignKey(
         Admin_Level_0, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_0_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
+    
     gid_1 = models.ForeignKey(
         Admin_Level_1, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_1_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
     nl_name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
@@ -135,18 +148,30 @@ admin_level_2_mapping = {
 
 
 class Admin_Level_3(models.Model):
+    # Foreign keys (populated after parallel load)
     gid_0 = models.ForeignKey(
         Admin_Level_0, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_0_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
+    
     gid_1 = models.ForeignKey(
         Admin_Level_1, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_1_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
     nl_name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    
     gid_2 = models.ForeignKey(
         Admin_Level_2, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_2_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
     nl_name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
@@ -195,21 +220,37 @@ admin_level_3_mapping = {
 
 
 class Admin_Level_4(models.Model):
+    # Foreign keys (populated after parallel load)
     gid_0 = models.ForeignKey(
         Admin_Level_0, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_0_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
+    
     gid_1 = models.ForeignKey(
         Admin_Level_1, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_1_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    
     gid_2 = models.ForeignKey(
         Admin_Level_2, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_2_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    
     gid_3 = models.ForeignKey(
         Admin_Level_3, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_3_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     name_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
     name_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
@@ -253,25 +294,45 @@ admin_level_4_mapping = {
 
 
 class Admin_Level_5(models.Model):
+    # Foreign keys (populated after parallel load)
     gid_0 = models.ForeignKey(
         Admin_Level_0, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_0_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     country = models.CharField(max_length=250, null=True, blank=True, default=None)
+    
     gid_1 = models.ForeignKey(
         Admin_Level_1, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_1_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     name_1 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    
     gid_2 = models.ForeignKey(
         Admin_Level_2, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_2_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     name_2 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    
     gid_3 = models.ForeignKey(
         Admin_Level_3, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_3_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     name_3 = models.CharField(max_length=250, null=True, blank=True, default=None)
+    
     gid_4 = models.ForeignKey(
         Admin_Level_4, on_delete=models.SET_DEFAULT, null=True, blank=True, default=None
     )
+    gid_4_string = models.CharField(max_length=250, null=True, blank=True, default=None,
+                                     help_text="Temp field for parallel loading")
+    
     name_4 = models.CharField(max_length=250, null=True, blank=True, default=None)
     gid_5 = models.CharField(max_length=250, null=True, blank=True, default=None)
     name_5 = models.CharField(max_length=250, null=True, blank=True, default=None)
