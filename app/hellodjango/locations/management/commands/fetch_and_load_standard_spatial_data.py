@@ -47,14 +47,32 @@ class Command(BaseCommand):
             action='store_true',
             help='Use optimized per-layer parallel loading (GADM only)',
         )
+        parser.add_argument(
+            '--pipelined',
+            action='store_true',
+            help='Use pipelined approach: preprocess→load per worker, all parallel (GADM only)',
+        )
 
     def handle(self, *args, **kwargs):
         # Check if async flag is set
         use_async = kwargs.get('async', False)
         use_optimized = kwargs.get('optimized', False)
+        use_pipelined = kwargs.get('pipelined', False)
         models = kwargs.get("models")
         
         if use_async:
+            # Check for pipelined GADM loading (BEST option)
+            if use_pipelined and models and 'gadm' in models:
+                from locations.tasks_gadm_pipeline import load_gadm_pipelined
+                result = load_gadm_pipelined.delay()
+                self.stdout.write(
+                    self.style.SUCCESS(f'✅ Pipelined GADM load queued: {result.id}')
+                )
+                self.stdout.write('Pipeline: Each worker does preprocess→load (×2 layers), all parallel')
+                self.stdout.write('Expected time: ~8-10 minutes (vs 25+ sequential)')
+                self.stdout.write(f'Monitor: docker logs geodjango_celery_1 geodjango_celery_2 geodjango_celery_3 -f')
+                return
+            
             # Check for optimized GADM loading
             if use_optimized and models and 'gadm' in models:
                 from locations.tasks_gadm_optimized import load_gadm_parallel_optimized
