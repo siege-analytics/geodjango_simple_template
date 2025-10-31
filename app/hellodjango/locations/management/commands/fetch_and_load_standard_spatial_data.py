@@ -124,6 +124,7 @@ def load_zipped_data_file_into_orm(
 
     successes = []
     failures = []
+    model_definition = None  # Initialize to avoid UnboundLocalError
 
     try:
         message = "\n"
