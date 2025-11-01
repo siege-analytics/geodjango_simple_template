@@ -17,13 +17,8 @@ app = Celery('hellodjango')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Load task modules from all registered Django apps.
+# All GADM tasks (SedonaDB, pipelined, optimized) are consolidated in locations/tasks.py
 app.autodiscover_tasks()
-
-# Explicitly register additional task modules beyond the standard tasks.py
-# Celery autodiscover only finds tasks.py by default
-app.autodiscover_tasks(['locations'], related_name='tasks_sedonadb', force=True)
-app.autodiscover_tasks(['locations'], related_name='tasks_gadm_optimized', force=True)
-app.autodiscover_tasks(['locations'], related_name='tasks_gadm_pipeline', force=True)
 
 
 @app.task(bind=True, ignore_result=True)

@@ -6,7 +6,6 @@ import importlib
 
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
-from django.contrib.gis.utils import LayerMapping
 
 # geospatial libraries
 
@@ -37,82 +36,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("models", nargs="*")
-        parser.add_argument(
-            '--async',
-            action='store_true',
-            help='Run as Celery task (async)',
-        )
-        parser.add_argument(
-            '--optimized',
-            action='store_true',
-            help='Use optimized per-layer parallel loading (GADM only)',
-        )
-        parser.add_argument(
-            '--pipelined',
-            action='store_true',
-            help='Use pipelined approach: preprocess→load per worker, all parallel (GADM only)',
-        )
-        parser.add_argument(
-            '--sedonadb',
-            action='store_true',
-            help='Use SedonaDB (Arrow-based) for preprocessing - FASTEST option (GADM only)',
-        )
 
     def handle(self, *args, **kwargs):
-        # Check if async flag is set
-        use_async = kwargs.get('async', False)
-        use_optimized = kwargs.get('optimized', False)
-        use_pipelined = kwargs.get('pipelined', False)
-        use_sedonadb = kwargs.get('sedonadb', False)
-        models = kwargs.get("models")
-        
-        if use_async:
-            # Check for SedonaDB GADM loading (FASTEST option)
-            if use_sedonadb and models and 'gadm' in models:
-                from locations.tasks_sedonadb import load_gadm_sedonadb
-                result = load_gadm_sedonadb.delay()
-                self.stdout.write(
-                    self.style.SUCCESS(f'✅ SedonaDB GADM load queued: {result.id}')
-                )
-                self.stdout.write('Engine: SedonaDB (Arrow + DataFusion)')
-                self.stdout.write('Pipeline: 6 parallel SedonaDB preprocess → load → FK population')
-                self.stdout.write('Expected time: ~5-8 minutes (vs 25+ sequential)')
-                self.stdout.write(f'Monitor: docker logs geodjango_celery_1 geodjango_celery_2 geodjango_celery_3 -f')
-                return
-            
-            # Check for pipelined GADM loading (GOOD option)
-            if use_pipelined and models and 'gadm' in models:
-                from locations.tasks_gadm_pipeline import load_gadm_pipelined
-                result = load_gadm_pipelined.delay()
-                self.stdout.write(
-                    self.style.SUCCESS(f'✅ Pipelined GADM load queued: {result.id}')
-                )
-                self.stdout.write('Pipeline: Each worker does preprocess→load (×2 layers), all parallel')
-                self.stdout.write('Expected time: ~8-10 minutes (vs 25+ sequential)')
-                self.stdout.write(f'Monitor: docker logs geodjango_celery_1 geodjango_celery_2 geodjango_celery_3 -f')
-                return
-            
-            # Check for optimized GADM loading
-            if use_optimized and models and 'gadm' in models:
-                from locations.tasks_gadm_optimized import load_gadm_parallel_optimized
-                result = load_gadm_parallel_optimized.delay()
-                self.stdout.write(
-                    self.style.SUCCESS(f'✅ Optimized GADM load queued: {result.id}')
-                )
-                self.stdout.write('This will: 6 parallel layer loads → FK population')
-                self.stdout.write('Expected time: ~8-10 minutes (vs 25+ sequential)')
-                self.stdout.write(f'Monitor: docker logs geodjango_celery_1 geodjango_celery_2 geodjango_celery_3 -f')
-                return
-            
-            # Standard async (current behavior)
-            from locations.tasks import fetch_and_load_standard_spatial_data_async
-            result = fetch_and_load_standard_spatial_data_async.delay(models)
-            self.stdout.write(
-                self.style.SUCCESS(f'✅ Task queued: {result.id}')
-            )
-            self.stdout.write(f'Monitor progress: docker logs geodjango_celery_1 -f')
-            return
-        
         # get command line specified options
         model_set = kwargs["models"]
         known_models = list(DOWNLOADS_DISPATCHER.keys())
@@ -181,7 +106,6 @@ def load_zipped_data_file_into_orm(
 
     successes = []
     failures = []
-    model_definition = None  # Initialize to avoid UnboundLocalError
 
     try:
         message = "\n"

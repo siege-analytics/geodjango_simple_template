@@ -75,7 +75,7 @@ def find_vector_dataset_file_in_directory(
             # logic test
             if lowered_file_suffix in settings.VALID_VECTOR_FILE_EXTENSIONS:
                 target_files_list.append(f)
-                logger.debug(f"Added {f} to target_files_list")
+                logger.info(f"Added {f} to target_files_list")
             else:
                 continue
 
@@ -90,22 +90,11 @@ def find_vector_dataset_file_in_directory(
             return target_file
 
         elif number_of_files_in_target_files_list > 1:
-            # Multiple files found - prefer the one matching directory name (not _fixed versions)
-            dir_name = target_directory.name
-            for f in target_files_list:
-                if dir_name in f.name and '_fixed' not in f.name:
-                    logger.info(f"Multiple files found - using primary: {f.name}")
-                    return f
-            
-            # Fallback: return first non-fixed file
-            for f in target_files_list:
-                if '_fixed' not in str(f):
-                    logger.info(f"Multiple files - using first non-fixed: {f.name}")
-                    return f
-            
-            # Last resort: just use first file
-            logger.warning(f"Multiple files, no clear primary - using: {target_files_list[0].name}")
-            return target_files_list[0]
+            message = "\n"
+            message += f"Found more than one vector spatial dataset file in {target_directory}: {files_in_directory}"
+            logger.error(message)
+
+            return False
 
         else:
             message = "\n"
@@ -127,28 +116,15 @@ def fix_gadm_null_foreign_keys(
     """
     The GADM dataset has a string value of `NA` as String where it should be None for several fields.
     This function:
-    1. Checks hash-based cache to see if cleaning already done
-    2. If cache hit, returns cached cleaned file (skips work)
-    3. Otherwise: iterates over every layer, replaces NA with np.nan, saves to new GPKG
-    4. Updates cache with hash of cleaned file
-    5. Returns the cleaned GPKG
+    1. iterates over every layer
+    2. iterates over every named column
+    3. replaces NA with np.na (None)
+    4. saves the layer back to a new GPKG
+    5. returns the new GPKG
 
     :param source_gadm_dataset:
     :return: pathlib.Path to cleaned dataset
     """
-    from utilities.dataset_cache import (
-        check_if_cleaning_needed,
-        update_cache_after_cleaning
-    )
-    
-    # Check cache first - skip cleaning if file unchanged
-    data_dir = source_gadm_dataset.parent
-    needs_cleaning, cached_path = check_if_cleaning_needed(source_gadm_dataset, data_dir)
-    
-    if not needs_cleaning and cached_path:
-        logger.info(f"✅ Using cached cleaned file (hash match): {cached_path}")
-        return cached_path
-    
     message = ""
     message += "The GADM dataset has a string value of `NA` as None for several fields."
     message += "We have to fix this using a function."
@@ -180,28 +156,22 @@ def fix_gadm_null_foreign_keys(
             gdf = gpd.read_file(source_gadm_dataset, layer=g)
             logging.info(f"Layer {g} has columns: {list(gdf)}")
 
-            # Fix ALL columns first, THEN write once (not per column!)
-            columns_fixed = []
             for c in columns_to_fix:
                 if c in list(gdf):
-                    message = f"Layer {g} fixing column: {c}"
+                    message = f"Layer {g} has a column that needs to be fixed: {c}"
                     logging.info(message)
                     gdf[c] = gdf[c].replace("NA", np.nan)
-                    columns_fixed.append(c)
-            
-            # Write ONCE after all columns fixed
-            if columns_fixed:
-                result = gdf.to_file(target_gpkg, driver="GPKG", layer=g)
-                message = f"Layer {g} written with {len(columns_fixed)} columns fixed: {columns_fixed}"
-                logging.info(message)
 
-        # Update cache with hash of cleaned file
-        update_cache_after_cleaning(source_gadm_dataset, target_gpkg, data_dir)
-        logger.info(f"✅ Cleaning complete - cached for future runs")
+                    result = gdf.to_file(target_gpkg, driver="GPKG", layer=g)
+                    message = ""
+                    message += f"Layer {g} to {target_gpkg}: {result}"
+                    logging.info(message)
+                else:
+                    pass
 
         return target_gpkg
 
     except Exception as e:
         message = f"Exception trying to replace nulls in layer: {e}"
         logging.error(message)
-        return source_gadm_dataset
+        return source_gadm_gpkg_for_layers

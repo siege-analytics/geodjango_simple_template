@@ -23,21 +23,6 @@ services:
     networks:
       - geodjango_network
 
-  redis:
-    image: redis:7-alpine
-    container_name: geodjango_redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      retries: 5
-    networks:
-      - geodjango_network
-
   webserver:
     build:
       context: ./docker
@@ -61,12 +46,6 @@ services:
       # Daphne
       DAPHNE_HOST: 0.0.0.0
       DAPHNE_PORT: 8000
-      # Redis (for Channels and Celery)
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      # Celery
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
     ports:
       - "8000:8000"
     volumes:
@@ -75,122 +54,9 @@ services:
     depends_on:
       postgis:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     networks:
       - geodjango_network
-    command: sh -c "cd /usr/src/app/hellodjango && /opt/venv/bin/daphne -b 0.0.0.0 -p 8000 hellodjango.asgi:application"
-
-  celery_worker_1:
-    build:
-      context: ./docker
-      args:
-        UBUNTU_BASE_IMAGE: ubuntu:jammy
-    image: geodjango_webserver
-    container_name: geodjango_celery_1
-    restart: unless-stopped
-    environment:
-      # Django
-      DEBUG: 1
-      SECRET_KEY: afdawango
-      DJANGO_ALLOWED_HOSTS: "*"
-      # Database
-      SQL_ENGINE: django.contrib.gis.db.backends.postgis
-      SQL_HOST: postgis
-      SQL_DATABASE: geodjango_database
-      SQL_USER: dheerajchand
-      SQL_PASSWORD: strongpasswd
-      SQL_PORT: 5432
-      # Redis
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      # Celery
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
-    volumes:
-      - ./app:/usr/src/app
-    depends_on:
-      postgis:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - geodjango_network
-    command: sh -c "cd /usr/src/app/hellodjango && /opt/venv/bin/celery -A hellodjango worker -n worker1@%h -l info"
-
-  celery_worker_2:
-    build:
-      context: ./docker
-      args:
-        UBUNTU_BASE_IMAGE: ubuntu:jammy
-    image: geodjango_webserver
-    container_name: geodjango_celery_2
-    restart: unless-stopped
-    environment:
-      # Django
-      DEBUG: 1
-      SECRET_KEY: afdawango
-      DJANGO_ALLOWED_HOSTS: "*"
-      # Database
-      SQL_ENGINE: django.contrib.gis.db.backends.postgis
-      SQL_HOST: postgis
-      SQL_DATABASE: geodjango_database
-      SQL_USER: dheerajchand
-      SQL_PASSWORD: strongpasswd
-      SQL_PORT: 5432
-      # Redis
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      # Celery
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
-    volumes:
-      - ./app:/usr/src/app
-    depends_on:
-      postgis:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - geodjango_network
-    command: sh -c "cd /usr/src/app/hellodjango && /opt/venv/bin/celery -A hellodjango worker -n worker2@%h -l info"
-
-  celery_worker_3:
-    build:
-      context: ./docker
-      args:
-        UBUNTU_BASE_IMAGE: ubuntu:jammy
-    image: geodjango_webserver
-    container_name: geodjango_celery_3
-    restart: unless-stopped
-    environment:
-      # Django
-      DEBUG: 1
-      SECRET_KEY: afdawango
-      DJANGO_ALLOWED_HOSTS: "*"
-      # Database
-      SQL_ENGINE: django.contrib.gis.db.backends.postgis
-      SQL_HOST: postgis
-      SQL_DATABASE: geodjango_database
-      SQL_USER: dheerajchand
-      SQL_PASSWORD: strongpasswd
-      SQL_PORT: 5432
-      # Redis
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      # Celery
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
-    volumes:
-      - ./app:/usr/src/app
-    depends_on:
-      postgis:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - geodjango_network
-    command: sh -c "cd /usr/src/app/hellodjango && /opt/venv/bin/celery -A hellodjango worker -n worker3@%h -l info"
+    command: sh -c "/opt/venv/bin/daphne -b 0.0.0.0 -p 8000 hellodjango.asgi:application"
 
   nginx:
     build:
@@ -207,25 +73,6 @@ services:
     networks:
       - geodjango_network
 
-  flower:
-    image: geodjango_webserver
-    container_name: geodjango_flower
-    restart: unless-stopped
-    environment:
-      DEBUG: 1
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
-    volumes:
-      - ./app:/usr/src/app
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - geodjango_network
-    ports:
-      - "5555:5555"
-    command: sh -c "cd /usr/src/app/hellodjango && /opt/venv/bin/celery -A hellodjango flower --port=5555"
-
 networks:
   geodjango_network:
     driver: bridge
@@ -233,5 +80,4 @@ networks:
 volumes:
   geodjango_pg_data:
   static_volume:
-  redis_data:
 
