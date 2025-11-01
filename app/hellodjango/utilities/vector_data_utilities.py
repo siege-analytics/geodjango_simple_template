@@ -90,11 +90,22 @@ def find_vector_dataset_file_in_directory(
             return target_file
 
         elif number_of_files_in_target_files_list > 1:
-            message = "\n"
-            message += f"Found more than one vector spatial dataset file in {target_directory}: {files_in_directory}"
-            logger.error(message)
-
-            return False
+            # Multiple files found - prefer the one matching directory name (not _fixed versions)
+            dir_name = target_directory.name
+            for f in target_files_list:
+                if dir_name in f.name and '_fixed' not in f.name:
+                    logger.info(f"Multiple files found - using primary: {f.name}")
+                    return f
+            
+            # Fallback: return first non-fixed file
+            for f in target_files_list:
+                if '_fixed' not in str(f):
+                    logger.info(f"Multiple files - using first non-fixed: {f.name}")
+                    return f
+            
+            # Last resort: just use first file
+            logger.warning(f"Multiple files, no clear primary - using: {target_files_list[0].name}")
+            return target_files_list[0]
 
         else:
             message = "\n"
