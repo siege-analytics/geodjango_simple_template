@@ -2,7 +2,7 @@
 Celery tasks for locations app
 """
 
-from celery import shared_task
+from celery import shared_task, group, chord, chain
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance
 from django.core.management import call_command
