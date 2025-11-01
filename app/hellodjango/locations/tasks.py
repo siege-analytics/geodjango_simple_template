@@ -324,12 +324,15 @@ def preprocess_gadm_layer_sedonadb(self, layer_index, layer_name, source_gpkg_pa
         # SedonaDB uses Arrow under the hood - very fast
         logger.info(f"[Worker {self.request.hostname}] Reading layer {layer_index} from {source_gpkg_path}")
         
-        # Read using GeoPandas first (SedonaDB might not support GPKG directly yet)
-        # Then use SedonaDB for the transformation
+        # Read layer
         gdf = gpd.read_file(source_gpkg_path, layer=layer_index)
         
-        # Convert to Arrow Table for SedonaDB
-        arrow_table = pa.Table.from_pandas(gdf)
+        # Separate geometry from attributes for Arrow processing
+        geom_col = gdf.geometry
+        attrs = gdf.drop(columns=['geometry'])
+        
+        # Convert attributes to Arrow Table (no geometry issues)
+        arrow_table = pa.Table.from_pandas(attrs)
         
         # Register as SedonaDB view
         sd.register("gadm_raw", arrow_table)
@@ -346,10 +349,10 @@ def preprocess_gadm_layer_sedonadb(self, layer_index, layer_name, source_gpkg_pa
                 CASE WHEN GID_5 = 'NA' THEN NULL ELSE GID_5 END as GID_5,
                 *
             FROM gadm_raw
-        """)
+        """).to_pandas()
         
-        # Convert back to GeoDataFrame for output
-        result_gdf = fixed_df.to_geopandas()
+        # Add geometry back
+        result_gdf = gpd.GeoDataFrame(fixed_df, geometry=geom_col, crs=gdf.crs)
         
         # Save to GeoParquet (fast Arrow format)
         from django.conf import settings
