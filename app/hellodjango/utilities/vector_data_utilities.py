@@ -116,15 +116,28 @@ def fix_gadm_null_foreign_keys(
     """
     The GADM dataset has a string value of `NA` as String where it should be None for several fields.
     This function:
-    1. iterates over every layer
-    2. iterates over every named column
-    3. replaces NA with np.na (None)
-    4. saves the layer back to a new GPKG
-    5. returns the new GPKG
+    1. Checks hash-based cache to see if cleaning already done
+    2. If cache hit, returns cached cleaned file (skips work)
+    3. Otherwise: iterates over every layer, replaces NA with np.nan, saves to new GPKG
+    4. Updates cache with hash of cleaned file
+    5. Returns the cleaned GPKG
 
     :param source_gadm_dataset:
     :return: pathlib.Path to cleaned dataset
     """
+    from utilities.dataset_cache import (
+        check_if_cleaning_needed,
+        update_cache_after_cleaning
+    )
+    
+    # Check cache first - skip cleaning if file unchanged
+    data_dir = source_gadm_dataset.parent
+    needs_cleaning, cached_path = check_if_cleaning_needed(source_gadm_dataset, data_dir)
+    
+    if not needs_cleaning and cached_path:
+        logger.info(f"✅ Using cached cleaned file (hash match): {cached_path}")
+        return cached_path
+    
     message = ""
     message += "The GADM dataset has a string value of `NA` as None for several fields."
     message += "We have to fix this using a function."
@@ -171,9 +184,13 @@ def fix_gadm_null_foreign_keys(
                 message = f"Layer {g} written with {len(columns_fixed)} columns fixed: {columns_fixed}"
                 logging.info(message)
 
+        # Update cache with hash of cleaned file
+        update_cache_after_cleaning(source_gadm_dataset, target_gpkg, data_dir)
+        logger.info(f"✅ Cleaning complete - cached for future runs")
+
         return target_gpkg
 
     except Exception as e:
         message = f"Exception trying to replace nulls in layer: {e}"
         logging.error(message)
-        return source_gadm_gpkg_for_layers
+        return source_gadm_dataset
