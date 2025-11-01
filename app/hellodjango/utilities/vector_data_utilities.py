@@ -75,7 +75,7 @@ def find_vector_dataset_file_in_directory(
             # logic test
             if lowered_file_suffix in settings.VALID_VECTOR_FILE_EXTENSIONS:
                 target_files_list.append(f)
-                logger.info(f"Added {f} to target_files_list")
+                logger.debug(f"Added {f} to target_files_list")
             else:
                 continue
 
