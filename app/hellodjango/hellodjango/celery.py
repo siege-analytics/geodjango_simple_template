@@ -5,7 +5,7 @@ Celery configuration for hellodjango project
 import os
 from celery import Celery
 
-# Set the default Django settings module
+# Set the default Django settings module  
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'hellodjango.settings')
 
 app = Celery('hellodjango')
