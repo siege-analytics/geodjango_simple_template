@@ -145,6 +145,235 @@ docker logs -f geodjango_flower
 - "I want to use all workers." → You already are. Tasks are split automatically.
 - "How do I retry?" → Re‑run the manage.py command with `--async`. Failed tasks are independent.
 
+## Writing Your Own Celery Tasks
+
+This template uses **Celery** for distributed task processing. Here's how to create your own tasks.
+
+### 1) Where to Put Tasks
+
+Tasks live in `<app_name>/tasks.py`. For the `locations` app, that's:
+
+```
+app/hellodjango/locations/tasks.py
+```
+
+Celery autodiscovers tasks from `tasks.py` files in all installed Django apps (no manual registration needed).
+
+### 2) Simple Task Example
+
+```python
+from celery import shared_task
+import logging
+
+logger = logging.getLogger(__name__)
+
+@shared_task(bind=True)
+def process_data(self, dataset_name):
+    """
+    Simple task that processes some data
+    
+    Args:
+        self: Task instance (because bind=True)
+        dataset_name: Name of dataset to process
+    
+    Returns:
+        dict: Results summary
+    """
+    try:
+        logger.info(f"[Worker {self.request.hostname}] Processing {dataset_name}")
+        
+        # Your processing logic here
+        result = do_some_work(dataset_name)
+        
+        return {
+            'status': 'success',
+            'dataset': dataset_name,
+            'records_processed': result.count,
+            'worker': self.request.hostname
+        }
+    
+    except Exception as e:
+        logger.error(f"Task failed: {e}")
+        return {'status': 'error', 'error': str(e)}
+```
+
+**Key Points:**
+- `@shared_task`: Makes the task reusable across multiple Celery apps
+- `bind=True`: Gives you access to `self.request` (task ID, hostname, retries, etc.)
+- Return a dict: Makes results easy to inspect
+- Log worker hostname: Helps debug distributed processing
+
+### 3) Parallel Task Patterns
+
+#### Pattern A: Run Multiple Independent Tasks (Group)
+
+```python
+from celery import shared_task, group
+
+@shared_task
+def process_layer(layer_name):
+    # Process one layer
+    return {'layer': layer_name, 'count': 1000}
+
+@shared_task
+def process_all_layers():
+    """Run tasks in parallel across all workers"""
+    layers = ['layer_0', 'layer_1', 'layer_2', 'layer_3']
+    
+    # Create a group of parallel tasks
+    job = group(process_layer.s(layer) for layer in layers)
+    result = job.apply_async()
+    
+    # Wait for all to complete (optional)
+    results = result.get(timeout=300)
+    return results
+```
+
+#### Pattern B: Chain Tasks (Sequential)
+
+```python
+from celery import shared_task, chain
+
+@shared_task
+def download_file(url):
+    return {'path': '/tmp/data.zip'}
+
+@shared_task
+def extract_file(download_result):
+    path = download_result['path']
+    return {'extracted': '/tmp/data/'}
+
+@shared_task
+def process_file(extract_result):
+    return {'status': 'complete'}
+
+@shared_task
+def full_pipeline(url):
+    """Chain tasks - output of each becomes input of next"""
+    workflow = chain(
+        download_file.s(url),
+        extract_file.s(),
+        process_file.s()
+    )
+    return workflow.apply_async()
+```
+
+#### Pattern C: Parallel → Callback (Chord)
+
+```python
+from celery import shared_task, group, chord
+
+@shared_task
+def preprocess_chunk(chunk_id):
+    """Process one chunk (runs in parallel)"""
+    return {'chunk': chunk_id, 'records': 5000}
+
+@shared_task
+def finalize_results(preprocess_results):
+    """Called after ALL preprocessing completes"""
+    total = sum(r['records'] for r in preprocess_results)
+    return {'status': 'complete', 'total_records': total}
+
+@shared_task
+def process_with_finalization():
+    """Run parallel tasks, then a callback when ALL are done"""
+    workflow = chord(
+        group(preprocess_chunk.s(i) for i in range(10))
+    )(finalize_results.s())
+    
+    return workflow.apply_async()
+```
+
+### 4) Calling Tasks
+
+```python
+# Fire and forget (returns immediately)
+result = process_data.delay('my_dataset')
+print(result.id)  # Task ID
+
+# Advanced call with options
+result = process_data.apply_async(
+    args=['my_dataset'],
+    countdown=60,           # Delay 60 seconds before starting
+    retry=True,             # Auto-retry on failure
+    retry_policy={
+        'max_retries': 3,
+        'interval_start': 0,
+        'interval_step': 0.2,
+        'interval_max': 0.2,
+    }
+)
+
+# Wait for result (blocks!)
+try:
+    output = result.get(timeout=300)  # 5 min timeout
+    print(output)
+except Exception as e:
+    print(f"Task failed: {e}")
+```
+
+### 5) Best Practices
+
+#### ✅ DO
+
+- **Use `bind=True`** to access task metadata (`self.request.hostname`, `self.request.id`)
+- **Return structured data** (dicts with `status`, `worker`, `elapsed_seconds`)
+- **Log worker hostnames** to debug parallel execution
+- **Handle exceptions** and return error dicts instead of raising
+- **Time your tasks** (`start_time = time.time()`, then `elapsed = time.time() - start_time`)
+
+#### ❌ DON'T
+
+- **Don't pass Django ORM objects** - pass IDs and re-fetch in the task
+- **Don't use global state** - workers are separate processes
+- **Don't block workers** - break long tasks into smaller chunks
+- **Don't ignore errors** - always log failures with context
+
+### 6) Real-World Example: GADM Pipeline
+
+See `locations/tasks.py` for a production example:
+
+```python
+@shared_task(bind=True)
+def load_gadm_pipeline(self):
+    """
+    Full GADM loading pipeline with parallel preprocessing
+    
+    1. Download GADM data
+    2. Clean 'NA' strings (fixes ForeignKey issues)
+    3. Preprocess 6 layers in parallel using SedonaDB (5-10x faster)
+    4. Load preprocessed layers into PostGIS
+    5. Resolve ForeignKey relationships
+    """
+    # Download & clean
+    source_gpkg = download_and_clean_gadm()
+    
+    # Parallel preprocessing using chord
+    workflow = chord(
+        group([
+            preprocess_gadm_layer_sedonadb.s(i, f'ADM_ADM_{i}', str(source_gpkg))
+            for i in range(6)
+        ])
+    )(load_preprocessed_layers.s())
+    
+    return workflow.apply_async()
+```
+
+This pattern is **reusable for any multi-step ETL pipeline**:
+- Download → Clean → Process (parallel) → Load → Resolve
+
+### 7) Learn More
+
+**Official Celery Documentation:**
+- [Celery Tasks Guide](https://docs.celeryq.dev/en/stable/userguide/tasks.html) - Task basics, options, best practices
+- [Canvas: Workflows](https://docs.celeryq.dev/en/stable/userguide/canvas.html) - `group`, `chain`, `chord` patterns
+- [Calling Tasks](https://docs.celeryq.dev/en/stable/userguide/calling.html) - `.delay()`, `.apply_async()`, options
+- [Django + Celery](https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html) - Integration guide
+
+**Helpful Tutorials:**
+- [Real Python: Celery Tasks](https://realpython.com/asynchronous-tasks-with-django-and-celery/) - Practical examples
+- [TestDriven.io: Django + Celery](https://testdriven.io/blog/django-and-celery/) - Production patterns
+
 ## API Endpoints
 
 - `/locations/places/` - GeoJSON places API
