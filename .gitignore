@@ -226,3 +226,11 @@ SIMPLIFICATION_COMPLETE.md
 *_ANALYSIS.md
 *_REPORT.md
 *_STATUS.md
+
+# Downloaded spatial data (re-downloadable via management commands)
+app/data/spatial/vector/*.zip
+app/data/spatial/vector/gadm_*/
+app/data/spatial/vector/timezones*/
+app/data/spatial/raster/*
+app/data/spatial/pointcloud/*
+app/data/tabular/*
