@@ -46,6 +46,74 @@ python hellodjango/manage.py create_sample_places
 python hellodjango/manage.py fetch_and_load_census_tiger_data
 ```
 
+## Census & Electoral Data (NEW!)
+
+### Voter Tabulation Districts (VTDs)
+
+VTDs are the **smallest geographic units** for election results. Essential for precinct-level analysis and voter geography.
+
+**Years Available:** 2010, 2020 (covers 2020-2025 FEC data)
+
+```bash
+make shell
+
+# Fetch VTDs for a single state (CA = 06)
+python hellodjango/manage.py fetch_census_vtds --year 2020 --state 06
+
+# Fetch for ALL 50 states + DC (use Celery!)
+python hellodjango/manage.py fetch_census_vtds --year 2020 --all-states --async
+
+# Fetch both 2010 and 2020
+python hellodjango/manage.py fetch_census_vtds --year 2010 --all-states --async
+python hellodjango/manage.py fetch_census_vtds --year 2020 --all-states --async
+```
+
+**Celery Monitoring:**
+```bash
+# Via Flower UI
+open http://localhost:5555
+
+# Via terminal
+docker logs -f geodjango_celery_1
+```
+
+### Address Geocoding & Census Unit Assignment
+
+Every address can be **geocoded** (lat/lon) and **assigned to census units** (state, county, tract, block group, VTD, congressional district).
+
+```python
+# In Django shell
+from locations.models import United_States_Address
+
+# Geocode an address (uses Census Geocoder API)
+from locations.tasks import geocode_address
+result = geocode_address.delay(address_id=123)
+
+# Assign census units via spatial join (requires VTDs loaded)
+from locations.tasks import assign_census_units_to_address
+result = assign_census_units_to_address.delay(address_id=123, year=2020)
+
+# Batch process (parallel across workers)
+from locations.tasks import geocode_addresses_batch, assign_census_units_batch
+address_ids = [1, 2, 3, 4, 5]
+
+# Step 1: Geocode all addresses
+geocode_result = geocode_addresses_batch.delay(address_ids)
+
+# Step 2: Assign census units to all geocoded addresses
+units_result = assign_census_units_batch.delay(address_ids, year=2020)
+```
+
+**Use Cases:**
+- "Show me donations from CA-12"
+- "Which VTD is this donor in?"
+- "Donations by block group"
+- Voter registration vs fundraising correlation
+
+**Data Size:**
+- ~8 GB per year (both 2010 + 2020 = 16 GB)
+- ~12 hours to load all states (with Celery parallelization)
+
 ## Celery (Idiot‑Proof Guide)
 
 Use Celery workers to split big/slow tasks across multiple containers so the web app stays fast.

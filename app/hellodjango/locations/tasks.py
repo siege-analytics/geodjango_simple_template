@@ -1159,3 +1159,293 @@ def load_gadm_parallel_optimized(self):
         logger.error(f"[Task {self.request.id}] GADM parallel workflow failed: {e}")
         return {'status': 'error', 'error': str(e)}
 
+
+# ============================================================================
+# CENSUS VOTER TABULATION DISTRICT (VTD) TASKS
+# ============================================================================
+
+@shared_task(bind=True)
+def fetch_and_load_vtd_state(self, year, state_fips):
+    """
+    Fetch and load VTDs for a single state
+    
+    Args:
+        year: Census year (2010 or 2020)
+        state_fips: State FIPS code (e.g., '06' for CA)
+    
+    Returns:
+        dict with status, count, elapsed time
+    """
+    import time
+    start_time = time.time()
+    
+    try:
+        logger.info(f"[Worker {self.request.hostname}] Fetching VTDs: {state_fips} ({year})")
+        
+        # Call management command
+        call_command(
+            'fetch_census_vtds',
+            year=year,
+            state=state_fips,
+            skip_download=False,
+            verbosity=1
+        )
+        
+        # Count records
+        from locations.models.census.tiger.vtd import United_States_Census_Voter_Tabulation_District
+        count = United_States_Census_Voter_Tabulation_District.objects.filter(
+            statefp=state_fips,
+            year=year
+        ).count()
+        
+        elapsed = time.time() - start_time
+        
+        logger.info(f"[Worker {self.request.hostname}] Loaded {count} VTDs for {state_fips} in {elapsed:.2f}s")
+        
+        return {
+            'status': 'success',
+            'state_fips': state_fips,
+            'year': year,
+            'vtd_count': count,
+            'elapsed_seconds': round(elapsed, 2),
+            'worker': self.request.hostname
+        }
+    
+    except Exception as e:
+        elapsed = time.time() - start_time
+        logger.error(f"[Worker {self.request.hostname}] Failed VTD fetch {state_fips}: {e}")
+        
+        return {
+            'status': 'error',
+            'state_fips': state_fips,
+            'year': year,
+            'error': str(e),
+            'elapsed_seconds': round(elapsed, 2),
+            'worker': self.request.hostname
+        }
+
+
+@shared_task
+def fetch_all_vtds_for_year(year):
+    """
+    Fetch VTDs for all 50 states + DC for a given year
+    
+    Uses Celery group for parallel processing across 3 workers
+    
+    Args:
+        year: Census year (2010 or 2020)
+    
+    Returns:
+        Async result group
+    """
+    # State FIPS codes
+    states = [
+        '01', '02', '04', '05', '06', '08', '09', '10', '11', '12', '13', '15', '16',
+        '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29',
+        '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42',
+        '44', '45', '46', '47', '48', '49', '50', '51', '53', '54', '55', '56'
+    ]
+    
+    # Create parallel group
+    tasks = group(
+        fetch_and_load_vtd_state.s(year, state_fips)
+        for state_fips in states
+    )
+    
+    logger.info(f"[Task] Queued {len(states)} VTD fetch tasks for year {year}")
+    
+    return tasks.apply_async()
+
+
+# ============================================================================
+# ADDRESS GEOCODING AND CENSUS UNIT ASSIGNMENT
+# ============================================================================
+
+@shared_task(bind=True)
+def geocode_address(self, address_id):
+    """
+    Geocode a single address using Census Geocoder API
+    
+    Args:
+        address_id: Address model ID
+    
+    Returns:
+        dict with status, coordinates, quality
+    """
+    import time
+    from django.utils import timezone
+    start_time = time.time()
+    
+    try:
+        from locations.models import United_States_Address
+        
+        address = United_States_Address.objects.get(id=address_id)
+        
+        # Build address string for geocoder
+        address_str = f"{address.primary_number} {address.street_name} {address.street_suffix}".strip()
+        city = address.city_name or address.default_city_name
+        state = address.state_abbreviation
+        zip_code = address.zip5
+        
+        if not all([address_str, city, state]):
+            return {
+                'status': 'error',
+                'address_id': address_id,
+                'error': 'Incomplete address'
+            }
+        
+        # Call Census Geocoder API
+        import requests
+        
+        url = "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress"
+        params = {
+            'address': f"{address_str}, {city}, {state} {zip_code}",
+            'benchmark': 'Public_AR_Current',
+            'format': 'json'
+        }
+        
+        response = requests.get(url, params=params, timeout=30)
+        response.raise_for_status()
+        result = response.json()
+        
+        if result.get('result', {}).get('addressMatches'):
+            match = result['result']['addressMatches'][0]
+            coords = match['coordinates']
+            
+            # Update address
+            from django.contrib.gis.geos import Point
+            address.geom = Point(coords['x'], coords['y'], srid=4326)
+            address.latitude = coords['y']
+            address.longitude = coords['x']
+            address.geocoded = True
+            address.geocode_quality = match.get('matchedAddress', 'Matched')
+            address.geocode_source = 'Census'
+            address.geocoded_at = timezone.now()
+            address.save()
+            
+            elapsed = time.time() - start_time
+            
+            return {
+                'status': 'success',
+                'address_id': address_id,
+                'coordinates': [coords['x'], coords['y']],
+                'quality': address.geocode_quality,
+                'elapsed_seconds': round(elapsed, 2)
+            }
+        else:
+            return {
+                'status': 'no_match',
+                'address_id': address_id,
+                'elapsed_seconds': round(time.time() - start_time, 2)
+            }
+    
+    except Exception as e:
+        logger.error(f"Failed geocoding address {address_id}: {e}")
+        return {
+            'status': 'error',
+            'address_id': address_id,
+            'error': str(e),
+            'elapsed_seconds': round(time.time() - start_time, 2)
+        }
+
+
+@shared_task
+def geocode_addresses_batch(address_ids):
+    """
+    Geocode multiple addresses in parallel
+    
+    Args:
+        address_ids: List of address IDs
+    
+    Returns:
+        Async result group
+    """
+    tasks = group(geocode_address.s(addr_id) for addr_id in address_ids)
+    return tasks.apply_async()
+
+
+@shared_task(bind=True)
+def assign_census_units_to_address(self, address_id, year=2020):
+    """
+    Assign census units to a geocoded address via spatial join
+    
+    Args:
+        address_id: Address model ID
+        year: Census year (2010 or 2020)
+    
+    Returns:
+        dict with status and assigned units
+    """
+    import time
+    start_time = time.time()
+    
+    try:
+        from locations.models import United_States_Address
+        
+        address = United_States_Address.objects.get(id=address_id)
+        
+        if not address.geom:
+            return {
+                'status': 'error',
+                'address_id': address_id,
+                'error': 'Address not geocoded'
+            }
+        
+        # Call assign_census_units method
+        success = address.assign_census_units(year=year)
+        
+        elapsed = time.time() - start_time
+        
+        if success:
+            return {
+                'status': 'success',
+                'address_id': address_id,
+                'year': year,
+                'units_assigned': {
+                    'state': address.state_geoid,
+                    'county': address.county_geoid,
+                    'tract': address.tract_geoid,
+                    'block_group': address.block_group_geoid,
+                    'block': address.block_geoid,
+                    'vtd': address.vtd_geoid,
+                    'cd': address.cd_geoid
+                },
+                'elapsed_seconds': round(elapsed, 2),
+                'worker': self.request.hostname
+            }
+        else:
+            return {
+                'status': 'error',
+                'address_id': address_id,
+                'error': 'Could not assign units',
+                'elapsed_seconds': round(elapsed, 2)
+            }
+    
+    except Exception as e:
+        logger.error(f"Failed assigning census units to address {address_id}: {e}")
+        return {
+            'status': 'error',
+            'address_id': address_id,
+            'error': str(e),
+            'elapsed_seconds': round(time.time() - start_time, 2)
+        }
+
+
+@shared_task
+def assign_census_units_batch(address_ids, year=2020):
+    """
+    Assign census units to multiple addresses in parallel
+    
+    Args:
+        address_ids: List of address IDs
+        year: Census year
+    
+    Returns:
+        Async result group
+    """
+    tasks = group(
+        assign_census_units_to_address.s(addr_id, year)
+        for addr_id in address_ids
+    )
+    return tasks.apply_async()
+
