@@ -61,7 +61,7 @@ def find_vector_dataset_file_in_directory(
         files_in_directory = [
             x
             for x in target_directory.glob("**/*")
-            if x.is_file() or permitted_gdb_substring in pathlib.Path(x.name)
+            if x.is_file() or permitted_gdb_substring in x.name
         ]
 
         # now look to see which file matches both the directory name and having a valid suffix
@@ -90,11 +90,26 @@ def find_vector_dataset_file_in_directory(
             return target_file
 
         elif number_of_files_in_target_files_list > 1:
-            message = "\n"
-            message += f"Found more than one vector spatial dataset file in {target_directory}: {files_in_directory}"
-            logger.error(message)
-
-            return False
+            # Multiple files found - prefer the one in the root directory that matches the directory name
+            target_dir_name = target_directory.name
+            
+            # Filter for files directly in target_directory (not subdirectories)
+            root_files = [f for f in target_files_list if f.parent == target_directory]
+            
+            # Prefer file that matches directory name
+            matching_file = next((f for f in root_files if target_dir_name in f.stem), None)
+            
+            if matching_file:
+                logger.info(f"Found primary file: {matching_file}")
+                return matching_file
+            elif root_files:
+                logger.info(f"Using first root file: {root_files[0]}")
+                return root_files[0]
+            else:
+                message = "\n"
+                message += f"Found more than one vector spatial dataset file in {target_directory}: {target_files_list}"
+                logger.error(message)
+                return False
 
         else:
             message = "\n"
