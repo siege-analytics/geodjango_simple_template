@@ -23,12 +23,54 @@ class United_States_Census_Tract(models.Model):
 
     # year
     year = models.IntegerField()
+    
+    # ==== INTER-RELATIONS: Hierarchical ForeignKeys ====
+    state = models.ForeignKey(
+        'United_States_Census_State',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='tracts',
+        db_constraint=False,
+        help_text="Parent state"
+    )
+    
+    county = models.ForeignKey(
+        'United_States_Census_County',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='tracts',
+        db_constraint=False,
+        help_text="Parent county"
+    )
 
     # representative string
 
     def __str__(self):
         representative_string = self.namelsad
         return representative_string
+    
+    def populate_parent_relationships(self):
+        """Populate state and county FKs"""
+        from .state import United_States_Census_State
+        from .county import United_States_Census_County
+        
+        self.state = United_States_Census_State.objects.filter(
+            statefp=self.statefp,
+            year=self.year
+        ).first()
+        
+        self.county = United_States_Census_County.objects.filter(
+            statefp=self.statefp,
+            countyfp=self.countyfp,
+            year=self.year
+        ).first()
+        
+        if self.state and self.county:
+            self.save()
+            return True
+        return False
 
 
 # Auto-generated `LayerMapping` dictionary for United_States_Census_Tract model

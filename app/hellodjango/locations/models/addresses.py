@@ -93,6 +93,68 @@ class United_States_Address(models.Model):
     # Metadata
     census_units_assigned_at = models.DateTimeField(null=True, blank=True)
     
+    # ==== INTER-RELATIONS: ForeignKeys to Census Units ====
+    # Optional FKs for rich queries (GEOIDs remain primary)
+    state_fk = models.ForeignKey(
+        'United_States_Census_State',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='addresses',
+        db_constraint=False,
+        help_text="State FK (use after populate_foreign_keys())"
+    )
+    
+    county_fk = models.ForeignKey(
+        'United_States_Census_County',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='addresses',
+        db_constraint=False,
+        help_text="County FK"
+    )
+    
+    tract_fk = models.ForeignKey(
+        'United_States_Census_Tract',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='addresses',
+        db_constraint=False,
+        help_text="Tract FK"
+    )
+    
+    block_group_fk = models.ForeignKey(
+        'United_States_Census_Block_Group',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='addresses',
+        db_constraint=False,
+        help_text="Block Group FK"
+    )
+    
+    vtd_fk = models.ForeignKey(
+        'United_States_Census_Voter_Tabulation_District',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='addresses',
+        db_constraint=False,
+        help_text="VTD (precinct) FK"
+    )
+    
+    cd_fk = models.ForeignKey(
+        'United_States_Census_Congressional_District',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='addresses',
+        db_constraint=False,
+        help_text="Congressional District FK"
+    )
+    
     class Meta:
         db_table = 'locations_address'
         indexes = [
@@ -218,4 +280,61 @@ class United_States_Address(models.Model):
         self.census_units_assigned_at = timezone.now()
         self.save()
         
+        return True
+    
+    def populate_foreign_keys(self):
+        """
+        Populate FK references from GEOIDs
+        Call after assign_census_units() to enable rich hierarchical queries
+        
+        Returns:
+            bool: True if successful
+        """
+        from .census.tiger import (
+            United_States_Census_State,
+            United_States_Census_County,
+            United_States_Census_Tract,
+            United_States_Census_Block_Group,
+            United_States_Census_Congressional_District,
+            United_States_Census_Voter_Tabulation_District
+        )
+        
+        # Populate FKs from GEOIDs
+        if self.state_geoid:
+            self.state_fk = United_States_Census_State.objects.filter(
+                geoid=self.state_geoid,
+                year=self.census_year
+            ).first()
+        
+        if self.county_geoid:
+            self.county_fk = United_States_Census_County.objects.filter(
+                geoid=self.county_geoid,
+                year=self.census_year
+            ).first()
+        
+        if self.tract_geoid:
+            self.tract_fk = United_States_Census_Tract.objects.filter(
+                geoid=self.tract_geoid,
+                year=self.census_year
+            ).first()
+        
+        if self.block_group_geoid:
+            self.block_group_fk = United_States_Census_Block_Group.objects.filter(
+                geoid=self.block_group_geoid,
+                year=self.census_year
+            ).first()
+        
+        if self.vtd_geoid:
+            self.vtd_fk = United_States_Census_Voter_Tabulation_District.objects.filter(
+                geoid=self.vtd_geoid,
+                year=self.census_year
+            ).first()
+        
+        if self.cd_geoid:
+            self.cd_fk = United_States_Census_Congressional_District.objects.filter(
+                geoid=self.cd_geoid,
+                year=self.census_year
+            ).first()
+        
+        self.save()
         return True

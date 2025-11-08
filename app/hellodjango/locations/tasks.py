@@ -1449,3 +1449,173 @@ def assign_census_units_batch(address_ids, year=2020):
     )
     return tasks.apply_async()
 
+
+# ============================================================================
+# GEOGRAPHIC MODEL FOREIGN KEY POPULATION
+# ============================================================================
+
+@shared_task(bind=True)
+def populate_census_unit_foreign_keys(self, unit_type, year=None, state_fips=None):
+    """
+    Populate ForeignKey relationships for census units
+    
+    Creates hierarchical relationships (e.g., VTD → County → State)
+    
+    Args:
+        unit_type: 'vtd', 'county', 'tract', 'blockgroup'
+        year: Optional - filter by year
+        state_fips: Optional - filter by state
+    
+    Returns:
+        dict with status and counts
+    """
+    import time
+    start_time = time.time()
+    
+    try:
+        logger.info(f"[Worker {self.request.hostname}] Populating {unit_type} FKs (year={year}, state={state_fips})")
+        
+        # Import models
+        from locations.models.census.tiger import (
+            United_States_Census_State,
+            United_States_Census_County,
+            United_States_Census_Tract,
+            United_States_Census_Block_Group,
+            United_States_Census_Voter_Tabulation_District
+        )
+        
+        # Get queryset
+        if unit_type == 'vtd':
+            qs = United_States_Census_Voter_Tabulation_District.objects.all()
+        elif unit_type == 'county':
+            qs = United_States_Census_County.objects.all()
+        elif unit_type == 'tract':
+            qs = United_States_Census_Tract.objects.all()
+        elif unit_type == 'blockgroup':
+            qs = United_States_Census_Block_Group.objects.all()
+        else:
+            raise ValueError(f"Unknown unit_type: {unit_type}")
+        
+        # Apply filters
+        if year:
+            qs = qs.filter(year=year)
+        if state_fips:
+            qs = qs.filter(statefp=state_fips)
+        
+        # Populate FKs
+        total = qs.count()
+        success_count = 0
+        
+        for i, unit in enumerate(qs.iterator(chunk_size=1000), 1):
+            if unit.populate_parent_relationships():
+                success_count += 1
+            
+            # Log progress every 1000
+            if i % 1000 == 0:
+                logger.info(f"[Worker {self.request.hostname}] Progress: {i}/{total} ({i/total*100:.1f}%)")
+        
+        elapsed = time.time() - start_time
+        
+        logger.info(f"[Worker {self.request.hostname}] Populated {success_count}/{total} {unit_type} FKs in {elapsed:.2f}s")
+        
+        return {
+            'status': 'success',
+            'unit_type': unit_type,
+            'year': year,
+            'state_fips': state_fips,
+            'total': total,
+            'success_count': success_count,
+            'elapsed_seconds': round(elapsed, 2),
+            'worker': self.request.hostname
+        }
+    
+    except Exception as e:
+        elapsed = time.time() - start_time
+        logger.error(f"[Worker {self.request.hostname}] Failed FK population: {e}")
+        
+        return {
+            'status': 'error',
+            'unit_type': unit_type,
+            'error': str(e),
+            'elapsed_seconds': round(elapsed, 2)
+        }
+
+
+@shared_task
+def populate_all_census_foreign_keys(year=2020):
+    """
+    Populate FKs for all census units (sequential order matters!)
+    
+    Order: State (no parents) → County → Tract → Block Group → VTD
+    
+    Args:
+        year: Census year to process
+    
+    Returns:
+        Celery chain result
+    """
+    from celery import chain
+    
+    # Sequential processing (parents before children)
+    workflow = chain(
+        populate_census_unit_foreign_keys.s('county', year=year),
+        populate_census_unit_foreign_keys.s('tract', year=year),
+        populate_census_unit_foreign_keys.s('blockgroup', year=year),
+        populate_census_unit_foreign_keys.s('vtd', year=year),
+    )
+    
+    logger.info(f"[Task] Queued FK population workflow for year {year}")
+    
+    return workflow.apply_async()
+
+
+@shared_task(bind=True)
+def populate_address_foreign_keys_batch(self, address_ids):
+    """
+    Populate FKs for a batch of addresses
+    
+    Args:
+        address_ids: List of address IDs
+    
+    Returns:
+        dict with status and counts
+    """
+    import time
+    start_time = time.time()
+    
+    try:
+        from locations.models import United_States_Address
+        
+        logger.info(f"[Worker {self.request.hostname}] Populating FKs for {len(address_ids)} addresses")
+        
+        success_count = 0
+        for address_id in address_ids:
+            try:
+                address = United_States_Address.objects.get(id=address_id)
+                if address.populate_foreign_keys():
+                    success_count += 1
+            except United_States_Address.DoesNotExist:
+                continue
+        
+        elapsed = time.time() - start_time
+        
+        logger.info(f"[Worker {self.request.hostname}] Populated {success_count}/{len(address_ids)} address FKs in {elapsed:.2f}s")
+        
+        return {
+            'status': 'success',
+            'total': len(address_ids),
+            'success_count': success_count,
+            'elapsed_seconds': round(elapsed, 2),
+            'worker': self.request.hostname
+        }
+    
+    except Exception as e:
+        elapsed = time.time() - start_time
+        logger.error(f"[Worker {self.request.hostname}] Failed address FK population: {e}")
+        
+        return {
+            'status': 'error',
+            'error': str(e),
+            'elapsed_seconds': round(elapsed, 2)
+        }
+
