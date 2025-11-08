@@ -9,7 +9,7 @@ djangorestframework-gis
 django-postgres-copy
 celery[redis]
 flower
-apache-sedona[db,spark,pandas,geopandas]
+apache-sedona[spark,pandas,geopandas]
 fiona
 geopandas
 geopy

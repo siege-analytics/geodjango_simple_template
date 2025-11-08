@@ -82,28 +82,6 @@ class United_States_Census_Voter_Tabulation_District(models.Model):
         help_text="Data source (CENSUS_TIGER, RDH, STATE)"
     )
     
-    # ==== INTER-RELATIONS: Hierarchical ForeignKeys ====
-    # Optional FKs for rich queries (keep GEOIDs as primary)
-    state = models.ForeignKey(
-        'United_States_Census_State',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='vtds',
-        db_constraint=False,  # No DB-level constraint (year flexibility)
-        help_text="Parent state (populated from statefp + year)"
-    )
-    
-    county = models.ForeignKey(
-        'United_States_Census_County',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='vtds',
-        db_constraint=False,
-        help_text="Parent county (populated from statefp + countyfp + year)"
-    )
-    
     class Meta:
         db_table = 'census_vtd'
         verbose_name = 'Voter Tabulation District'
@@ -119,35 +97,6 @@ class United_States_Census_Voter_Tabulation_District(models.Model):
     
     def __str__(self):
         return f"{self.namelsad} ({self.geoid}, {self.year})"
-    
-    def populate_parent_relationships(self):
-        """
-        Populate state and county ForeignKeys from FIPS codes
-        Called after VTD is loaded to establish hierarchical relationships
-        
-        Returns:
-            bool: True if successful, False if parents not found
-        """
-        # Find parent state
-        from .state import United_States_Census_State
-        self.state = United_States_Census_State.objects.filter(
-            statefp=self.statefp,
-            year=self.year
-        ).first()
-        
-        # Find parent county
-        from .county import United_States_Census_County
-        self.county = United_States_Census_County.objects.filter(
-            statefp=self.statefp,
-            countyfp=self.countyfp,
-            year=self.year
-        ).first()
-        
-        if self.state and self.county:
-            self.save()
-            return True
-        
-        return False
 
 
 # LayerMapping dictionary for Census TIGER VTD files

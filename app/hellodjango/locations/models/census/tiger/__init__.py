@@ -1,6 +1,7 @@
 from .blockgroup import *
 from .cd import *
 from .county import *
+from .place import *
 from .sldl import *
 from .sldu import *
 from .state import *
@@ -8,3 +9,4 @@ from .tabblock import *
 from .tract import *
 from .ttract import *
 from .vtd import *
+from .zcta import *

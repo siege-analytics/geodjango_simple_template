@@ -26,43 +26,12 @@ class United_States_Census_County(models.Model):
 
     # year
     year = models.IntegerField()
-    
-    # ==== INTER-RELATIONS: Hierarchical ForeignKey ====
-    # Optional FK for rich queries (keep GEOIDs as primary)
-    state = models.ForeignKey(
-        'United_States_Census_State',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='counties',
-        db_constraint=False,  # No DB-level constraint (year flexibility)
-        help_text="Parent state (populated from statefp + year)"
-    )
 
     # representative string
 
     def __str__(self):
         representative_string = self.namelsad
         return representative_string
-    
-    def populate_parent_relationships(self):
-        """
-        Populate state ForeignKey from FIPS code
-        
-        Returns:
-            bool: True if successful, False if parent not found
-        """
-        from .state import United_States_Census_State
-        self.state = United_States_Census_State.objects.filter(
-            statefp=self.statefp,
-            year=self.year
-        ).first()
-        
-        if self.state:
-            self.save()
-            return True
-        
-        return False
 
 
 # Auto-generated `LayerMapping` dictionary for United_States_Census_County model

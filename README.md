@@ -114,48 +114,6 @@ units_result = assign_census_units_batch.delay(address_ids, year=2020)
 - ~8 GB per year (both 2010 + 2020 = 16 GB)
 - ~12 hours to load all states (with Celery parallelization)
 
-### Geographic Model Inter-Relations (NEW!)
-
-After loading census data, you can **populate hierarchical ForeignKeys** for richer queries:
-
-```python
-# In Django shell
-from locations.tasks import populate_all_census_foreign_keys
-
-# Populate FKs for all census units (County → State, VTD → County, etc.)
-result = populate_all_census_foreign_keys.delay(year=2020)
-
-# Monitor in Flower: http://localhost:5555
-```
-
-**What This Enables**:
-```python
-# Traverse hierarchy (no manual joins!)
-vtd = United_States_Census_Voter_Tabulation_District.objects.get(geoid='060750001')
-print(vtd.county.name)           # San Francisco County
-print(vtd.county.state.name)     # California
-
-# Reverse lookups
-california = United_States_Census_State.objects.get(statefp='06', year=2020)
-ca_vtds = california.vtds.all()  # All CA precincts
-
-# Rich aggregations
-from fec.models import Transaction
-sf_donations = Transaction.objects.filter(
-    individual__address__vtd_fk__county__name__icontains='San Francisco'
-).aggregate(total=Sum('amount'))
-```
-
-**When to Use**:
-- ✅ Django admin navigation (click through relationships)
-- ✅ Complex hierarchical queries
-- ✅ Aggregations by parent units
-
-**When to Use GEOIDs Instead**:
-- ✅ Simple lookups (faster with string indexes)
-- ✅ Year-switching scenarios
-- ✅ Import/export operations
-
 ## Celery (Idiot‑Proof Guide)
 
 Use Celery workers to split big/slow tasks across multiple containers so the web app stays fast.

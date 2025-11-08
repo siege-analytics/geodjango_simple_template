@@ -1450,287 +1450,200 @@ def assign_census_units_batch(address_ids, year=2020):
     return tasks.apply_async()
 
 
-# ============================================================================
-# GEOGRAPHIC MODEL FOREIGN KEY POPULATION
-# ============================================================================
-
 @shared_task(bind=True)
-def populate_census_unit_foreign_keys(self, unit_type, year=None, state_fips=None):
+def fetch_census_unit_task(self, unit_type, year, state_fips=None, skip_download=False):
     """
-    Populate ForeignKey relationships for census units
+    Fetch and load Census TIGER data for a specific unit/year/state
     
-    Creates hierarchical relationships (e.g., VTD → County → State)
+    This is the Celery task called by fetch_census_data management command.
     
     Args:
-        unit_type: 'vtd', 'county', 'tract', 'blockgroup'
-        year: Optional - filter by year
-        state_fips: Optional - filter by state
+        unit_type: Type of unit (state, county, cd, sldu, sldl, tract, blockgroup, vtd, place, zcta)
+        year: Census year
+        state_fips: State FIPS code (if needed for this unit type)
+        skip_download: Skip download if file exists
     
     Returns:
-        dict with status and counts
+        dict with status, unit_type, year, state_fips, count
     """
-    import time
-    start_time = time.time()
+    from django.core.management import call_command
+    from io import StringIO
+    import sys
+    
+    # Capture command output
+    stdout = StringIO()
+    stderr = StringIO()
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+    sys.stdout = stdout
+    sys.stderr = stderr
     
     try:
-        logger.info(f"[Worker {self.request.hostname}] Populating {unit_type} FKs (year={year}, state={state_fips})")
+        # Build command args
+        cmd_args = [
+            '--unit', unit_type,
+            '--year', str(year),
+        ]
         
-        # Import models
-        from locations.models.census.tiger import (
-            United_States_Census_State,
-            United_States_Census_County,
-            United_States_Census_Tract,
-            United_States_Census_Block_Group,
-            United_States_Census_Voter_Tabulation_District
-        )
-        
-        # Get queryset
-        if unit_type == 'vtd':
-            qs = United_States_Census_Voter_Tabulation_District.objects.all()
-        elif unit_type == 'county':
-            qs = United_States_Census_County.objects.all()
-        elif unit_type == 'tract':
-            qs = United_States_Census_Tract.objects.all()
-        elif unit_type == 'blockgroup':
-            qs = United_States_Census_Block_Group.objects.all()
-        else:
-            raise ValueError(f"Unknown unit_type: {unit_type}")
-        
-        # Apply filters
-        if year:
-            qs = qs.filter(year=year)
         if state_fips:
-            qs = qs.filter(statefp=state_fips)
+            cmd_args.extend(['--state', state_fips])
         
-        # Populate FKs
-        total = qs.count()
-        success_count = 0
+        if skip_download:
+            cmd_args.append('--skip-download')
         
-        for i, unit in enumerate(qs.iterator(chunk_size=1000), 1):
-            if unit.populate_parent_relationships():
-                success_count += 1
-            
-            # Log progress every 1000
-            if i % 1000 == 0:
-                logger.info(f"[Worker {self.request.hostname}] Progress: {i}/{total} ({i/total*100:.1f}%)")
+        # Run management command (synchronous within this task)
+        call_command('fetch_census_data', *cmd_args)
         
-        elapsed = time.time() - start_time
+        # Get model count
+        from locations.models.census.tiger import *
+        model_mapping = {
+            'state': United_States_Census_State,
+            'county': United_States_Census_County,
+            'cd': United_States_Census_Congressional_District,
+            'sldu': United_States_Census_State_Legislative_District_Upper,
+            'sldl': United_States_Census_State_Legislative_District_Lower,
+            'tract': United_States_Census_Tract,
+            'blockgroup': United_States_Census_Block_Group,
+            'vtd': United_States_Census_Voter_Tabulation_District,
+            'place': United_States_Census_Place,
+            'zcta': United_States_Census_ZCTA,
+        }
         
-        logger.info(f"[Worker {self.request.hostname}] Populated {success_count}/{total} {unit_type} FKs in {elapsed:.2f}s")
+        model = model_mapping.get(unit_type)
+        if model:
+            count = model.objects.filter(year=year).count()
+        else:
+            count = 0
+        
+        logger.info(f"✓ Loaded {unit_type} {year} {state_fips or 'national'}: {count} records")
         
         return {
             'status': 'success',
             'unit_type': unit_type,
             'year': year,
             'state_fips': state_fips,
-            'total': total,
-            'success_count': success_count,
-            'elapsed_seconds': round(elapsed, 2),
-            'worker': self.request.hostname
+            'count': count,
+            'output': stdout.getvalue()
         }
     
     except Exception as e:
-        elapsed = time.time() - start_time
-        logger.error(f"[Worker {self.request.hostname}] Failed FK population: {e}")
-        
+        logger.error(f"Error loading {unit_type} {year} {state_fips}: {e}")
         return {
             'status': 'error',
             'unit_type': unit_type,
+            'year': year,
+            'state_fips': state_fips,
             'error': str(e),
-            'elapsed_seconds': round(elapsed, 2)
+            'output': stdout.getvalue(),
+            'errors': stderr.getvalue()
         }
+    
+    finally:
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
 
 
 @shared_task
-def populate_all_census_foreign_keys(year=2020):
+def load_all_years_for_unit(unit_type, start_year, end_year, state_fips=None):
     """
-    Populate FKs for all census units (sequential order matters!)
+    Load multiple years of a single unit type
     
-    Order: State (no parents) → County → Tract → Block Group → VTD
+    Example:
+        load_all_years_for_unit.delay('cd', 2020, 2024)
+        # Loads Congressional Districts for 2020, 2021, 2022, 2023, 2024
     
     Args:
-        year: Census year to process
+        unit_type: Type of unit (state, county, cd, etc.)
+        start_year: Start year (inclusive)
+        end_year: End year (inclusive)
+        state_fips: Optional state FIPS (if unit needs it)
     
     Returns:
-        Celery chain result
+        Group result
     """
-    from celery import chain
+    years = range(start_year, end_year + 1)
     
-    # Sequential processing (parents before children)
-    workflow = chain(
-        populate_census_unit_foreign_keys.s('county', year=year),
-        populate_census_unit_foreign_keys.s('tract', year=year),
-        populate_census_unit_foreign_keys.s('blockgroup', year=year),
-        populate_census_unit_foreign_keys.s('vtd', year=year),
-    )
-    
-    logger.info(f"[Task] Queued FK population workflow for year {year}")
-    
-    return workflow.apply_async()
-
-
-@shared_task(bind=True)
-def populate_address_foreign_keys_batch(self, address_ids):
-    """
-    Populate FKs for a batch of addresses
-    
-    Args:
-        address_ids: List of address IDs
-    
-    Returns:
-        dict with status and counts
-    """
-    import time
-    start_time = time.time()
-    
-    try:
-        from locations.models import United_States_Address
-        
-        logger.info(f"[Worker {self.request.hostname}] Populating FKs for {len(address_ids)} addresses")
-        
-        success_count = 0
-        for address_id in address_ids:
-            try:
-                address = United_States_Address.objects.get(id=address_id)
-                if address.populate_foreign_keys():
-                    success_count += 1
-            except United_States_Address.DoesNotExist:
-                continue
-        
-        elapsed = time.time() - start_time
-        
-        logger.info(f"[Worker {self.request.hostname}] Populated {success_count}/{len(address_ids)} address FKs in {elapsed:.2f}s")
-        
-        return {
-            'status': 'success',
-            'total': len(address_ids),
-            'success_count': success_count,
-            'elapsed_seconds': round(elapsed, 2),
-            'worker': self.request.hostname
-        }
-    
-    except Exception as e:
-        elapsed = time.time() - start_time
-        logger.error(f"[Worker {self.request.hostname}] Failed address FK population: {e}")
-        
-        return {
-            'status': 'error',
-            'error': str(e),
-            'elapsed_seconds': round(elapsed, 2)
-        }
-
-
-# ============================================================================
-# GEOGRAPHIC INTERSECTION COMPUTATION
-# ============================================================================
-
-@shared_task(bind=True)
-def compute_intersections_for_state_task(self, state_fips, year, intersection_type='all', min_overlap=1.0):
-    """
-    Compute geographic intersections for a single state
-    
-    Args:
-        state_fips: State FIPS code (e.g., '06' for CA)
-        year: Census year (2010 or 2020)
-        intersection_type: 'county-cd', 'vtd-cd', or 'all'
-        min_overlap: Minimum overlap % to store (default 1.0%)
-    
-    Returns:
-        dict with status and counts
-    """
-    import time
-    start_time = time.time()
-    
-    try:
-        logger.info(f"[Worker {self.request.hostname}] Computing {intersection_type} intersections: {state_fips} ({year})")
-        
-        # Call management command
-        call_command(
-            'compute_geographic_intersections',
-            year=year,
-            type=intersection_type,
-            state=state_fips,
-            min_overlap=min_overlap,
-            verbosity=1
-        )
-        
-        # Count intersections created
-        from locations.models.intersections import (
-            CountyCongressionalDistrictIntersection,
-            VTDCongressionalDistrictIntersection
-        )
-        
-        counts = {}
-        
-        if intersection_type in ['county-cd', 'all']:
-            county_cd_count = CountyCongressionalDistrictIntersection.objects.filter(
-                county__statefp=state_fips,
-                year=year
-            ).count()
-            counts['county_cd'] = county_cd_count
-        
-        if intersection_type in ['vtd-cd', 'all']:
-            vtd_cd_count = VTDCongressionalDistrictIntersection.objects.filter(
-                vtd__statefp=state_fips,
-                year=year
-            ).count()
-            counts['vtd_cd'] = vtd_cd_count
-        
-        elapsed = time.time() - start_time
-        
-        logger.info(f"[Worker {self.request.hostname}] Computed intersections for {state_fips}: {counts} in {elapsed:.2f}s")
-        
-        return {
-            'status': 'success',
-            'state_fips': state_fips,
-            'year': year,
-            'intersection_type': intersection_type,
-            'counts': counts,
-            'elapsed_seconds': round(elapsed, 2),
-            'worker': self.request.hostname
-        }
-    
-    except Exception as e:
-        elapsed = time.time() - start_time
-        logger.error(f"[Worker {self.request.hostname}] Failed intersection computation {state_fips}: {e}")
-        
-        return {
-            'status': 'error',
-            'state_fips': state_fips,
-            'year': year,
-            'error': str(e),
-            'elapsed_seconds': round(elapsed, 2),
-            'worker': self.request.hostname
-        }
-
-
-@shared_task
-def compute_all_intersections(year, intersection_type='county-cd'):
-    """
-    Compute intersections for all 50 states + DC
-    
-    Args:
-        year: Census year (2010 or 2020)
-        intersection_type: 'county-cd', 'vtd-cd', or 'all'
-    
-    Returns:
-        Async result group
-    """
-    # All state FIPS codes
-    states = [
-        '01', '02', '04', '05', '06', '08', '09', '10', '11', '12', '13', '15', '16',
-        '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29',
-        '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42',
-        '44', '45', '46', '47', '48', '49', '50', '51', '53', '54', '55', '56'
-    ]
-    
-    # Create parallel group
     tasks = group(
-        compute_intersections_for_state_task.s(state_fips, year, intersection_type)
-        for state_fips in states
+        fetch_census_unit_task.s(
+            unit_type=unit_type,
+            year=year,
+            state_fips=state_fips
+        )
+        for year in years
     )
     
-    logger.info(f"[Task] Queued {len(states)} intersection computation tasks for year {year}")
+    return tasks.apply_async()
+
+
+@shared_task
+def load_all_units_for_year(year, unit_types=None):
+    """
+    Load all unit types for a single year
+    
+    Example:
+        load_all_units_for_year.delay(2024, ['state', 'county', 'cd', 'place'])
+    
+    Args:
+        year: Census year
+        unit_types: List of unit types (default: all major units)
+    
+    Returns:
+        Group result
+    """
+    if unit_types is None:
+        # Default: all major units (exclude tabblock - too large!)
+        unit_types = ['state', 'county', 'cd', 'tract', 'blockgroup', 'vtd', 'place', 'zcta']
+    
+    tasks = group(
+        fetch_census_unit_task.s(
+            unit_type=unit_type,
+            year=year,
+            state_fips=None  # Will be handled by management command if needed
+        )
+        for unit_type in unit_types
+    )
+    
+    return tasks.apply_async()
+
+
+@shared_task
+def load_comprehensive_census(start_year=2007, end_year=2025, unit_types=None):
+    """
+    Master orchestrator: Load all years and all unit types
+    
+    WARNING: This will load ~1 TB of data and take ~1 week!
+    
+    Example:
+        # Load everything from 2020-2024
+        load_comprehensive_census.delay(start_year=2020, end_year=2024)
+        
+        # Load only specific units
+        load_comprehensive_census.delay(
+            start_year=2020,
+            end_year=2024,
+            unit_types=['cd', 'vtd', 'place']
+        )
+    
+    Args:
+        start_year: Start year (default: 2007)
+        end_year: End year (default: 2025)
+        unit_types: List of unit types (default: all major units)
+    
+    Returns:
+        Group of groups (nested parallelism)
+    """
+    if unit_types is None:
+        unit_types = ['state', 'county', 'cd', 'sldu', 'sldl', 'tract', 'blockgroup', 'vtd', 'place', 'zcta']
+    
+    years = range(start_year, end_year + 1)
+    
+    # Create nested groups: For each year, load all units in parallel
+    tasks = group(
+        load_all_units_for_year.s(year, unit_types)
+        for year in years
+    )
+    
+    logger.info(f"🚀 Starting comprehensive Census load: {len(years)} years × {len(unit_types)} units = {len(years) * len(unit_types)} tasks")
     
     return tasks.apply_async()
 
