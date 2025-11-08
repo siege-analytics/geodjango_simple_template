@@ -1619,3 +1619,118 @@ def populate_address_foreign_keys_batch(self, address_ids):
             'elapsed_seconds': round(elapsed, 2)
         }
 
+
+# ============================================================================
+# GEOGRAPHIC INTERSECTION COMPUTATION
+# ============================================================================
+
+@shared_task(bind=True)
+def compute_intersections_for_state_task(self, state_fips, year, intersection_type='all', min_overlap=1.0):
+    """
+    Compute geographic intersections for a single state
+    
+    Args:
+        state_fips: State FIPS code (e.g., '06' for CA)
+        year: Census year (2010 or 2020)
+        intersection_type: 'county-cd', 'vtd-cd', or 'all'
+        min_overlap: Minimum overlap % to store (default 1.0%)
+    
+    Returns:
+        dict with status and counts
+    """
+    import time
+    start_time = time.time()
+    
+    try:
+        logger.info(f"[Worker {self.request.hostname}] Computing {intersection_type} intersections: {state_fips} ({year})")
+        
+        # Call management command
+        call_command(
+            'compute_geographic_intersections',
+            year=year,
+            type=intersection_type,
+            state=state_fips,
+            min_overlap=min_overlap,
+            verbosity=1
+        )
+        
+        # Count intersections created
+        from locations.models.intersections import (
+            CountyCongressionalDistrictIntersection,
+            VTDCongressionalDistrictIntersection
+        )
+        
+        counts = {}
+        
+        if intersection_type in ['county-cd', 'all']:
+            county_cd_count = CountyCongressionalDistrictIntersection.objects.filter(
+                county__statefp=state_fips,
+                year=year
+            ).count()
+            counts['county_cd'] = county_cd_count
+        
+        if intersection_type in ['vtd-cd', 'all']:
+            vtd_cd_count = VTDCongressionalDistrictIntersection.objects.filter(
+                vtd__statefp=state_fips,
+                year=year
+            ).count()
+            counts['vtd_cd'] = vtd_cd_count
+        
+        elapsed = time.time() - start_time
+        
+        logger.info(f"[Worker {self.request.hostname}] Computed intersections for {state_fips}: {counts} in {elapsed:.2f}s")
+        
+        return {
+            'status': 'success',
+            'state_fips': state_fips,
+            'year': year,
+            'intersection_type': intersection_type,
+            'counts': counts,
+            'elapsed_seconds': round(elapsed, 2),
+            'worker': self.request.hostname
+        }
+    
+    except Exception as e:
+        elapsed = time.time() - start_time
+        logger.error(f"[Worker {self.request.hostname}] Failed intersection computation {state_fips}: {e}")
+        
+        return {
+            'status': 'error',
+            'state_fips': state_fips,
+            'year': year,
+            'error': str(e),
+            'elapsed_seconds': round(elapsed, 2),
+            'worker': self.request.hostname
+        }
+
+
+@shared_task
+def compute_all_intersections(year, intersection_type='county-cd'):
+    """
+    Compute intersections for all 50 states + DC
+    
+    Args:
+        year: Census year (2010 or 2020)
+        intersection_type: 'county-cd', 'vtd-cd', or 'all'
+    
+    Returns:
+        Async result group
+    """
+    # All state FIPS codes
+    states = [
+        '01', '02', '04', '05', '06', '08', '09', '10', '11', '12', '13', '15', '16',
+        '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29',
+        '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42',
+        '44', '45', '46', '47', '48', '49', '50', '51', '53', '54', '55', '56'
+    ]
+    
+    # Create parallel group
+    tasks = group(
+        compute_intersections_for_state_task.s(state_fips, year, intersection_type)
+        for state_fips in states
+    )
+    
+    logger.info(f"[Task] Queued {len(states)} intersection computation tasks for year {year}")
+    
+    return tasks.apply_async()
+

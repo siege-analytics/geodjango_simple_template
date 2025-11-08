@@ -3,3 +3,4 @@ from .time import *
 from .addresses import *
 from .synthetic_models import *
 from .census import *
+from .intersections import *
