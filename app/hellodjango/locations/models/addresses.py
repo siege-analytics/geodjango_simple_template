@@ -24,7 +24,7 @@ class United_States_Address(models.Model):
         max_length=2, null=True, blank=True, default=None
     )
     zip5 = models.CharField(max_length=5, null=True, blank=True, default=None)
-    plus4_code = (models.CharField(max_length=4, null=True, blank=True, default=None),)
+    plus4_code = models.CharField(max_length=4, null=True, blank=True, default=None)
     delivery_point = models.CharField(
         max_length=99, null=True, blank=True, default=None
     )
