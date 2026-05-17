@@ -21,7 +21,21 @@ import sys, os
 
 # custom functions and data
 
-from utilities import *
+from siege_utilities.files.remote import download_file
+from siege_utilities.files.hashing import calculate_file_hash as generate_sha256_hash_for_file
+
+from locations.dispatchers import DOWNLOADS_DISPATCHER
+from locations.data.file_hashes import FILE_NAMES_AND_HASHES
+from locations.helpers.file_ops import (
+    generate_local_path_from_url,
+    unzip_file_to_its_own_directory,
+    check_for_hash_in_dispatcher,
+)
+from locations.helpers.spatial_data import (
+    GADM_MODEL_FIELD_NAMES,
+    find_vector_dataset_file_in_directory,
+    fix_gadm_null_foreign_keys,
+)
 
 # logging
 

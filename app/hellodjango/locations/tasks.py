@@ -155,7 +155,7 @@ def fetch_and_load_standard_spatial_data_async(self, models=None):
     try:
         logger.info(f"[Task {self.request.id}] Starting PARALLEL spatial data load")
         
-        from utilities.dispatchers import DOWNLOADS_DISPATCHER
+        from locations.dispatchers import DOWNLOADS_DISPATCHER
         from celery import group
         
         # Determine models to load
@@ -557,7 +557,7 @@ def load_gadm_sedonadb(self):
     """
     try:
         from django.conf import settings
-        from utilities.vector_data_utilities import find_vector_dataset_file_in_directory
+        from locations.helpers.spatial_data import find_vector_dataset_file_in_directory
         
         logger.info(f"[Task {self.request.id}] Starting SedonaDB-powered GADM load")
         
@@ -871,7 +871,7 @@ def load_gadm_pipelined(self):
     """
     try:
         from django.conf import settings
-        from utilities.vector_data_utilities import find_vector_dataset_file_in_directory
+        from locations.helpers.spatial_data import find_vector_dataset_file_in_directory
         
         logger.info(f"[Task {self.request.id}] Starting pipelined GADM load")
         
@@ -952,8 +952,8 @@ def load_gadm_layer_parallel(self, layer_index):
             admin_level_5_mapping_parallel
         )
         from locations.models.gadm import admin_level_0_mapping
-        from utilities.dispatchers import DOWNLOADS_DISPATCHER
-        from utilities.vector_data_utilities import find_vector_dataset_file_in_directory
+        from locations.dispatchers import DOWNLOADS_DISPATCHER
+        from locations.helpers.spatial_data import find_vector_dataset_file_in_directory
         from django.conf import settings
         
         model_classes = [Admin_Level_0, Admin_Level_1, Admin_Level_2,

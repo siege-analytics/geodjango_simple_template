@@ -18,7 +18,7 @@ import logging
 
 logger = logging.getLogger("django")
 
-from utilities import *
+from siege_utilities.files.paths import ensure_path_exists
 
 
 class Command(BaseCommand):

@@ -13,7 +13,7 @@ from django.conf import settings
 
 # custom functions and data
 
-from utilities import *
+from locations.helpers.geocoding import geocode_with_nominatim_public
 from locations.models import *
 
 # logging
