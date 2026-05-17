@@ -15,10 +15,6 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance
 from django.contrib.gis.db.models.functions import Transform
 
-# utilities
-
-from utilities import *
-
 # logging
 
 import logging

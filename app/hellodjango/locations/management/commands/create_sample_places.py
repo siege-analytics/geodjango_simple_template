@@ -15,7 +15,7 @@ from django.conf import settings
 
 from locations.models import *
 
-from utilities import *
+from locations.helpers.geocoding import geocode_with_nominatim_public
 
 # geography things
 from django.contrib.gis.geos import Point
