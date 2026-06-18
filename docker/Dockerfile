@@ -1,68 +1,81 @@
+# GeoDjango Simple Template — docker image.
+# Base default is ubuntu:24.04 (Python 3.12, active LTS).
+# Override with `--build-arg UBUNTU_BASE_IMAGE=ubuntu:22.04` if pinned.
 
-ARG UBUNTU_BASE_IMAGE
+ARG UBUNTU_BASE_IMAGE=ubuntu:24.04
 FROM ${UBUNTU_BASE_IMAGE}
 
 ARG PYTHON_VENV_PATH=/opt/venv
+ARG APP_USER=app
+ARG APP_UID=10001
+ARG APP_GID=10001
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Environmental Variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="${PYTHON_VENV_PATH}/bin:${PATH}" \
+    CPLUS_INCLUDE_PATH=/usr/include/gdal \
+    C_INCLUDE_PATH=/usr/include/gdal
 
-# assure TZ config
-RUN apt-get update && apt-get install -y tzdata
-
-# Install the basics, python utils, gdal, and postgres
-RUN apt-get install -y \
-    build-essential \
-    ca-certificates \
-    vim \
-    wget \
-    curl \
-    zip \
-    unzip \
-    python3-pip \
-    python3-pyproj \
-    python3-venv \
-    gdal-bin \
-    postgresql \
-    postgresql-contrib \
-    postgis \
-    netcat-traditional \
-    sqlite3 \
-    spatialite-bin \
-    libcairo2-dev \
-    libjpeg-dev \
-    libgif-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Python Installer Config
-COPY pip.conf /etc/pip.conf
-
-# Activate Python Virtual Environment
-RUN python3 -m venv ${PYTHON_VENV_PATH}
-ENV PATH="${PYTHON_VENV_PATH}/bin:$PATH"
-
-# Install GDAL python bindings
+# One consolidated apt layer.
+#
+# Notes on package selection:
+#   - libpq-dev: psycopg2 client headers (NOT the postgres server)
+#   - postgis: postgis client tools (shp2pgsql, raster2pgsql); pulls libgeos
+#   - sqlite3 / spatialite-bin: optional spatialite backend
+#   - libcairo2-dev / libjpeg-dev / libgif-dev: pycairo, reportlab[pycairo]
+#   - libgdal-dev / gdal-bin: GDAL python bindings build + runtime
+#   - tzdata, ca-certificates, python3-venv: build-time prerequisites
+#
+# Explicitly NOT installed: postgresql / postgresql-contrib (server daemon).
 RUN apt-get update \
-    && apt-get install -y --install-recommends libgdal-dev \
+    && apt-get install -y --no-install-recommends \
+        tzdata \
+        ca-certificates \
+        build-essential \
+        curl \
+        wget \
+        zip \
+        unzip \
+        python3 \
+        python3-pip \
+        python3-venv \
+        python3-pyproj \
+        gdal-bin \
+        libgdal-dev \
+        libpq-dev \
+        postgis \
+        sqlite3 \
+        spatialite-bin \
+        libcairo2-dev \
+        libjpeg-dev \
+        libgif-dev \
+        netcat-traditional \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
-ENV C_INCLUDE_PATH=/usr/include/gdal
-RUN pip install --trusted-host pypi.python.org --upgrade pip --default-timeout=1200 GDAL=="$(gdal-config --version).*" \
- && echo "succesfully built python gdal bindings"
+# Python venv
+RUN python3 -m venv "${PYTHON_VENV_PATH}"
 
-# Install PIP requirements
-ADD requirements.txt /tmp/
-RUN pip install --trusted-host pypi.python.org --default-timeout=1200 --upgrade pip -r /tmp/requirements.txt
+# GDAL python bindings, pinned to the installed gdal-config version
+RUN pip install --no-cache-dir --upgrade pip \
+ && pip install --no-cache-dir "GDAL==$(gdal-config --version).*"
 
-# Container entrypoint
+# Python requirements
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Non-root user
+RUN groupadd --gid ${APP_GID} ${APP_USER} \
+ && useradd  --uid ${APP_UID} --gid ${APP_GID} --create-home --shell /bin/bash ${APP_USER} \
+ && mkdir -p /usr/src/app /home/${APP_USER}/web/staticfiles \
+ && chown -R ${APP_USER}:${APP_USER} /usr/src/app /home/${APP_USER} "${PYTHON_VENV_PATH}"
+
+# Entrypoint
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
 
-# set work directory
 WORKDIR /usr/src/app
+USER ${APP_USER}
+
+ENTRYPOINT ["/entrypoint.sh"]
