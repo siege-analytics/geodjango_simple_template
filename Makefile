@@ -1,28 +1,26 @@
-# Simplified Makefile for GeoDjango
-# No complex abstractions, just clear commands
+# GeoDjango Simple Template — single prod build path.
+# No dev/prod split; one Dockerfile, one compose.yaml.
 
-.PHONY: help build up down restart logs shell pg-shell migrate collectstatic clean test
+.PHONY: help build up down restart logs shell pg-shell migrate makemigrations \
+        collectstatic createsuperuser test clean status runserver
 
-# Default target
 .DEFAULT_GOAL := help
 
-# Docker Compose command
 DC := docker compose
+APP_DIR := app/hellodjango
 
-help:  ## Show this help message
-	@echo "GeoDjango Simple Template - Available Commands:"
-	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+help:  ## Show available targets
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+		| sort \
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
 
-build:  ## Build all Docker images
-	$(DC) build
+# --- docker compose targets ---
 
-up:  ## Start all services
+build:  ## Build images (no cache)
+	$(DC) build --no-cache
+
+up:  ## Start all services in the background
 	$(DC) up -d
-	@echo "✅ Services started!"
-	@echo "   Django:  http://localhost:8000"
-	@echo "   Nginx:   http://localhost:1337"
-	@echo "   PostGIS: localhost:54321"
 
 down:  ## Stop all services
 	$(DC) down
@@ -30,50 +28,39 @@ down:  ## Stop all services
 restart:  ## Restart all services
 	$(DC) restart
 
-logs:  ## Show logs (use 'make logs SERVICE=webserver' for specific service)
+logs:  ## Tail logs (SERVICE=name for one service)
 	$(DC) logs -f $(SERVICE)
 
-shell:  ## Open shell in webserver container
+shell:  ## Open a shell in the webserver container
 	$(DC) exec webserver /bin/bash
 
-pg-shell:  ## Open PostgreSQL shell
+pg-shell:  ## Open psql against the postgis container
 	$(DC) exec postgis psql -U dheerajchand -d geodjango_database
-
-migrate:  ## Run Django migrations
-	$(DC) exec webserver python3 hellodjango/manage.py migrate
-
-makemigrations:  ## Create Django migrations
-	$(DC) exec webserver python3 hellodjango/manage.py makemigrations
-
-collectstatic:  ## Collect static files
-	$(DC) exec webserver python3 hellodjango/manage.py collectstatic --no-input
-
-createsuperuser:  ## Create Django superuser
-	$(DC) exec webserver python3 hellodjango/manage.py createsuperuser
-
-test:  ## Run Django tests
-	$(DC) exec webserver python3 hellodjango/manage.py test
-
-clean:  ## Remove containers and volumes
-	$(DC) down -v
-	@echo "✅ Cleaned up containers and volumes"
-
-rebuild:  ## Rebuild images without cache
-	$(DC) build --no-cache
 
 status:  ## Show container status
 	$(DC) ps
 
-# Data loading commands
-load-spatial:  ## Load standard spatial data (GADM, timezones)
-	$(DC) exec webserver python3 hellodjango/manage.py fetch_and_load_standard_spatial_data
+clean:  ## Stop services and drop volumes
+	$(DC) down -v
 
-load-census:  ## Load US Census TIGER data
-	$(DC) exec webserver python3 hellodjango/manage.py fetch_and_load_census_tiger_data
+# --- django management targets (run inside webserver container) ---
 
-create-places:  ## Create sample places
-	$(DC) exec webserver python3 hellodjango/manage.py create_sample_places
+migrate:  ## Apply migrations
+	$(DC) exec webserver python3 $(APP_DIR)/manage.py migrate
 
-create-addresses:  ## Create sample addresses
-	$(DC) exec webserver python3 hellodjango/manage.py create_sample_addresses
+makemigrations:  ## Create new migrations
+	$(DC) exec webserver python3 $(APP_DIR)/manage.py makemigrations
 
+collectstatic:  ## Collect static files
+	$(DC) exec webserver python3 $(APP_DIR)/manage.py collectstatic --no-input
+
+createsuperuser:  ## Create a Django superuser
+	$(DC) exec webserver python3 $(APP_DIR)/manage.py createsuperuser
+
+test:  ## Run the Django test suite
+	$(DC) exec webserver python3 $(APP_DIR)/manage.py test
+
+# --- local (non-docker) target for downstream consumers ---
+
+runserver:  ## Run Django locally against an existing Postgres+PostGIS
+	cd $(APP_DIR) && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000
