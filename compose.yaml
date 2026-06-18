@@ -27,7 +27,7 @@ services:
     build:
       context: ./docker
       args:
-        UBUNTU_BASE_IMAGE: ubuntu:jammy
+        UBUNTU_BASE_IMAGE: ubuntu:24.04
     image: geodjango_webserver
     container_name: geodjango_webserver
     restart: unless-stopped
@@ -43,9 +43,6 @@ services:
       SQL_USER: dheerajchand
       SQL_PASSWORD: strongpasswd
       SQL_PORT: 5432
-      # Daphne
-      DAPHNE_HOST: 0.0.0.0
-      DAPHNE_PORT: 8000
       # Celery
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
@@ -53,13 +50,15 @@ services:
       - "8000:8000"
     volumes:
       - ./app:/usr/src/app
+      - ./gunicorn.conf.py:/usr/src/gunicorn.conf.py:ro
       - static_volume:/home/app/web/staticfiles
     depends_on:
       postgis:
         condition: service_healthy
     networks:
       - geodjango_network
-    command: sh -c "/opt/venv/bin/daphne -b 0.0.0.0 -p 8000 hellodjango.asgi:application"
+    # Gunicorn is the default; swap for daphne if you need channels/ASGI.
+    command: sh -c "cd /usr/src/app/hellodjango && /opt/venv/bin/gunicorn -c /usr/src/gunicorn.conf.py hellodjango.wsgi:application"
 
   nginx:
     build:
@@ -94,18 +93,15 @@ services:
     container_name: geodjango_celery_1
     restart: unless-stopped
     environment:
-      # Django
       DEBUG: 1
       SECRET_KEY: afdawango
       DJANGO_ALLOWED_HOSTS: "*"
-      # Database
       SQL_ENGINE: django.contrib.gis.db.backends.postgis
       SQL_HOST: postgis
       SQL_DATABASE: geodjango_database
       SQL_USER: dheerajchand
       SQL_PASSWORD: strongpasswd
       SQL_PORT: 5432
-      # Celery
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
     volumes:
@@ -124,18 +120,15 @@ services:
     container_name: geodjango_celery_2
     restart: unless-stopped
     environment:
-      # Django
       DEBUG: 1
       SECRET_KEY: afdawango
       DJANGO_ALLOWED_HOSTS: "*"
-      # Database
       SQL_ENGINE: django.contrib.gis.db.backends.postgis
       SQL_HOST: postgis
       SQL_DATABASE: geodjango_database
       SQL_USER: dheerajchand
       SQL_PASSWORD: strongpasswd
       SQL_PORT: 5432
-      # Celery
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
     volumes:
@@ -154,18 +147,15 @@ services:
     container_name: geodjango_celery_3
     restart: unless-stopped
     environment:
-      # Django
       DEBUG: 1
       SECRET_KEY: afdawango
       DJANGO_ALLOWED_HOSTS: "*"
-      # Database
       SQL_ENGINE: django.contrib.gis.db.backends.postgis
       SQL_HOST: postgis
       SQL_DATABASE: geodjango_database
       SQL_USER: dheerajchand
       SQL_PASSWORD: strongpasswd
       SQL_PORT: 5432
-      # Celery
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
     volumes:
@@ -184,18 +174,15 @@ services:
     container_name: geodjango_flower
     restart: unless-stopped
     environment:
-      # Django
       DEBUG: 1
       SECRET_KEY: afdawango
       DJANGO_ALLOWED_HOSTS: "*"
-      # Database
       SQL_ENGINE: django.contrib.gis.db.backends.postgis
       SQL_HOST: postgis
       SQL_DATABASE: geodjango_database
       SQL_USER: dheerajchand
       SQL_PASSWORD: strongpasswd
       SQL_PORT: 5432
-      # Celery
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
     ports:
@@ -215,4 +202,3 @@ networks:
 volumes:
   geodjango_pg_data:
   static_volume:
-
