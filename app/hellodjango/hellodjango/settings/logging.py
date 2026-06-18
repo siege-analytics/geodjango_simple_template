@@ -1,31 +1,39 @@
 # python imports
 
+import logging
 import os
 from pathlib import Path
 
-#  django imports
+# read LOGS_DIRECTORY from the sibling path_settings module rather than
+# from django.conf.settings. settings/__init__.py star-imports path_settings
+# before this module loads, but django.conf.settings is a LazyObject that
+# is not populated until Django finishes its first Settings(settings_module)
+# boot. A cold star-import (test_settings doing `from .settings import *`)
+# runs this module INSIDE Settings.__init__ and raises AttributeError on
+# settings.LOGS_DIRECTORY. The sibling-module import resolves at compile
+# time and does not depend on Django's settings machinery.
 
-from django.conf import settings
+from .path_settings import LOGS_DIRECTORY
 
 # log file
 
 log_file_name = "django_application.log"
-Path(settings.LOGS_DIRECTORY).mkdir(parents=True, exist_ok=True)
-LOG_PATH = str(settings.LOGS_DIRECTORY / log_file_name)
+Path(LOGS_DIRECTORY).mkdir(parents=True, exist_ok=True)
+LOG_PATH = str(Path(LOGS_DIRECTORY) / log_file_name)
 
-# doing something very stupid here
+# touch the log file so the FileHandler does not fail on first write
 try:
-    Path(LOG_PATH).touch(exist_ok=True)  # will create file, if it exists will do nothing
+    Path(LOG_PATH).touch(exist_ok=True)
 except Exception as e:
-    message ="\n"
-    message +=f"Pathlib method to create the logging file didn't work, trying OS lib method:{e}"
+    message = "\n"
+    message += f"Pathlib method to create the logging file didn't work, trying OS lib method:{e}"
     logging.error(message)
 try:
     if not os.path.exists(LOG_PATH):
         f = open(LOG_PATH, 'w+').close()
 except Exception as e:
-    message ="\n"
-    message +=f"OS method to create the logging file didn't work, Alfred E. Neumann:{e}"
+    message = "\n"
+    message += f"OS method to create the logging file didn't work, Alfred E. Neumann:{e}"
     logging.error(message)
 
 
